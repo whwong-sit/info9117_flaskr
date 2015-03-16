@@ -7,8 +7,9 @@ from flask import Flask, request, session, g, redirect, url_for, \
 DATABASE = 'db/flask.db'
 DEBUG = True
 SECRET_KEY = 'development key'
-USERNAME = 'admin'
-PASSWORD = 'default'
+#USERNAME = 'admin'
+#PASSWORD = 'default'
+USERS = {'admin' : 'default', 'jim' : 'bean', 'spock' : 'vulcan'}
 
 app = Flask(__name__)
 app.config.from_object(__name__)
@@ -36,16 +37,16 @@ def teardown_request(exception):
 
 @app.route('/')
 def show_entries():
-    cur = g.db.execute('select title, text from entries order by id desc')
-    entries = [dict(title=row[0], text=row[1]) for row in cur.fetchall()]
+    cur = g.db.execute('select title, text, username from entries order by id desc')
+    entries = [dict(title=row[0], text=row[1], username=row[2]) for row in cur.fetchall()]
     return render_template('show_entries.html', entries=entries)
 
 @app.route('/add', methods=['POST'])
 def add_entry():
     if not session.get('logged_in'):
         abort(401)
-    g.db.execute('insert into entries (title, text) values (?,?)',
-                 [request.form['title'], request.form['text']])
+    g.db.execute('insert into entries (title, text, username) values (?,?,?)',
+                 [request.form['title'], request.form['text'], session['username']])
     g.db.commit()
     flash('New entry was successfully posted')
     return redirect(url_for('show_entries'))
@@ -54,12 +55,14 @@ def add_entry():
 def login():
     error = None
     if request.method == 'POST':
-        if request.form['username'] != app.config['USERNAME']:
+        username = request.form['username']
+        if username not in app.config['USERS'].keys():
             error = 'Invalid username'
-        elif request.form['password'] != app.config['PASSWORD']:
+        elif request.form['password'] != app.config['USERS'][username]:
             error = 'Invalid password'
         else:
             session['logged_in'] = True
+            session['username'] = username
             flash('You were logged in')
             return redirect(url_for('show_entries'))
     return render_template('login.html', error=error)
