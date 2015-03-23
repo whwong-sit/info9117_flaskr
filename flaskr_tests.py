@@ -28,6 +28,38 @@ class FlaskrTestCase(unittest.TestCase):
     def logout(self):
         return self.app.get('/logout', follow_redirects=True)
 
+    #test for multiple users
+    def test_multiple_login_logout(self):
+	# test admin login
+	rv = self.login('admin','default')
+	assert 'You were logged in' in rv.data
+	rv = self.logout()
+	assert 'You were logged out' in rv.data
+	
+	#test adam login
+	rv = self.login('adam','alpha')
+	assert 'You were logged in' in rv.data
+	rv = self.logout()
+	assert 'You were logged out' in rv.data
+
+	#test bob login
+	rv = self.login('bob','bravo') in rv.data
+	assert 'You were logged in' in rv.data
+	rv = self.logout()
+	assert 'You were logged out' in rv.data
+	
+	#test cat login
+	rv = self.login('cat','charlie') in rv.data
+	assert 'You were logged in' in rv.data
+	rv = self.logout()
+	assert 'You were logged out' in rv.data
+
+	#test for invalid user
+	rv = self.login('adminx','default')
+	assert 'Invalid username' in rv.data
+	rv = self.login('admin','defaultx')
+	assert 'Invalid password' in rv.data
+
     def test_login_logout(self):
         rv = self.login('admin', 'default')
         assert 'You were logged in' in rv.data
