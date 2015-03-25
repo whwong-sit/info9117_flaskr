@@ -58,9 +58,9 @@ def login():
 		username = request.form['username']
 		if username not in app.config['USERS'].keys():
 			error = 'Invalid username'
-        elif request.form['password'] != app.config['USERS'][username]:
+		elif request.form['password'] != app.config['USERS'][username]:
 			error = 'Invalid password'
-        else:
+		else:
 			session['logged_in'] = True
 			session['username'] = username
 			flash('You were logged in')
