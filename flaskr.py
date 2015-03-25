@@ -55,14 +55,14 @@ def add_entry():
 def login():
     error = None
     if request.method == 'POST':
-	username = request.form['uesrname']
+		username = request.form['uesrname']
         if username not in app.config['USERS'].keys():
             error = 'Invalid username'
         elif request.form['password'] != app.config['USERS'][username]:
             error = 'Invalid password'
         else:
             session['logged_in'] = True
-	    session['username'] = username
+			session['username'] = username
             flash('You were logged in')
             return redirect(url_for('show_entries'))
     return render_template('login.html', error=error)
