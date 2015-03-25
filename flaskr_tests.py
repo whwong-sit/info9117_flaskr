@@ -43,13 +43,13 @@ class FlaskrTestCase(unittest.TestCase):
 	assert 'You were logged out' in rv.data
 
 	#test bob login
-	rv = self.login('bob','bravo') in rv.data
+	rv = self.login('bob','bravo')
 	assert 'You were logged in' in rv.data
 	rv = self.logout()
 	assert 'You were logged out' in rv.data
 	
 	#test cat login
-	rv = self.login('cat','charlie') in rv.data
+	rv = self.login('cat','charlie')
 	assert 'You were logged in' in rv.data
 	rv = self.logout()
 	assert 'You were logged out' in rv.data
