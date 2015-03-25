@@ -7,8 +7,9 @@ from flask import Flask, request, session, g, redirect, url_for, \
 DATABASE = 'db/flask.db'
 DEBUG = True
 SECRET_KEY = 'development key'
-USERNAME = 'admin'
-PASSWORD = 'default'
+#USERNAME = 'admin'
+#PASSWORD = 'default'
+USERS = {'admin':'default','adam':'alpha','bob':'bravo','cat':'charlie'}
 
 app = Flask(__name__)
 app.config.from_object(__name__)
@@ -54,12 +55,14 @@ def add_entry():
 def login():
     error = None
     if request.method == 'POST':
-        if request.form['username'] != app.config['USERNAME']:
+	username = request.form['uesrname']
+        if username not in app.config['USERS'].keys():
             error = 'Invalid username'
-        elif request.form['password'] != app.config['PASSWORD']:
+        elif request.form['password'] != app.config['USERS'][username]:
             error = 'Invalid password'
         else:
             session['logged_in'] = True
+	    session['username'] = username
             flash('You were logged in')
             return redirect(url_for('show_entries'))
     return render_template('login.html', error=error)
