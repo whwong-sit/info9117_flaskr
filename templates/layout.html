@@ -8,7 +8,10 @@
         <a href=" {{ url_for('login') }}">log in</a>
         {% else %}
         <a href=" {{ url_for('logout') }}">log out</a>
-        {% endif %}
+	<div class=user>
+	<h3 align=left> {{ session.username }}</h3>
+	</div>
+	{% endif %}
     </div>
     {% for message in get_flashed_messages() %}
     <div class=flash> {{ message }} </div>
