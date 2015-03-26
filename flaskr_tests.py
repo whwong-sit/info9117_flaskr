@@ -76,12 +76,20 @@ class FlaskrTestCase(unittest.TestCase):
         rv = self.app.post('/add', data=dict(
             title='<Hello admin>',
             text='<strong>HTML</strong> allowed here',
-			username='admin'
+			username='admin',
+			sdate='2015/01/01',
+			stime='09:00',
+			edate='2015/01/01',
+			etime='13:00'
         ), follow_redirects=True)
         assert 'No entries here so far' not in rv.data
         assert '&lt;Hello admin&gt;' in rv.data
         assert '<strong>HTML</strong> allowed here' in rv.data
         assert 'admin' in rv.data
+        assert '2015/01/01' in rv.data
+        assert '09:00' in rv.data
+        assert '2015/01/01' in rv.data
+        assert '13:00' in rv.data
 		
 	#test for adding message by adam
     def test_messages_adam(self):
@@ -89,12 +97,20 @@ class FlaskrTestCase(unittest.TestCase):
         rv = self.app.post('/add', data=dict(
             title='<Hello adam>',
             text='<strong>HTML</strong> allowed here',
-			username='adam'
+			username='adam',
+			sdate='2015/01/01',
+			stime='09:00',
+			edate='2015/01/02',
+			etime='13:00'
         ), follow_redirects=True)
         assert 'No entries here so far' not in rv.data
         assert '&lt;Hello adam&gt;' in rv.data
         assert '<strong>HTML</strong> allowed here' in rv.data
         assert 'adam' in rv.data
+        assert '2015/01/01' in rv.data
+        assert '09:00' in rv.data
+        assert '2015/01/02' in rv.data
+        assert '13:00' in rv.data
 
 	#test for adding message by bob
     def test_messages_bob(self):
@@ -102,12 +118,20 @@ class FlaskrTestCase(unittest.TestCase):
         rv = self.app.post('/add', data=dict(
             title='<Hello bob>',
             text='<strong>HTML</strong> allowed here',
-			username='bob'
+			username='bob',
+			sdate='2015/01/02',
+			stime='10:00',
+			edate='2015/01/03',
+			etime='16:00'
         ), follow_redirects=True)
         assert 'No entries here so far' not in rv.data
         assert '&lt;Hello bob&gt;' in rv.data
         assert '<strong>HTML</strong> allowed here' in rv.data
         assert 'bob' in rv.data
+        assert '2015/01/02' in rv.data
+        assert '10:00' in rv.data
+        assert '2015/01/03' in rv.data
+        assert '16:00' in rv.data
 		
 	#test for adding message by cat
     def test_messages_cat(self):
@@ -115,12 +139,20 @@ class FlaskrTestCase(unittest.TestCase):
         rv = self.app.post('/add', data=dict(
             title='<Hello cat>',
             text='<strong>HTML</strong> allowed here',
-			username='cat'
+			username='cat',
+			sdate='2015/01/02',
+			stime='16:00',
+			edate='2015/01/03',
+			etime='20:00'
         ), follow_redirects=True)
         assert 'No entries here so far' not in rv.data
         assert '&lt;Hello cat&gt;' in rv.data
         assert '<strong>HTML</strong> allowed here' in rv.data
         assert 'cat' in rv.data
+        assert '2015/01/02' in rv.data
+        assert '16:00' in rv.data
+        assert '2015/01/03' in rv.data
+        assert '20:00' in rv.data
 
 if __name__ == '__main__':
     unittest.main()
