@@ -70,16 +70,53 @@ class FlaskrTestCase(unittest.TestCase):
         rv = self.login('admin', 'defaultx')
         assert 'Invalid password' in rv.data
 
-    def test_messages(self):
+	#test for adding message by admin
+    def test_messages_admin(self):
         self.login('admin', 'default')
         rv = self.app.post('/add', data=dict(
-            title='<Hello>',
-            text='<strong>HTML</strong> allowed here'
+            title='<Hello admin>',
+            text='<strong>HTML</strong> allowed here',
+			username='admin'
         ), follow_redirects=True)
         assert 'No entries here so far' not in rv.data
-        assert '&lt;Hello&gt;' in rv.data
+        assert '&lt;Hello admin&gt;' in rv.data
+        assert '<strong>HTML</strong> allowed here' in rv.data
+		
+	#test for adding message by adam
+    def test_messages_adam(self):
+        self.login('adam', 'alpha')
+        rv = self.app.post('/add', data=dict(
+            title='<Hello adam>',
+            text='<strong>HTML</strong> allowed here',
+			username='adam'
+        ), follow_redirects=True)
+        assert 'No entries here so far' not in rv.data
+        assert '&lt;Hello adam&gt;' in rv.data
         assert '<strong>HTML</strong> allowed here' in rv.data
 
+	#test for adding message by bob
+    def test_messages_bob(self):
+        self.login('bob', 'bravo')
+        rv = self.app.post('/add', data=dict(
+            title='<Hello bob>',
+            text='<strong>HTML</strong> allowed here',
+			username='bob'
+        ), follow_redirects=True)
+        assert 'No entries here so far' not in rv.data
+        assert '&lt;Hello bob&gt;' in rv.data
+        assert '<strong>HTML</strong> allowed here' in rv.data
+		
+	#test for adding message by cat
+    def test_messages_cat(self):
+        self.login('cat', 'charlie')
+        rv = self.app.post('/add', data=dict(
+            title='<Hello cat>',
+            text='<strong>HTML</strong> allowed here',
+			username='cat'
+        ), follow_redirects=True)
+        assert 'No entries here so far' not in rv.data
+        assert '&lt;Hello cat&gt;' in rv.data
+        assert '<strong>HTML</strong> allowed here' in rv.data
 
 if __name__ == '__main__':
     unittest.main()
