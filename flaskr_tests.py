@@ -81,6 +81,7 @@ class FlaskrTestCase(unittest.TestCase):
         assert 'No entries here so far' not in rv.data
         assert '&lt;Hello admin&gt;' in rv.data
         assert '<strong>HTML</strong> allowed here' in rv.data
+        assert 'admin' in rv.data
 		
 	#test for adding message by adam
     def test_messages_adam(self):
@@ -93,6 +94,7 @@ class FlaskrTestCase(unittest.TestCase):
         assert 'No entries here so far' not in rv.data
         assert '&lt;Hello adam&gt;' in rv.data
         assert '<strong>HTML</strong> allowed here' in rv.data
+        assert 'adam' in rv.data
 
 	#test for adding message by bob
     def test_messages_bob(self):
@@ -105,6 +107,7 @@ class FlaskrTestCase(unittest.TestCase):
         assert 'No entries here so far' not in rv.data
         assert '&lt;Hello bob&gt;' in rv.data
         assert '<strong>HTML</strong> allowed here' in rv.data
+        assert 'bob' in rv.data
 		
 	#test for adding message by cat
     def test_messages_cat(self):
@@ -117,6 +120,7 @@ class FlaskrTestCase(unittest.TestCase):
         assert 'No entries here so far' not in rv.data
         assert '&lt;Hello cat&gt;' in rv.data
         assert '<strong>HTML</strong> allowed here' in rv.data
+        assert 'cat' in rv.data
 
 if __name__ == '__main__':
     unittest.main()
