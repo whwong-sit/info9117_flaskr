@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
 <<<<<<< HEAD
+<<<<<<< HEAD
     <list default="true" id="b9e16c8e-76a7-4aa0-a18d-badbaa0dd6be" name="Default" comment="">
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/encodings.xml" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/info9117_flaskr.iml" />
@@ -18,6 +19,9 @@
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/templates/show_entries.html" afterPath="$PROJECT_DIR$/templates/show_entries.html" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/static/style.css" afterPath="$PROJECT_DIR$/static/style.css" />
     </list>
+=======
+    <list default="true" id="4da7af4a-138e-40f4-b2dc-d0ad261dc33b" name="Default" comment="" />
+>>>>>>> origin/taskcomment
 =======
     <list default="true" id="4da7af4a-138e-40f4-b2dc-d0ad261dc33b" name="Default" comment="" />
 >>>>>>> origin/taskcomment
@@ -44,17 +48,23 @@
   <component name="FileEditorManager">
     <leaf>
 <<<<<<< HEAD
+<<<<<<< HEAD
       <file leaf-file-name="flaskr.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/flaskr.py">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1275">
               <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
 =======
+=======
+>>>>>>> origin/taskcomment
       <file leaf-file-name="flaskr.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/flaskr.py">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0" vertical-offset="810" max-vertical-offset="1275">
               <caret line="54" column="0" selection-start-line="54" selection-start-column="0" selection-end-line="54" selection-end-column="0" />
+<<<<<<< HEAD
+>>>>>>> origin/taskcomment
+=======
 >>>>>>> origin/taskcomment
               <folding>
                 <element signature="e#0#30#0" expanded="true" />
@@ -64,7 +74,10 @@
         </entry>
       </file>
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> origin/taskcomment
       <file leaf-file-name="schema.sql" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/schema.sql">
           <provider selected="true" editor-type-id="text-editor">
@@ -87,6 +100,9 @@
           </provider>
         </entry>
       </file>
+<<<<<<< HEAD
+>>>>>>> origin/taskcomment
+=======
 >>>>>>> origin/taskcomment
     </leaf>
   </component>
@@ -94,7 +110,10 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> origin/taskcomment
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
@@ -104,6 +123,9 @@
       </list>
     </option>
   </component>
+<<<<<<< HEAD
+>>>>>>> origin/taskcomment
+=======
 >>>>>>> origin/taskcomment
   <component name="ProjectFrameBounds">
     <option name="x" value="20" />
@@ -135,7 +157,10 @@
     </navigator>
     <panes>
 <<<<<<< HEAD
+<<<<<<< HEAD
       <pane id="Scope" />
+=======
+>>>>>>> origin/taskcomment
 =======
 >>>>>>> origin/taskcomment
       <pane id="ProjectPane">
@@ -157,9 +182,12 @@
             </PATH_ELEMENT>
           </PATH>
 <<<<<<< HEAD
+<<<<<<< HEAD
         </subPane>
       </pane>
 =======
+=======
+>>>>>>> origin/taskcomment
           <PATH>
             <PATH_ELEMENT>
               <option name="myItemId" value="info9117_flaskr" />
@@ -205,6 +233,9 @@
         </subPane>
       </pane>
       <pane id="Scope" />
+<<<<<<< HEAD
+>>>>>>> origin/taskcomment
+=======
 >>>>>>> origin/taskcomment
     </panes>
   </component>
@@ -214,7 +245,10 @@
   </component>
   <component name="RunManager" selected="Python.flaskr">
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> origin/taskcomment
     <configuration default="false" name="Unittests in info9117_flaskr" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -239,6 +273,9 @@
       <ConfigurationWrapper RunnerId="PythonRunner" />
       <method />
     </configuration>
+<<<<<<< HEAD
+>>>>>>> origin/taskcomment
+=======
 >>>>>>> origin/taskcomment
     <configuration default="false" name="flaskr" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -260,7 +297,10 @@
       <method />
     </configuration>
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> origin/taskcomment
     <configuration default="false" name="Unittests in flaskr_tests" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -285,6 +325,9 @@
       <ConfigurationWrapper RunnerId="PythonRunner" />
       <method />
     </configuration>
+<<<<<<< HEAD
+>>>>>>> origin/taskcomment
+=======
 >>>>>>> origin/taskcomment
     <configuration default="true" type="PythonConfigurationType" factoryName="Python">
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -409,6 +452,7 @@
       <method />
     </configuration>
 <<<<<<< HEAD
+<<<<<<< HEAD
     <list size="1">
       <item index="0" class="java.lang.String" itemvalue="Python.flaskr" />
     </list>
@@ -416,6 +460,8 @@
       <list size="1">
         <item index="0" class="java.lang.String" itemvalue="Python.flaskr" />
 =======
+=======
+>>>>>>> origin/taskcomment
     <list size="3">
       <item index="0" class="java.lang.String" itemvalue="Python tests.Unittests in info9117_flaskr" />
       <item index="1" class="java.lang.String" itemvalue="Python.flaskr" />
@@ -426,6 +472,9 @@
         <item index="0" class="java.lang.String" itemvalue="Python.flaskr" />
         <item index="1" class="java.lang.String" itemvalue="Python tests.Unittests in flaskr_tests" />
         <item index="2" class="java.lang.String" itemvalue="Python tests.Unittests in info9117_flaskr" />
+<<<<<<< HEAD
+>>>>>>> origin/taskcomment
+=======
 >>>>>>> origin/taskcomment
       </list>
     </recent_temporary>
@@ -436,8 +485,13 @@
     <editor active="false" />
     <layout>
 <<<<<<< HEAD
+<<<<<<< HEAD
       <window_info id="Changes" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.3294702" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.24939467" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+=======
+      <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.24939467" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+>>>>>>> origin/taskcomment
 =======
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.24939467" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
@@ -458,7 +512,10 @@
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
     </layout>
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> origin/taskcomment
     <layout-to-restore>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
@@ -477,6 +534,9 @@
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
     </layout-to-restore>
+<<<<<<< HEAD
+>>>>>>> origin/taskcomment
+=======
 >>>>>>> origin/taskcomment
   </component>
   <component name="Vcs.Log.UiProperties">
@@ -503,8 +563,13 @@
     <entry file="file://$PROJECT_DIR$/flaskr.py">
       <provider selected="true" editor-type-id="text-editor">
 <<<<<<< HEAD
+<<<<<<< HEAD
         <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1275">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+=======
+        <state vertical-scroll-proportion="0.0" vertical-offset="810" max-vertical-offset="1275">
+          <caret line="54" column="0" selection-start-line="54" selection-start-column="0" selection-end-line="54" selection-end-column="0" />
+>>>>>>> origin/taskcomment
 =======
         <state vertical-scroll-proportion="0.0" vertical-offset="810" max-vertical-offset="1275">
           <caret line="54" column="0" selection-start-line="54" selection-start-column="0" selection-end-line="54" selection-end-column="0" />
@@ -516,10 +581,13 @@
       </provider>
     </entry>
 <<<<<<< HEAD
+<<<<<<< HEAD
     <entry file="file://$PROJECT_DIR$/flaskr.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1275">
 =======
+=======
+>>>>>>> origin/taskcomment
     <entry file="file://$PROJECT_DIR$/schema.sql">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="100">
@@ -541,6 +609,9 @@
     <entry file="file://$PROJECT_DIR$/flaskr.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1245">
+<<<<<<< HEAD
+>>>>>>> origin/taskcomment
+=======
 >>>>>>> origin/taskcomment
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
@@ -550,7 +621,10 @@
       </provider>
     </entry>
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> origin/taskcomment
     <entry file="file:///Library/Python/2.7/site-packages/flask/app.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="11065" max-vertical-offset="27345">
@@ -628,6 +702,9 @@
         </state>
       </provider>
     </entry>
+<<<<<<< HEAD
+>>>>>>> origin/taskcomment
+=======
 >>>>>>> origin/taskcomment
   </component>
 </project>
