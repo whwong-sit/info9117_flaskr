@@ -37,19 +37,21 @@ def teardown_request(exception):
 
 @app.route('/')
 def show_entries():
-    cur = g.db.execute('select title, text, username from entries order by id desc')
-    entries = [dict(title=row[0], text=row[1], username=row[2]) for row in cur.fetchall()]
+    cur = g.db.execute('select title, text, username, start_time, end_time, comments from entries order by id desc')
+    entries = [dict(title=row[0], text=row[1], username=row[2], start_time=row[3], end_time=row[4], comments=row[5] ) for row in cur.fetchall()]
     return render_template('show_entries.html', entries=entries)
 
 @app.route('/add', methods=['POST'])
 def add_entry():
     if not session.get('logged_in'):
         abort(401)
-    g.db.execute('insert into entries (title, text, username) values (?,?,?)',
-                 [request.form['title'], request.form['text'], session['username']])
+ 
+    g.db.execute('insert into entries (title, text, username, start_time, end_time, comments) values (?,?,?,?,?,?)',
+                 [request.form['title'], request.form['text'], session['username'], request.form['start_time'], request.form['end_time'], request.form['comments']])
     g.db.commit()
     flash('New entry was successfully posted')
     return redirect(url_for('show_entries'))
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -74,4 +76,4 @@ def logout():
     return redirect(url_for('show_entries'))
 
 if __name__ == '__main__':
-    app.run()
+    app.run('0.0.0.0', 5002)
