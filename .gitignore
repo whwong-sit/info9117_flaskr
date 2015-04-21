@@ -1,0 +1,12 @@
+# Pycharm idea folder
+.idea
+
+# Emacs autosave files
+*~ 
+
+# Virtual environment
+venv
+
+# Python compiled and Python optimised files
+*.pyc
+*.pyo
