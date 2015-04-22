@@ -1,8 +1,8 @@
-#Analysis:
+# Analysis:
 #  If you want to "manage details" then this means you want to be able to view
 #  these details and edit (at least some of) them.
 #
-#Design Sketch:
+# Design Sketch:
 #  * A button/link on the main page to be taken to a "manage details" page.
 #  * The page should display username and any other details associated with that username
 #  * The option to change password should be available, as well as other details
@@ -18,8 +18,8 @@ Feature: User account web interface
 
   Scenario Outline: Edit details
     Given the User is logged in
-    And the User navigates to the web interface
-    When the User clicks "change <detail>"
+    When the User navigates to the web interface
+    And the User clicks "change <detail>"
     Then the User is able to edit <detail>
     And the User is able to commit the new value successfully
   Examples:

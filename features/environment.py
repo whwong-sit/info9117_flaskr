@@ -1,18 +1,13 @@
+import os
+import flaskr
+import tempfile
+
 # These run before and after every step.
 def before_step(context, step):
     pass
 
 
 def after_step(context, step):
-    pass
-
-
-# These run before and after the whole shooting match.
-def before_all(context):
-    pass
-
-
-def after_all(context):
     pass
 
 
@@ -42,3 +37,23 @@ def before_tag(context, tag):
 
 def after_tag(context, tag):
     pass
+
+
+# These run before and after the whole shooting match.
+def before_all(context):
+    """
+    Create a new test client, initialise a database and activate TESTING mode
+    """
+    context.db_fd, flaskr.app.config['DATABASE'] = tempfile.mkstemp()
+    flaskr.app.config['TESTING'] = True
+    context.app = flaskr.app.test_client()
+    flaskr.init_db()
+
+
+def after_all(context):
+    """
+    Close temporary file and remove from filesystem
+    """
+    os.close(context.db_fd)
+    os.unlink(flaskr.app.config['DATABASE'])
+
