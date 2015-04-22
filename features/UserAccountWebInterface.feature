@@ -26,6 +26,3 @@ Feature: User account web interface
     | detail   |
     | username |
     | password |
-
-
-
