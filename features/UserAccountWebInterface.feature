@@ -20,8 +20,7 @@ Feature: User account web interface
     Given the User is logged in
     When the User navigates to the web interface
     And the User clicks "change <detail>"
-    Then the User is able to edit <detail>
-    And the User is able to commit the new value successfully
+    Then the User is able to edit and commit <detail>
   Examples:
     | detail   |
     | username |

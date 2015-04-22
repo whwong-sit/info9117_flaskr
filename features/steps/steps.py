@@ -1,6 +1,7 @@
 from behave import *
+import flaskr
 
-##### GIVENS
+# GIVENS
 
 @given(u'the User is logged in')
 def step_impl(context):
@@ -12,8 +13,13 @@ def step_impl(context):
         password='bean'
     ), follow_redirects=True)
 
+    with context.app.session_transaction() as sess:
+        # see http://flask.pocoo.org/docs/0.10/testing/#accessing-and-modifying-sessions for
+        # an explanation of accessing sessions during testing.
+        assert sess['logged_in']
 
-##### WHENS
+
+# WHENS
 
 @when(u'the User navigates to the web interface')
 def step_impl(context):
@@ -22,18 +28,23 @@ def step_impl(context):
     """
     context.rv = context.app.get('/user/<username>')
 
-
-@when(u'the User clicks "change username"')
-def step_impl(context):
-    raise NotImplementedError(u'STEP: When the User clicks "change username"')
+    # assert that this page actually exists
+    assert context.rv.status_code != 404
 
 
-@when(u'the User clicks "change password"')
-def step_impl(context):
-    raise NotImplementedError(u'STEP: When the User clicks "change password"')
+@when(u'the User clicks "change {detail}"')
+def step_impl(context, detail):
+    """
+    Check that detail is on this page, and then go to the page to change <detail>
+    """
+    # assert that <detail> is on the current page.
+    assert detail in context.rv.get_data()
+
+    # GET the pge to change <detail>
+    context.rv = context.app.get('/users/<username>/change_{0}'.format(detail))
 
 
-#### THENS
+# THENS
 
 @then(u'account details are displayed')
 def step_impl(context):
@@ -50,18 +61,31 @@ def step_impl(context):
         assert "Username: " + sess['username'] in context.rv.get_data()
 
 
-@then(u'the User is able to edit username')
-def step_impl(context):
-    raise NotImplementedError(u'STEP: Then the User is able to edit username')
+@then(u'the User is able to edit and commit {detail}')
+def step_impl(context, detail):
+    """
+    POST a new value for {detail} to the change_{detail} page, then check if flaskr.USERS dicitonary
+    has been updated appropriately.  Of all the methods written so far this is the least robust,
+    as it only deals with usernames and passwords (not any other details associated with a user's account)
+    and it is relying on usernames and passwords being in the flat little dictionary they are currently in.
+    This is bound to be one of the first things to change.
+    """
+    # create the data to be sent in the POST to the change_{detail} page's POST method
+    data = {detail: "xXx_New_Detail_xXx"}
 
+    # This should take the new value of <detail> and put it through the
+    # POST method of /users/<username>/change_{detail}
+    context.app.post('/users/<username>/change_{0}'.format(detail), data=data, follow_redirects=True)
 
-@then(u'the User is able to commit the new value successfully')
-def step_impl(context):
-    raise NotImplementedError(u'STEP: Then the User is able to commit the new value successfully')
+    # this ensures that the session's username is still functioning
+    context.execute_steps(u'''
+        when the User navigates to the web interface
+        then account details are displayed
+    ''')
 
-
-@then(u'the User is able to edit password')
-def step_impl(context):
-    raise NotImplementedError(u'STEP: Then the User is able to edit password')
-
-
+    #TODO this needs to be made more robust, as at the moment it only deals with the flat dictionary
+    #TODO mapping usernames to passwords; this is bound to soon change to a proper database implementation
+    if detail == "password":
+        assert data[detail] in flaskr.USERS.values()
+    elif detail == "username":
+        assert data[detail] in flaskr.USERS.keys()
