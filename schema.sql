@@ -11,7 +11,7 @@ create table entries (
   etime text not null
 );
 
-create table entries (
+create table userPassword (
 username text not null,
 password text not null
 );
