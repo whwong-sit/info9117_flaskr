@@ -1,3 +1,4 @@
+
 from behave import *
 
 @given('we have behave installed')
@@ -15,14 +16,14 @@ def step_impl(context):
 
 
 
-@given(u'the User is logged in')
+@given(u'the Admin is logged in')
 def step_impl(context):
     """
-    Admin login to the /login_admin page and changing the password of jim
+    Admin login to the /login_admin page and changing the password of 'jim' %%
     """
     context.app.post('/login_admin', data=dict(
         username='jim',
-        passwordtochange='1234'
+        resetpassword='1234'
     ), follow_redirects=True)
 
     with context.app.session_transaction() as sess:
