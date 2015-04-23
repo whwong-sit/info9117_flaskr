@@ -18,4 +18,9 @@ h3               {font-size: 1.1em;}
                   border: 1px solid: #aacbe2; }
 .error          { background: #f0d6d6; padding: 0.5em; }
 .user           { font-family: sans-serif; color: #dc3900; font-size:0.8em}
+.comments      {list-style: none; margin: 0; padding: 0;}
+.comments li     { margin: 0.8em 1.2em; }
+.comments li h2  { margin-left: -1em; }
+.add-comments{ font-size: 0.9em; border-bottom: 1px solid #ccc;}
+.add-comments d1   { font-weight: bold; }
 

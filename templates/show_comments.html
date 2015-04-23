@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+{% block body %}
+
+  {% if session.logged_in %}
+<br>
+
+<textarea rows=7 cols=50 style=BORDER-BOTTOM: 0px solid; BORDER-LEFT: 0px solid; BORDER-RIGHT: 0px solid; BORDER-TOP: 0px solid; class = entry>
+Title：{{entry.title}}
+User: {{entry.username}}
+Text: {{entry.text}} 
+StartTime: {{entry.starttime}}
+EndTime: {{entry.endtime}} 
+</textarea>
+
+<button type=button onclick=EndTask! </button>
+<br>
+
+<form action="{{ url_for('add_comments) }}" method=post class=add-comments>
+        <dl>
+        <dt>Comments:
+        <dd><textarea name=comments rows=3 cols=40></textarea>
+
+        <dd><input value=Add type=submit>
+        </dl>
+  </form>
+{% endif %}
+<br>
+<ul class=comments>
+{% for comment in comments %}
+<li>{{ comment.content|safe}} <span class=user> by {{ comment.username }}
+{% else %}
+<li>NO COMMENT HERE YET</li>
+{% endfor %}
+</ul>
+{% endblock %}

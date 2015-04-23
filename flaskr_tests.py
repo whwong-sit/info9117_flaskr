@@ -114,12 +114,12 @@ class FlaskrTestCase(unittest.TestCase):
             text='<strong>HTML</strong> allowed here',
             start_time= '<15:00>',
             end_time= '<17:30>',
-            comments= '<NoComment>'
+            comments= '<reytru>'
         ), follow_redirects=True)
         assert 'No entries here so far' not in rv.data
         assert '&lt;Hello&gt;' in rv.data
         assert 'by admin' in rv.data
-        assert '&lt;NoComment&gt;' in rv.data
+        assert '&lt;reytru&gt;' in rv.data
         
     def test_end_time(self):
         self.login('admin', 'default')
