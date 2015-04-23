@@ -19,7 +19,7 @@ def step_impl(context):
 @given(u'the Admin is logged in')
 def step_impl(context):
     """
-    Admin login to the /login_admin page and changing the password of 'jim' ##
+    Admin login to the /login_admin page and changing the password of 'jim' ########
     """
     context.app.post('/login_admin', data=dict(
         username='jim',
