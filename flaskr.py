@@ -55,14 +55,17 @@ def add_entry():
 def login():
     error = None
     if request.method == 'POST':
-        username = request.form['username']
-        if username not in app.config['USERS'].keys():
+        cursor = g.db.execute('select username, password from userPassword where username=?', [request.form['username']])
+        row = cursor.fetchone()
+        user = {'username':row[0], 'password':row[1]}
+        print user
+        if user['username'] is None:
             error = 'Invalid username'
-        elif request.form['password'] != app.config['USERS'][username]:
+        elif request.form['password'] != user['password']:
             error = 'Invalid password'
         else:
             session['logged_in'] = True
-            session['username'] = username
+            session['username'] = user['username']
             flash('You were logged in')
             return redirect(url_for('show_entries'))
     return render_template('login.html', error=error)
@@ -73,5 +76,11 @@ def logout():
 	flash('You were logged out')
 	return redirect(url_for('show_entries'))
 
+	
+@app.route('/change_password')
+def change_password():
+    
+	return redirect(url_for('change_password'))
+
 if __name__ == '__main__':
-    app.run(host='0.0.0.0')
+    app.run(host='0.0.0.0',port=8080)
