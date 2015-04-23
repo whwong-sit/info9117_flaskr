@@ -16,7 +16,7 @@ def step_impl(context):
     with context.app.session_transaction() as sess:
         # see http://flask.pocoo.org/docs/0.10/testing/#accessing-and-modifying-sessions for
         # an explanation of accessing sessions during testing.
-        assert sess['logged_in']
+        assert sess['logged_in'], "The user is not logged in."
 
 
 # WHENS
@@ -29,7 +29,7 @@ def step_impl(context):
     context.rv = context.app.get('/user/<username>')
 
     # assert that this page actually exists
-    assert context.rv.status_code != 404
+    assert context.rv.status_code != 404, "'/user/<username>/' page does not exist; you're getting a 404 error"
 
 
 @when(u'the User clicks "change {detail}"')
@@ -38,7 +38,7 @@ def step_impl(context, detail):
     Check that detail is on this page, and then go to the page to change <detail>
     """
     # assert that <detail> is on the current page.
-    assert detail in context.rv.get_data()
+    assert detail in context.rv.get_data(), "{0} is not on the current page".format(detail)
 
     # GET the pge to change <detail>
     context.rv = context.app.get('/users/<username>/change_{0}'.format(detail))
@@ -58,7 +58,8 @@ def step_impl(context):
     with context.app.session_transaction() as sess:
         # see http://flask.pocoo.org/docs/0.10/testing/#accessing-and-modifying-sessions for
         # an explanation of accessing sessions during testing.
-        assert "Username: " + sess['username'] in context.rv.get_data()
+        assert "Username: " + sess['username'] in context.rv.get_data(), "'Username: {0}' " \
+                                                                         "is not on the page".format(sess['username'])
 
 
 @then(u'the User is able to edit and commit {detail}')
@@ -86,6 +87,6 @@ def step_impl(context, detail):
     #TODO this needs to be made more robust, as at the moment it only deals with the flat dictionary
     #TODO mapping usernames to passwords; this is bound to soon change to a proper database implementation
     if detail == "password":
-        assert data[detail] in flaskr.USERS.values()
+        assert data[detail] in flaskr.USERS.values(), "new password is not in the USERS dictionary"
     elif detail == "username":
-        assert data[detail] in flaskr.USERS.keys()
+        assert data[detail] in flaskr.USERS.keys(), "new username is not in the USERS dictionary"
