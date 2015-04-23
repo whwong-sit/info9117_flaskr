@@ -1,20 +1,20 @@
 #####
 import os
-import adminchangepassword
+import Adminchangepassword
 import unittest
 import tempfile
 
-class FlaskrTestCase(unittest.TestCase):
+class AdminchangepasswordTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.db_fd, adminchangepassword.app.config['DATABASE'] = tempfile.mkstemp()
-        adminchangepassword.app.config['TESTING'] = True
-        self.app = adminchangepassword.app.test_client()
-        adminchangepassword.init_db()
+        self.db_fd, Adminchangepassword.app.config['DATABASE'] = tempfile.mkstemp()
+        Adminchangepassword.app.config['TESTING'] = True
+        self.app = Adminchangepassword.app.test_client()
+        Adminchangepassword.init_db()
 
     def tearDown(self):
         os.close(self.db_fd)
-        os.unlink(adminchangepassword.app.config['DATABASE'] )
+        os.unlink(Adminchangepassword.app.config['DATABASE'] )
 
 
     def login(self, username, password):
