@@ -1,62 +1,60 @@
+#####
+import os
+import adminchangepassword
+import unittest
+import tempfile
 
-from behave import *
+class FlaskrTestCase(unittest.TestCase):
 
-@given('we have behave installed')
-def step_impl(context):
-    pass
+    def setUp(self):
+        self.db_fd, adminchangepassword.app.config['DATABASE'] = tempfile.mkstemp()
+        adminchangepassword.app.config['TESTING'] = True
+        self.app = adminchangepassword.app.test_client()
+        adminchangepassword.init_db()
 
-@when('we implement a test')
-def step_impl(context):
-    assert True is not False
-
-@then('behave will test it for us!')
-def step_impl(context):
-    assert context.failed is False
-
-
-
-
-@given(u'the Admin is logged in')
-def step_impl(context):
-    """
-    Admin login to the /login_admin page and changing the password of 'jim' ########
-    """
-    context.app.post('/login_admin', data=dict(
-        username='jim',
-        resetpassword='1234'
-    ), follow_redirects=True)
-
-    with context.app.session_transaction() as sess:
-        assert sess['changing jim password']
+    def tearDown(self):
+        os.close(self.db_fd)
+        os.unlink(adminchangepassword.app.config['DATABASE'] )
 
 
+    def login(self, username, password):
+        return self.app.post('/login', data=dict(
+            username=username,
+            password=password
+        ), follow_redirects=True)
+
+    def change_password(self, username, password, confirm_password):
+        return self.app.post('/change_password', data=dict(
+            username=username,
+            password=password,
+            comfirmpassword=confirm_password
+        ), follow_redirects=True)
+
+    def logout(self):
+        return self.app.get('/logout', follow_redirects=True)
 
 
-
-@given(u'the User is logged in')
-def step_impl(context):
-    """
-     try to login with the old password - this should fail.
-    """
-    context.app.post('/login', data=dict(
-        username='jim',
-        password='bean'
-    ), follow_redirects=True)
-
-    with context.app.session_transaction() as sess:
-        assert sess['logged_in_fail']
+    def test_change_password(self):
+        rv= self.login('admin','default')
+        assert 'You were logged in ' in rv.data
+        rv= self.change_password('jim','1234')
+        assert 'You change jim password ' in rv.data
+        rv = self.logout()
+        assert 'You were logged out' in rv.data
 
 
+    def test_multiple_login_logout(self):
 
-@given(u'the User is logged in')
-def step_impl(context):
-    """
-   Then try to login with the new password - this should pass.
-    """
-    context.app.post('/login', data=dict(
-        username='jim',
-        password='1234'
-    ), follow_redirects=True)
+        # Test jim login with old password
+        rv = self.login('jim', 'bean')
+        assert ' fail to log in' in rv.data
+        print ("rv.data",rv.data)
 
-    with context.app.session_transaction() as sess:
-        assert sess['logged_in_pass']
+        rv = self.logout()
+        assert 'You were logged out' in rv.data
+
+        # Test jim login with new password
+        rv = self.login('jim', '1234')
+        assert 'You were logged in' in rv.data
+        rv = self.logout()
+        assert 'You were logged out' in rv.data
