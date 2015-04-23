@@ -1,4 +1,5 @@
 drop table if exists entries;
+drop table if exists userPassword;
 create table entries (
   id integer primary key autoincrement,
   title text not null,
@@ -10,3 +11,7 @@ create table entries (
   etime text not null
 );
 
+create table entries (
+username text not null,
+password text not null
+);
