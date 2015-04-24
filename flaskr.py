@@ -54,8 +54,8 @@ def add_entry():
 
 @app.route('/show_comments')
 def show_comments():
-    cur = g.db.execute('SELECT comment_id, comment_input FROM comments order BY comment_id desc')
-    comments = [dict(comment_id=row[0],comment_input=row[1] ) for row in cur.fetchall()]
+    cur = g.db.execute('SELECT comment_input FROM comments JOIN entries USING (id) ORDER BY comment_id desc')
+    comments = [dict(comment_input=row[0]) for row in cur.fetchall()]
     return render_template('show_comments.html', comments=comments)
 
 @app.route('/add_comments', methods=['POST'])
@@ -63,8 +63,8 @@ def add_comments():
     if not session.get('logged_in'):
         abort(401)
  
-    g.db.execute('insert into comments (comments) values (?)',
-                 [request.form['comments']])
+    g.db.execute('insert into comments (comment_input, entry_id) values (?,?)',
+                 [request.form['comments'], session['entry_id']])
     g.db.commit()
     flash('New comment was successfully posted')
     return redirect(url_for('show_comments'))
