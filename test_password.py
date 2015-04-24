@@ -31,10 +31,14 @@ class FlaskrTestCase(unittest.TestCase):
 
     def logout(self):
         return self.app.get('/logout', follow_redirects=True)
-
-
+ 
     def test_change_password(self):
-        self.app.get('/change_password')
+        self.connect_db().execute('insert into userPassword values(?,?)',['admin','default'])
+        self.connect_db().execute('insert into userPassword values(?,?)',['jim','bean'])
+        self.app.post('/login', data=dict(
+            username='admin',
+            password='default'
+        ), follow_redirects=True)
         rv = self.change_password('jim','1234','1234')
         print rv.data
         assert 'Successfully changed user password' in rv.data
