@@ -58,3 +58,6 @@ class FlaskrTestCase(unittest.TestCase):
         assert 'You were logged in' in rv.data
         rv = self.logout()
         assert 'You were logged out' in rv.data
+
+if __name__ == '__main__':
+    unittest.main()
