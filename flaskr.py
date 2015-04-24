@@ -84,10 +84,13 @@ def change_password():
     if request.method == 'POST':
         user=request.form['username']
         passwd=request.form['password']
+		confirm_passwd=request.form['confirm_password']
         if user is None or user=='':
             error = 'Empty username'
         elif passwd is None or passwd=='':
             error = 'Empty password'
+        elif passwd!=confirm_passwd:
+            error = 'Please enter same password twice'
         else:
             g.db.execute('update userPassword set password=? where username =?', [request.form['password'],request.form['username']])
             g.db.commit()
