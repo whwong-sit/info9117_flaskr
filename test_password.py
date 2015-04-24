@@ -47,11 +47,7 @@ class FlaskrTestCase(unittest.TestCase):
 
         # Test jim login with old password
         rv = self.login('jim', 'bean')
-        assert ' fail to log in' in rv.data
-        print ("rv.data",rv.data)
-
-        rv = self.logout()
-        assert 'You were logged out' in rv.data
+        assert 'Invalid password' in rv.data
 
         # Test jim login with new password
         rv = self.login('jim', '1234')
