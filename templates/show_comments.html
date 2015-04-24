@@ -2,13 +2,16 @@
 {% block body %}
 
   {% if session.logged_in %}
+  
+  <ul class=entries>
+{% for entry in entries1 %}
+<li><h2><a href=" {{ url_for('show_entries') }}">{{ entry.title }}</a> <span class=user> by {{ entry.username }} </span></h2> {{ entry.text|safe }} </li></h3> {{ entry.start_time }} </span></h3> {{ entry.end_time }}
+{% else %}
+<li><em>No entries here yet!!!</em></li> 
+{% endfor %}
+</ul>
+
 <br>
-<form action="{{ url_for('show_entries') }}" method=post class=show-entries>
-      <dl>
-        <dt>{{ entry.title }}</a> 
-        <dt> <span class=user> by {{entry.username}} 
-         <dt></span></h2> {{ entry.text|safe }}
-         <dt> </li></h3> {{ entry.start_time }} </span></h3> {{ entry.end_time }}
 <form action="{{ url_for('add_comments') }}" method=post class=add_comments>
         <dl>
         <dt>Comments:
@@ -19,21 +22,6 @@
         </dl>
   </form>
   <br>
-<ul class=entries>
-{% for entry in entries %}
-<textarea rows="7" cols="50" style="BORDER-BOTTOM: 0px solid; BORDER-LEFT: 0px solid; BORDER-RIGHT: 0px solid; BORDER-TOP: 0px solid;" class = entries>
-Title：{{entry.title}}
-User: {{entry.username}}
-Text: {{entry.text}} 
-StartTime: {{entry.start_time}}
-EndTime: {{entry.end_time}} 
-</textarea>
-
-
-
-<li><h2><a href=" {{ url_for('show_entries') }}">{{ entry.title }}</a> <span class=user> by {{ entry.username }} </span></h2> {{ entry.text|safe }} </li></h3> {{ entry.start_time }} </span></h3> {{ entry.end_time }}
-{% endfor %}
-
 
 {% endif %}
 <br>
