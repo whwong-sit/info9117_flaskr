@@ -94,6 +94,7 @@ def change_password():
         else:
             g.db.execute('update userPassword set password=? where username =?', [request.form['password'],request.form['username']])
             g.db.commit()
+            flash('Successfully changed user password')
             return render_template('change_password.html', success='Successfully changed password')
     return render_template('change_password.html', error=error)
 
