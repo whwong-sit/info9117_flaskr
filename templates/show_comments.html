@@ -3,12 +3,11 @@
 
   {% if session.logged_in %}
 <br>
-
 <ul class=entries>
 {% for entry in entries %}
 <li><h2><a href=" {{ url_for('show_comments') }}">{{ entry.title }}</a> <span class=user> by {{ entry.username }} </span></h2> {{ entry.text|safe }} </li></h3> {{ entry.start_time }} </span></h3> {{ entry.end_time }}
 {% endfor %}
-
+</ul>
 <button type=button onclick=EndTask!</button>
 <br>
 
@@ -24,7 +23,7 @@
 <br>
 <ul class=comments>
 {% for comment in comments %}
-<li>{{ comment.content|safe}} <span class=user> by {{ comment.username }}
+<li>{{ comment.comment_input|safe}} <span
 {% else %}
 <li>NO COMMENT HERE YET</li>
 {% endfor %}
