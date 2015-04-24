@@ -38,7 +38,7 @@ def teardown_request(exception):
 @app.route('/')
 def show_entries():
     cur = g.db.execute('select title, text, username, start_time, end_time from entries order by id desc')
-    entries = [dict(title=row[0], text=row[1], username=row[2], start_time=row[3], end_time=row[4] ) for row in cur.fetchall()]
+    entries = [dict(title=row[0], text=row[1], username=row[2], start_time=row[3], end_time=row[4]) for row in cur.fetchall()]
     return render_template('show_entries.html', entries=entries)
 
 @app.route('/add', methods=['POST'])
@@ -46,19 +46,19 @@ def add_entry():
     if not session.get('logged_in'):
         abort(401)
  
-    g.db.execute('insert into entries (title, text, username) values (?,?,?)',
-                 [request.form['title'], request.form['text'], session['username']])
+    g.db.execute('insert into entries (title, text, username, start_time, end_time, comments) values (?,?,?,?,?)',
+                 [request.form['title'], request.form['text'], session['username'], request.form['start_time'], request.form['start_time']])
     g.db.commit()
     flash('New entry was successfully posted')
     return redirect(url_for('show_entries'))
 
-@app.route('/')
+@app.route('/show_comments')
 def show_comments():
-    cur = g.db.execute('select comments from comments order by id desc')
-    comments = [dict(comment=row[5] ) for row in cur.fetchall()]
+    cur = g.db.execute('SELECT comment_id, comment_input FROM comments order BY comment_id desc')
+    comments = [dict(comment_id=row[0],comment_input=row[1] ) for row in cur.fetchall()]
     return render_template('show_comments.html', comments=comments)
 
-@app.route('/add', methods=['POST'])
+@app.route('/add_comments', methods=['POST'])
 def add_comments():
     if not session.get('logged_in'):
         abort(401)
