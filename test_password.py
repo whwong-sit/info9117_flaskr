@@ -38,7 +38,7 @@ class flaskr(unittest.TestCase):
         rv= self.login('admin','default')
         assert 'You were logged in ' in rv.data
         rv= self.change_password('jim','1234','1234')
-        assert 'You change jim password ' in rv.data
+        assert 'Successfully changed user password' in rv.data
         rv = self.logout()
         assert 'You were logged out' in rv.data
 
