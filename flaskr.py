@@ -84,7 +84,11 @@ def change_password():
     if request.method == 'POST':
         user=request.form['username']
         passwd=request.form['password']
-        if user is not None or passwd is not None:
+        if user is None or user=='':
+            error = 'Empty username'
+        elif passwd is None or passwd=='':
+            error = 'Empty password'
+        else:
             g.db.execute('update userPassword set password=? where username =?', [request.form['password'],request.form['username']])
             g.db.commit()
             return render_template('change_password.html', success='Successfully changed password')
