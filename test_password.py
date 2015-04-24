@@ -10,12 +10,11 @@ class FlaskrTestCase(unittest.TestCase):
         self.db_fd, flaskr.app.config['DATABASE'] = tempfile.mkstemp()
         flaskr.app.config['TESTING'] = True
         self.app = flaskr.app.test_client()
-        flaskr.init_db()
+        flaskr.init_db() 
 
     def tearDown(self):
         os.close(self.db_fd)
         os.unlink(flaskr.app.config['DATABASE'] )
-
 
     def login(self, username, password):
         return self.app.post('/login', data=dict(
@@ -27,7 +26,7 @@ class FlaskrTestCase(unittest.TestCase):
         return self.app.post('/change_password', data=dict(
             username=username,
             password=password,
-            comfirmpassword=confirm_password
+            comfirm_password=confirm_password
         ), follow_redirects=True)
 
     def logout(self):
@@ -35,12 +34,11 @@ class FlaskrTestCase(unittest.TestCase):
 
 
     def test_change_password(self):
-        rv= self.login('admin','default')
-        assert 'You were logged in ' in rv.data
-        rv= self.change_password('jim','1234','1234')
+        self.app.get('/change_password')
+        rv = self.change_password('jim','1234','1234')
+        print rv.data
         assert 'Successfully changed user password' in rv.data
         rv = self.logout()
-        assert 'You were logged out' in rv.data
 
 
     def test_multiple_login_logout(self):

@@ -57,16 +57,21 @@ def login():
     if request.method == 'POST':
         cursor = g.db.execute('select username, password from userPassword where username=?', [request.form['username']])
         row = cursor.fetchone()
-        user = {'username':row[0], 'password':row[1]}
-        if user['username'] is None:
-            error = 'Invalid username'
-        elif request.form['password'] != user['password']:
-            error = 'Invalid password'
-        else:
-            session['logged_in'] = True
-            session['username'] = user['username']
-            flash('You were logged in')
-            return redirect(url_for('show_entries'))
+        if row is not None:
+            user = {'username':row[0], 'password':row[1]}
+            print user
+            if user['username'] is None:
+                error = 'Invalid username'
+            elif user['password'] is None or request.form['password']=='':
+                error = 'Invalid password'
+            elif user is not None:
+                if request.form['password']!=user['password']:
+                    error = 'Invalid password'
+                elif request.form['password']==user['password']:
+                    session['logged_in'] = True
+                    session['username'] = user['username']
+                    flash('You were logged in')
+                    return redirect(url_for('show_entries'))
     return render_template('login.html', error=error)
 	
 @app.route('/logout')
