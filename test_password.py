@@ -3,6 +3,7 @@ import os
 import flaskr
 import unittest
 import tempfile
+from sqlite3 import dbapi2 as sqlite3
 
 class FlaskrTestCase(unittest.TestCase):
 
@@ -10,7 +11,7 @@ class FlaskrTestCase(unittest.TestCase):
         self.db_fd, flaskr.app.config['DATABASE'] = tempfile.mkstemp()
         flaskr.app.config['TESTING'] = True
         self.app = flaskr.app.test_client()
-        flaskr.init_db() 
+        flaskr.init_db()
 
     def tearDown(self):
         os.close(self.db_fd)
@@ -33,29 +34,37 @@ class FlaskrTestCase(unittest.TestCase):
         return self.app.get('/logout', follow_redirects=True)
  
     def test_change_password(self):
-        self.connect_db().execute('insert into userPassword values(?,?)',['admin','default'])
-        self.connect_db().execute('insert into userPassword values(?,?)',['jim','bean'])
-        self.app.post('/login', data=dict(
-            username='admin',
-            password='default'
+        db = sqlite3.connect(flaskr.app.config['DATABASE'])
+        db.execute('insert into userPassword values(?,?)',['admin','default'])
+        db.execute('insert into userPassword values(?,?)',['jim','bean'])
+        db.commit()
+        self.login(username='admin',password='default')
+        self.app.get('/change_password', follow_redirects=True)
+        rv = self.app.post('/change_password', data=dict(
+            username='jim',
+            password='1234',
+            confirm_password='1234'
         ), follow_redirects=True)
-        rv = self.change_password('jim','1234','1234')
-        print rv.data
+        #print rv.data
         assert 'Successfully changed user password' in rv.data
         rv = self.logout()
 
 
     def test_multiple_login_logout(self):
-
+        db = sqlite3.connect(flaskr.app.config['DATABASE'])
+        db.execute('insert into userPassword values(?,?)',['jim','1234'])
+        db.commit()
         # Test jim login with old password
-        rv = self.login('jim', 'bean')
-        assert 'Invalid password' in rv.data
+
+        r = self.login('jim', 'bean')
+        #print r.data
+        assert 'Invalid password' in r.data
 
         # Test jim login with new password
-        rv = self.login('jim', '1234')
-        assert 'You were logged in' in rv.data
-        rv = self.logout()
-        assert 'You were logged out' in rv.data
+        r = self.login('jim', '1234')
+        assert 'You were logged in' in r.data
+        r = self.logout()
+        assert 'You were logged out' in r.data
 
 if __name__ == '__main__':
     unittest.main()

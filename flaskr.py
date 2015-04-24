@@ -59,7 +59,7 @@ def login():
         row = cursor.fetchone()
         if row is not None:
             user = {'username':row[0], 'password':row[1]}
-            print user
+            #print user
             if user['username'] is None:
                 error = 'Invalid username'
             elif user['password'] is None or request.form['password']=='':
