@@ -9,7 +9,7 @@ DEBUG = True
 SECRET_KEY = 'development key'
 #USERNAME = 'admin'
 #PASSWORD = 'default'
-USERS = {'admin':'default','adam':'alpha','bob':'bravo','cat':'charlie'}
+#USERS = {'admin':'default','adam':'alpha','bob':'bravo','cat':'charlie'}
 
 app = Flask(__name__)
 app.config.from_object(__name__)
@@ -58,7 +58,6 @@ def login():
         cursor = g.db.execute('select username, password from userPassword where username=?', [request.form['username']])
         row = cursor.fetchone()
         user = {'username':row[0], 'password':row[1]}
-        print user
         if user['username'] is None:
             error = 'Invalid username'
         elif request.form['password'] != user['password']:
@@ -77,10 +76,19 @@ def logout():
 	return redirect(url_for('show_entries'))
 
 	
-@app.route('/change_password')
+@app.route('/change_password',methods=['GET','POST'])
 def change_password():
-    
-	return redirect(url_for('change_password'))
+    error = None
+    if not session.get('logged_in'):
+        abort(401)
+    if request.method == 'POST':
+        user=request.form['username']
+        passwd=request.form['password']
+        if user is not None or passwd is not None:
+            g.db.execute('update userPassword set password=? where username =?', [request.form['password'],request.form['username']])
+            g.db.commit()
+            return render_template('change_password.html', success='Successfully changed password')
+    return render_template('change_password.html', error=error)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0',port=8080)
