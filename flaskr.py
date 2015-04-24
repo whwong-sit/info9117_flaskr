@@ -22,7 +22,7 @@ def connect_db():
 def init_db():
     with closing(connect_db()) as db:
         with app.open_resource('schema.sql', mode='r') as f:
-            db.cursor().executescript(f.read())
+         db.cursor().executescript(f.read())
         db.commit()
 
 @app.before_request
@@ -46,15 +46,15 @@ def add_entry():
     if not session.get('logged_in'):
         abort(401)
  
-    g.db.execute('insert into entries (title, text, username, start_time, end_time) values (?,?,?,?,?)',
-                 [request.form['title'], request.form['text'], session['username'], request.form['start_time'], request.form['start_time']])
+    g.db.execute('insert into entries (title, text, username) values (?,?,?)',
+                 [request.form['title'], request.form['text'], session['username']])
     g.db.commit()
     flash('New entry was successfully posted')
     return redirect(url_for('show_entries'))
 
 @app.route('/show_comments')
 def show_comments():
-    cur = g.db.execute('SELECT comment_input FROM comments JOIN entries USING (id) ORDER BY comment_id desc')
+    cur = g.db.execute('SELECT comment_input FROM comments, entries WHERE comments.entry_id = entries.id ORDER BY comment_id desc')
     comments = [dict(comment_input=row[0]) for row in cur.fetchall()]
     return render_template('show_comments.html', comments=comments)
 

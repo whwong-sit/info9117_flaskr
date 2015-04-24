@@ -7,7 +7,7 @@
         <dd><input type=text size=30 name=title>
         <dt>Text:
         <dd><textarea name=text rows=5 cols=40></textarea>
-		<dt>Start Time:
+		<!--<dt>Start Time:
 		<dd><input type=text size=20 name=start_time>
 		<!--<dt>End Time:
 		<dd><input type=text size=20 name=end_time>-->
@@ -18,7 +18,7 @@
 {% endif %}
 <ul class=entries>
 {% for entry in entries %}
-<li><h2><a href=" {{ url_for('login') }}">{{ entry.title }}</a> <span class=user> by {{ entry.username }} </span></h2> {{ entry.text|safe }} </span></h3> {{ entry.start_time }} </span></h3> {{ entry.end_time }}
+<li><h2><a href=" {{ url_for('show_comments') }}">{{ entry.title }}</a> <span class=user> by {{ entry.username }} </span></h2> {{ entry.text|safe }} </li></h3> {{ entry.start_time }} </span></h3> {{ entry.end_time }}
 {% else %}
 <li><em>No entries here yet</em></li> 
 {% endfor %}

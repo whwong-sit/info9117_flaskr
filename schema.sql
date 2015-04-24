@@ -5,7 +5,7 @@ create table entries (
   text text NOT NULL,
   username text NOT NULL,
   start_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-  end_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  end_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
   );
 
 create table comments (
