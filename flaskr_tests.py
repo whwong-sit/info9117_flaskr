@@ -28,6 +28,7 @@ class FlaskrTestCase(unittest.TestCase):
     def logout(self):
         return self.app.get('/logout', follow_redirects=True)
 
+<<<<<<< HEAD
     #test for multiple users
     def test_multiple_login_logout(self):
 	# test admin login
@@ -59,6 +60,33 @@ class FlaskrTestCase(unittest.TestCase):
 	assert 'Invalid username' in rv.data
 	rv = self.login('admin','defaultx')
 	assert 'Invalid password' in rv.data
+=======
+    def test_multiple_login_logout(self):
+        # Test admin login
+        rv = self.login('admin', 'default')
+        assert 'You were logged in' in rv.data
+        rv = self.logout()
+        assert 'You were logged out' in rv.data
+
+        # Test Jim login
+        rv = self.login('jim', 'bean')
+        assert 'You were logged in' in rv.data
+        rv = self.logout()
+        assert 'You were logged out' in rv.data
+
+        # Test Spock login
+        rv = self.login('spock', 'vulcan')
+        assert 'You were logged in' in rv.data
+        rv = self.logout()
+        assert 'You were logged out' in rv.data
+
+
+        # Test non-recognised users
+        rv = self.login('adminx', 'default')
+        assert 'Invalid username' in rv.data
+        rv = self.login('admin', 'defaultx')
+        assert 'Invalid password' in rv.data
+>>>>>>> 967bfd00bad2cace6dccfaf0261d0c390953b733
 
     def test_login_logout(self):
         rv = self.login('admin', 'default')
