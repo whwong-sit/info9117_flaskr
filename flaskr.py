@@ -56,11 +56,11 @@ def add_entry():
 def show_comments():
 
     cur = g.db.execute('SELECT comment_input FROM comments, entries WHERE comments.entry_id = entries.id ORDER BY comment_id desc')
-    comment = [dict(comment_input=row[0]) for row in cur.fetchall()]
+    comments = [dict(comment_input=row[0]) for row in cur.fetchall()]
     cur = g.db.execute('select title, text, username, start_time, end_time from comments, entries WHERE comments.entry_id = entries.id')
     entry = [dict(title=row[0], text=row[1], username=row[2], start_time=row[3], end_time=row[4]) for row in cur.fetchall()]
 
-    return render_template('show_comments.html', comment=comment, entry=entry )
+    return render_template('show_comments.html', comments=comments, entry = entry )
 
 @app.route('/add_comments', methods=['POST'])
 def add_comments():

@@ -82,58 +82,50 @@ class FlaskrTestCase(unittest.TestCase):
         rv = self.app.post('/add', data=dict(
             title='<C++_Exercise_01>',
             text='<strong>HTML</strong> allowed here',
-            start_time= '<15:00>',
-            end_time= '<16:00>',
+            start_time= '<04:43:51>',
+            end_time= '<04:43:51>',
             comments= 'hello'
         ), follow_redirects=True)
         assert 'No entries here so far' not in rv.data 
         assert '&lt;C++_Exercise_01&gt; <span class=user> by jim' in rv.data
         assert '<strong>HTML</strong> allowed here' in rv.data
-        assert '&lt;15:00&gt;' in rv.data
-        assert '&lt;16:00&gt;' in rv.data
+        assert '&lt;04:43:51&gt;' in rv.data
+        assert '&lt;04:43:51&gt;' in rv.data
 
-    def test_time(self):
-        self.login('admin', 'default')
-        rv = self.app.post('/add', data=dict(
-            title='<Hello>',
-            text='<strong>HTML</strong> allowed here',
-            start_time= '<15:00>',
-            end_time= '<17:30>',
-            comments='Hello'
-        ), follow_redirects=True)
-        assert 'No entries here so far' not in rv.data
-        assert '&lt;Hello&gt;' in rv.data
-        assert 'by admin' in rv.data
-        assert '&lt;15:00&gt;' in rv.data
-        assert '&lt;17:30&gt;' in rv.data
+    #def test_time(self):
+    #    self.login('admin', 'default')
+    #    rv = self.app.post('/add', data=dict(
+    #        title='<Hello>',
+    #        text='<strong>HTML</strong> allowed here',
+    #        start_time= '<04:43:51>',
+    #        end_time= '<04:43:51>',
+    #        comments='Hello'
+    #    ), follow_redirects=True)
+    #    assert 'No entries here so far' not in rv.data
+    #    assert '&lt;Hello&gt;' in rv.data
+    #    assert 'by admin' in rv.data
+    #    assert '&lt;04:43:51&gt;' in rv.data
+    #    assert '&lt;04:43:51&gt;' in rv.data
 
     def test_comment(self):
         self.login('admin', 'default')
-        rv = self.app.post('/add', data= dict(
-        title='<Hello>',
-            text='<strong>HTML</strong> allowed here',
-            start_time= '<15:00>',
-            end_time= '<17:30>',
-            comments= '<reytru>'
+        rv = self.app.post('/show_comments', data= dict(
+        comment_input='<Hello>'
         ), follow_redirects=True)
-        assert 'No entries here so far' not in rv.data
         assert '&lt;Hello&gt;' in rv.data
-        assert 'by admin' in rv.data
-        assert '&lt;reytru&gt;' in rv.data
+        assert 'No Comment Yet' not in rv.data
+         
         
     def test_end_time(self):
         self.login('admin', 'default')
-        rv = self.app.post('/add', data= dict(
-            title='<Hello>',
-            text='<strong>HTML</strong> allowed here',
-            start_time= '<15:00>',
-            end_time= '<17:30>',
-            comments= '<>'
+        rv = self.app.post('/show_comments', data= dict(
+           comment_input='<Hello>',
+           start_time= '<04:43:51>',
+           end_time= '<04:43:51>'
         ), follow_redirects=True)
-        assert 'No entries here so far' not in rv.data
-        assert '&lt;Hello&gt;' in rv.data
-        assert 'by admin' in rv.data
-        assert '&lt;17:30&gt;' in rv.data
+         assert '&lt;Hello&gt;' in rv.data
+        assert '&lt;04:43:51&gt;' in rv.data
+        assert '&lt;04:43:51&gt;' in rv.data
 
         
 
