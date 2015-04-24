@@ -84,7 +84,7 @@ def change_password():
     if request.method == 'POST':
         user=request.form['username']
         passwd=request.form['password']
-		confirm_passwd=request.form['confirm_password']
+        confirm_passwd=request.form['confirm_password']
         if user is None or user=='':
             error = 'Empty username'
         elif passwd is None or passwd=='':
