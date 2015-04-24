@@ -4,13 +4,10 @@
   {% if session.logged_in %}
 <br>
 
-<textarea rows=7 cols=50 style=BORDER-BOTTOM: 0px solid; BORDER-LEFT: 0px solid; BORDER-RIGHT: 0px solid; BORDER-TOP: 0px solid; class = entries>
-Title：{{entry.title}}
-User: {{entry.username}}
-Text: {{entry.text}}
-StartTime: {{entry.start_time}}
-EndTime: {{entry.end_time}}
-</textarea>
+<ul class=entries>
+{% for entry in entries %}
+<li><h2><a href=" {{ url_for('show_comments') }}">{{ entry.title }}</a> <span class=user> by {{ entry.username }} </span></h2> {{ entry.text|safe }} </li></h3> {{ entry.start_time }} </span></h3> {{ entry.end_time }}
+{% endfor %}
 
 <button type=button onclick=EndTask!</button>
 <br>
