@@ -97,7 +97,13 @@ def change_password():
         elif passwd!=confirm_passwd:
             error = 'Please enter same password twice'
         else:
-            g.db.execute('update userPassword set password=? where username =?', [request.form['password'],request.form['username']])
+            cursor = g.db.execute('select username from userPassword where username=?', [request.form['username']])
+            row = cursor.fetchone()
+            if row is None:
+                error = 'User does not exist'
+                return render_template('change_password.html',error=error)
+            else:
+                g.db.execute('update userPassword set password=? where username =?', [request.form['password'],request.form['username']])
             g.db.commit()
             flash('Successfully changed user password')
             return render_template('change_password.html', success='Successfully changed password')

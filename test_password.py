@@ -33,6 +33,7 @@ class FlaskrTestCase(unittest.TestCase):
     def logout(self):
         return self.app.get('/logout', follow_redirects=True)
  
+    #test changing existing user password
     def test_change_password(self):
         db = sqlite3.connect(flaskr.app.config['DATABASE'])
         db.execute('insert into userPassword values(?,?)',['admin','default'])
@@ -49,7 +50,23 @@ class FlaskrTestCase(unittest.TestCase):
         assert 'Successfully changed user password' in rv.data
         rv = self.logout()
 
-
+    #test changing non-existing user password
+    def test_change_non_exist_password(self):
+        db = sqlite3.connect(flaskr.app.config['DATABASE'])
+        db.execute('insert into userPassword values(?,?)',['admin','default'])
+        db.commit()
+        self.login(username='admin',password='default')
+        self.app.get('/change_password', follow_redirects=True)
+        rv = self.app.post('/change_password', data=dict(
+            username='nonexist',
+            password='test',
+            confirm_password='test'
+        ), follow_redirects=True)
+        #print rv.data
+        assert 'User does not exist' in rv.data
+        rv = self.logout()
+		
+    #test login after administrator changed user password
     def test_multiple_login_logout(self):
         db = sqlite3.connect(flaskr.app.config['DATABASE'])
         db.execute('insert into userPassword values(?,?)',['jim','1234'])
