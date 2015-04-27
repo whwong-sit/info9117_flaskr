@@ -1,5 +1,5 @@
 from behave import *
-import flaskr
+import meterage
 
 # GIVENS
 
@@ -84,9 +84,9 @@ def step_impl(context, detail):
         then account details are displayed
     ''')
 
-    #TODO this needs to be made more robust, as at the moment it only deals with the flat dictionary
-    #TODO mapping usernames to passwords; this is bound to soon change to a proper database implementation
+    # TODO this needs to be made more robust, as at the moment it only deals with the flat dictionary
+    # TODO mapping usernames to passwords; this is bound to soon change to a proper database implementation
     if detail == "password":
-        assert data[detail] in flaskr.USERS.values(), "new password is not in the USERS dictionary"
+        assert data[detail] in meterage.USERS.values(), "new password is not in the USERS dictionary"
     elif detail == "username":
-        assert data[detail] in flaskr.USERS.keys(), "new username is not in the USERS dictionary"
+        assert data[detail] in meterage.USERS.keys(), "new username is not in the USERS dictionary"

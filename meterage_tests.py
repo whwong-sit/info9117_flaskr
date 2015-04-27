@@ -1,19 +1,19 @@
 import os
-import flaskr
+import meterage
 import unittest
 import tempfile
 
-class FlaskrTestCase(unittest.TestCase):
 
+class FlaskrTestCase(unittest.TestCase):
     def setUp(self):
-        self.db_fd, flaskr.app.config['DATABASE'] = tempfile.mkstemp()
-        flaskr.app.config['TESTING'] = True
-        self.app = flaskr.app.test_client()
-        flaskr.init_db()
+        self.db_fd, meterage.app.config['DATABASE'] = tempfile.mkstemp()
+        meterage.app.config['TESTING'] = True
+        self.app = meterage.app.test_client()
+        meterage.init_db()
 
     def tearDown(self):
         os.close(self.db_fd)
-        os.unlink( flaskr.app.config['DATABASE'] )
+        os.unlink(meterage.app.config['DATABASE'])
 
     def test_empty_db(self):
         rv = self.app.get('/')

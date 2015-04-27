@@ -1,5 +1,5 @@
 import os
-import flaskr
+import meterage
 import tempfile
 
 # These run before and after every step.
@@ -44,10 +44,10 @@ def before_all(context):
     """
     Create a new test client, initialise a database and activate TESTING mode
     """
-    context.db_fd, flaskr.app.config['DATABASE'] = tempfile.mkstemp()
-    flaskr.app.config['TESTING'] = True
-    context.app = flaskr.app.test_client()
-    flaskr.init_db()
+    context.db_fd, meterage.app.config['DATABASE'] = tempfile.mkstemp()
+    meterage.app.config['TESTING'] = True
+    context.app = meterage.app.test_client()
+    meterage.init_db()
 
 
 def after_all(context):
@@ -55,5 +55,5 @@ def after_all(context):
     Close temporary file and remove from filesystem
     """
     os.close(context.db_fd)
-    os.unlink(flaskr.app.config['DATABASE'])
+    os.unlink(meterage.app.config['DATABASE'])
 
