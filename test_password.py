@@ -1,6 +1,6 @@
 #####
 import os
-import flaskr
+import meterage
 import unittest
 import tempfile
 from sqlite3 import dbapi2 as sqlite3
@@ -8,14 +8,14 @@ from sqlite3 import dbapi2 as sqlite3
 class FlaskrTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.db_fd, flaskr.app.config['DATABASE'] = tempfile.mkstemp()
-        flaskr.app.config['TESTING'] = True
-        self.app = flaskr.app.test_client()
-        flaskr.init_db()
+        self.db_fd, meterage.app.config['DATABASE'] = tempfile.mkstemp()
+        meterage.app.config['TESTING'] = True
+        self.app = meterage.app.test_client()
+        meterage.init_db()
 
     def tearDown(self):
         os.close(self.db_fd)
-        os.unlink(flaskr.app.config['DATABASE'] )
+        os.unlink(meterage.app.config['DATABASE'] )
 
     def login(self, username, password):
         return self.app.post('/login', data=dict(
@@ -35,7 +35,7 @@ class FlaskrTestCase(unittest.TestCase):
  
     #test changing existing user password
     def test_change_password(self):
-        db = sqlite3.connect(flaskr.app.config['DATABASE'])
+        db = sqlite3.connect(meterage.app.config['DATABASE'])
         db.execute('insert into userPassword values(?,?)',['admin','default'])
         db.execute('insert into userPassword values(?,?)',['jim','bean'])
         db.commit()
@@ -52,7 +52,7 @@ class FlaskrTestCase(unittest.TestCase):
 
     #test changing non-existing user password
     def test_change_non_exist_password(self):
-        db = sqlite3.connect(flaskr.app.config['DATABASE'])
+        db = sqlite3.connect(meterage.app.config['DATABASE'])
         db.execute('insert into userPassword values(?,?)',['admin','default'])
         db.commit()
         self.login(username='admin',password='default')
@@ -68,7 +68,7 @@ class FlaskrTestCase(unittest.TestCase):
 		
     #test login after administrator changed user password
     def test_multiple_login_logout(self):
-        db = sqlite3.connect(flaskr.app.config['DATABASE'])
+        db = sqlite3.connect(meterage.app.config['DATABASE'])
         db.execute('insert into userPassword values(?,?)',['jim','1234'])
         db.commit()
         # Test jim login with old password

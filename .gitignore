@@ -1,12 +1,13 @@
-# PyCharm artefacts
+# Pycharm idea folder
 .idea
 
-# Mac generated files
-.DS_Store
+# Emacs autosave files
+*~ 
 
-# Python compiled and Python object files
+# Virtual environment
+venv
+
+# Python compiled and Python optimised files
 *.pyc
 *.pyo
-
-# emacs artefacts
-*~
+>>>>>>> useradminweb
