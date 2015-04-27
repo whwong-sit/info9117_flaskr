@@ -9,7 +9,7 @@ DEBUG = True
 SECRET_KEY = 'development key'
 #USERNAME = 'admin'
 #PASSWORD = 'default'
-USERS = {'admin' : 'default', 'jim' : 'bean', 'spock' : 'vulcan'}
+#USERS = {'admin':'default','adam':'alpha','bob':'bravo','cat':'charlie'}
 
 app = Flask(__name__)
 app.config.from_object(__name__)
@@ -37,16 +37,16 @@ def teardown_request(exception):
 
 @app.route('/')
 def show_entries():
-    cur = g.db.execute('select title, text, username from entries order by id desc')
-    entries = [dict(title=row[0], text=row[1], username=row[2]) for row in cur.fetchall()]
+    cur = g.db.execute('select title, text, username, sdate, stime, edate, etime from entries order by id desc')
+    entries = [dict(title=row[0], text=row[1], username=row[2], sdate=row[3], stime=row[4], edate=row[5], etime=row[6]) for row in cur.fetchall()]
     return render_template('show_entries.html', entries=entries)
 
 @app.route('/add', methods=['POST'])
 def add_entry():
     if not session.get('logged_in'):
         abort(401)
-    g.db.execute('insert into entries (title, text, username) values (?,?,?)',
-                 [request.form['title'], request.form['text'], session['username']])
+    g.db.execute('insert into entries (title, text, username, sdate, stime, edate, etime) values (?,?,?,?,?,?,?)',
+                 [request.form['title'], request.form['text'], session['username'], request.form['sdate'], request.form['stime'], request.form['edate'], request.form['etime']])
     g.db.commit()
     flash('New entry was successfully posted')
     return redirect(url_for('show_entries'))
@@ -55,23 +55,59 @@ def add_entry():
 def login():
     error = None
     if request.method == 'POST':
-        username = request.form['username']
-        if username not in app.config['USERS'].keys():
-            error = 'Invalid username'
-        elif request.form['password'] != app.config['USERS'][username]:
-            error = 'Invalid password'
-        else:
-            session['logged_in'] = True
-            session['username'] = username
-            flash('You were logged in')
-            return redirect(url_for('show_entries'))
+        cursor = g.db.execute('select username, password from userPassword where username=?', [request.form['username']])
+        row = cursor.fetchone()
+        if row is not None:
+            user = {'username':row[0], 'password':row[1]}
+            #print user
+            if user['username'] is None:
+                error = 'Invalid username'
+            elif user['password'] is None or request.form['password']=='':
+                error = 'Invalid password'
+            elif user is not None:
+                if request.form['password']!=user['password']:
+                    error = 'Invalid password'
+                elif request.form['password']==user['password']:
+                    session['logged_in'] = True
+                    session['username'] = user['username']
+                    flash('You were logged in')
+                    return redirect(url_for('show_entries'))
     return render_template('login.html', error=error)
-
+	
 @app.route('/logout')
 def logout():
-    session.pop('logged_in', None)
-    flash('You were logged out')
-    return redirect(url_for('show_entries'))
+	session.pop('logged_in', None)
+	flash('You were logged out')
+	return redirect(url_for('show_entries'))
+
+	
+@app.route('/change_password',methods=['GET','POST'])
+def change_password():
+    error = None
+    if not session.get('logged_in'):
+        abort(401)
+    if request.method == 'POST':
+        user=request.form['username']
+        passwd=request.form['password']
+        confirm_passwd=request.form['confirm_password']
+        if user is None or user=='':
+            error = 'Empty username'
+        elif passwd is None or passwd=='':
+            error = 'Empty password'
+        elif passwd!=confirm_passwd:
+            error = 'Please enter same password twice'
+        else:
+            cursor = g.db.execute('select username from userPassword where username=?', [request.form['username']])
+            row = cursor.fetchone()
+            if row is None:
+                error = 'User does not exist'
+                return render_template('change_password.html',error=error)
+            else:
+                g.db.execute('update userPassword set password=? where username =?', [request.form['password'],request.form['username']])
+            g.db.commit()
+            flash('Successfully changed user password')
+            return render_template('change_password.html', success='Successfully changed password')
+    return render_template('change_password.html', error=error)
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0',port=8080)

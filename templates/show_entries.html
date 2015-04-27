@@ -5,6 +5,14 @@
       <dl>
         <dt>Title:
         <dd><input type=text size=30 name=title>
+		<dt>Start date:
+		<dd><input type=date name=sdate>
+		<dt>Start time:
+		<dd><input type=time name=stime>
+		<dt>End date:
+		<dd><input type=date name=edate>
+		<dt>End time:
+		<dd><input type=time name=etime>
         <dt>Text:
         <dd><textarea name=text rows=5 cols=40></textarea>
         <dd><input type=submit value=Share>
@@ -13,7 +21,8 @@
 {% endif %}
 <ul class=entries>
 {% for entry in entries %}
-<li><h2>{{ entry.title }} <span class=user> by {{ entry.username }} </span></h2> {{ entry.text|safe }}
+<li><h2>{{ entry.title }} <span class=user> by {{ entry.username }} </span></h2><div class=datetime> start time:{{entry.sdate}} {{entry.stime}}
+end time:{{entry.edate}} {{entry.etime}}</div> {{ entry.text|safe }}
 {% else %}
 <li><em>No entries here yet</em></li>
 {% endfor %}
