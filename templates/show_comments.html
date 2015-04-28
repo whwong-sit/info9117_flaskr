@@ -5,31 +5,37 @@
   
   <ul class=entries>
 {% for entry in entries1 %}
-<li><h2><a href=" {{ url_for('show_entries') }}">{{ entry.title }}</a> <span class=user> by {{ entry.username }} </span></h2> {{ entry.text|safe }} </li></h3> {{ entry.start_time }} </span></h3> {{ entry.end_time }}
-{% else %}
-<li><em>No entries here yet!!!</em></li> 
-{% endfor %}
+<li><h2><a href=" {{ url_for('show_entries') }}">{{ entry.title }}</a><span class=user> by {{ entry.username }} </span></h2> {{ entry.text|safe }} </li></h3> Started at: {{ entry.start_time }} | </span></h3> End at: {{ entry.end_time }}
+{% endfor%}
 </ul>
 
-<br>
-<form action="{{ url_for('add_comments') }}" method=post class=add_comments>
+
+<form action="{{ url_for('add_end_time', entry_id=entry_id) }}" method=post class=add_end_time>
+        </dl><dt>Press to end task:
+        <input type=submit value=EndTask!>
+</form>
+
+<form action="{{ url_for('add_comments', entry_id=entry_id) }}" method=post class=add_comments>
         <dl>
         <dt>Comments:
-        <dd><textarea name=comments rows=3 cols=40></textarea>
+        <dd><textarea name=comment_input rows=5 cols=40></textarea>
 
         <dd><input type=submit value=Add >
-         <input type=button value=EndTask!>
         </dl>
   </form>
-  <br>
 
 {% endif %}
 <br>
+<div style="height:50; width:560px; background:white; word-wrap: break-word; word-break: normal;">
+
 <ul class=comments>
 {% for comment in comments %}
-<li><h2><a href=" {{ url_for('show_comments') }}">{{ comment.content|safe}} <span class=user> by {{ comment.username }}
+<li>{{comment.comment_input|safe}}
+    <li><span class=user> by {{ comment.username }} </span>
 {% else %}
 <li><em>No Comment Yet</em></li>
 {% endfor %}
+
 </ul>
+    </div>
 {% endblock %}
