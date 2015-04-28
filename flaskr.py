@@ -7,8 +7,8 @@ from flask import Flask, request, session, g, redirect, url_for, \
 DATABASE = 'db/flask.db'
 DEBUG = True
 SECRET_KEY = 'development key'
-#USERNAME = 'admin'
-#PASSWORD = 'default'
+# USERNAME = 'admin'
+# PASSWORD = 'default'
 USERS = {'admin': 'default', 'jim': 'bean', 'spock': 'vulcan'}
 
 app = Flask(__name__)
@@ -90,23 +90,23 @@ def add_comments(entry_id):
 def add_end_time(entry_id):
     if not session.get('logged_in'):
         abort(401)
-    #if not end_time_NULL_check() is entry_id:
-    #    flash('TASK ALREADY ENDED')
-
-    #else:
+    #if end_time_null_check is True:
     g.db.execute('UPDATE entries SET end_time=CURRENT_TIMESTAMP WHERE entries.id=' + entry_id + '')
     g.db.commit()
     flash('TASK ENDED')
     return redirect(url_for('show_comments', entry_id=entry_id))
+   # else:
+        #flash('TASK ALREADY ENDED')
+        #return redirect(url_for('show_comments', entry_id=entry_id))
 
-#@app.route('/<entry_id>/end_time_NULL_check', methods=['POST'])
-#def end_time_NULL_check(entry_id): #need to debug
-    #cur = g.db.execute('select end_time from entries where id=' + entry_id)
-    #end_time_check = [dict(end_time=row[0]) for row in cur.fetchall()]
 
-    #if end_time_check is '%0000-00-00 00:00:00%':
-   # return entry_id
 
+@app.route('/<entry_id>/end_time_null_check')
+def end_time_null_check(entry_id):  #need to debug
+    cur = g.db.execute('select end_time from entries where id=' + entry_id)
+    end_time_fill = [dict(end_time=row[0]) for row in cur.fetchall()]
+    if end_time_fill is None:
+        return end_time_null_check is True
 
 
 @app.route('/login', methods=['GET', 'POST'])
