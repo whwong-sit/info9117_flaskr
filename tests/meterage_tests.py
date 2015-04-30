@@ -2,157 +2,133 @@ import os
 import meterage
 import unittest
 import tempfile
+from contextlib import closing
+
 
 class FlaskrTestCase(unittest.TestCase):
 
     def setUp(self):
+        """
+        create a new test client, initialise a database and activate TESTING mode
+        """
         self.db_fd, meterage.app.config['DATABASE'] = tempfile.mkstemp()
         meterage.app.config['TESTING'] = True
         self.app = meterage.app.test_client()
         meterage.init_db()
 
-    def tearDown(self):
-        os.close(self.db_fd)
-        os.unlink( meterage.app.config['DATABASE'] )
+        # add users to the temporary database
+        # Note that an admin and a normal user are added.
+        with closing(meterage.connect_db()) as db:
+            db.execute('insert into userPassword (username, password) values (?, ?)',
+                       ['admin', 'default'])
+            db.execute('insert into userPassword (username, password) values (?, ?)',
+                       ['hari', 'seldon'])
+            db.commit()
 
-    def test_empty_db(self):
-        rv = self.app.get('/')
-        assert 'No entries here yet' in rv.data
+    def tearDown(self):
+        """
+        close temporary file and remove from filesystem
+        """
+        os.close(self.db_fd)
+        os.unlink(meterage.app.config['DATABASE'])
+
+    #### Some useful functions
 
     def login(self, username, password):
+        """
+        login as the user specified by username and password
+        :param username: username to post
+        :param password: password to post
+        :return: the page that you are redirected to upon login
+        """
         return self.app.post('/login', data=dict(
             username=username,
             password=password
         ), follow_redirects=True)
 
     def logout(self):
+        """
+        log out
+        """
         return self.app.get('/logout', follow_redirects=True)
 
-    #test for multiple users
-    def test_multiple_login_logout(self):
-        # test admin login
-        rv = self.login('admin','default')
-        assert 'You were logged in' in rv.data
-        rv = self.logout()
-        assert 'You were logged out' in rv.data
-
-        #test adam login
-        rv = self.login('adam','alpha')
-        assert 'You were logged in' in rv.data
-        rv = self.logout()
-        assert 'You were logged out' in rv.data
-
-        #test bob login
-        rv = self.login('bob','bravo')
-        assert 'You were logged in' in rv.data
-        rv = self.logout()
-        assert 'You were logged out' in rv.data
-
-        #test cat login
-        rv = self.login('cat','charlie')
-        assert 'You were logged in' in rv.data
-        rv = self.logout()
-        assert 'You were logged out' in rv.data
-
-        #test for invalid user
-        rv = self.login('adminx','default')
-        assert 'Invalid username' in rv.data
-        rv = self.login('admin','defaultx')
-        assert 'Invalid password' in rv.data
-
-    def test_login_logout(self):
-        rv = self.login('admin', 'default')
-        assert 'You were logged in' in rv.data
-        rv = self.logout()
-        assert 'You were logged out' in rv.data
-        rv = self.login('adminx', 'default')
-        assert 'Invalid username' in rv.data
-        rv = self.login('admin', 'defaultx')
-        assert 'Invalid password' in rv.data
-
-    #test for adding message by admin
-    def test_messages_admin(self):
-        self.login('admin', 'default')
-        rv = self.app.post('/add', data=dict(
-            title='<Hello admin>',
+    def generic_post(self):
+        """
+        make a generic post
+        """
+        return self.app.post('/add', data=dict(
+            title='<Hello>',
             text='<strong>HTML</strong> allowed here',
-            username='admin',
-            sdate='2015-01-01',
-            stime='09:00:00',
-            edate='2015-01-01',
-            etime='13:00:00'
-        ), follow_redirects=True)
-        assert 'No entries here so far' not in rv.data
-        assert '&lt;Hello admin&gt;' in rv.data
-        assert '<strong>HTML</strong> allowed here' in rv.data
-        assert 'admin' in rv.data
-        assert '2015-01-01' in rv.data
-        assert '09:00:00' in rv.data
-        assert '2015-01-01' in rv.data
-        assert '13:00:00' in rv.data
-
-    #test for adding message by adam
-    def test_messages_adam(self):
-        self.login('adam', 'alpha')
-        rv = self.app.post('/add', data=dict(
-            title='<Hello adam>',
-            text='<strong>HTML</strong> allowed here',
-            username='adam',
             sdate='2015-01-01',
             stime='09:00:00',
             edate='2015-01-02',
             etime='13:00:00'
         ), follow_redirects=True)
-        assert 'No entries here so far' not in rv.data
-        assert '&lt;Hello adam&gt;' in rv.data
-        assert '<strong>HTML</strong> allowed here' in rv.data
-        assert 'adam' in rv.data
-        assert '2015-01-01' in rv.data
-        assert '09:00:00' in rv.data
-        assert '2015-01-02' in rv.data
-        assert '13:00:00' in rv.data
 
-    #test for adding message by bob
-    def test_messages_bob(self):
-        self.login('bob', 'bravo')
-        rv = self.app.post('/add', data=dict(
-            title='<Hello bob>',
-            text='<strong>HTML</strong> allowed here',
-            username='bob',
-            sdate='2015-01-02',
-            stime='10:00:00',
-            edate='2015-01-03',
-            etime='16:00:00'
-        ), follow_redirects=True)
-        assert 'No entries here so far' not in rv.data
-        assert '&lt;Hello bob&gt;' in rv.data
-        assert '<strong>HTML</strong> allowed here' in rv.data
-        assert 'bob' in rv.data
-        assert '2015-01-02' in rv.data
-        assert '10:00:00' in rv.data
-        assert '2015-01-03' in rv.data
-        assert '16:00:00' in rv.data
+    def test_no_messages(self):
+        """
+        When we only have the userPassword table in the database populated,
+        make sure that 'No entries here yet' is present in the data when
+        we check show_entries.html (i.e. the root page)
+        """
+        rv = self.app.get('/')
+        assert 'No entries here yet' in rv.get_data()
 
-    #test for adding message by cat
-    def test_messages_cat(self):
-        self.login('cat', 'charlie')
-        rv = self.app.post('/add', data=dict(
-            title='<Hello cat>',
-            text='<strong>HTML</strong> allowed here',
-            username='cat',
-            sdate='2015-01-02',
-            stime='16:00:00',
-            edate='2015-01-03',
-            etime='20:00:00'
-        ), follow_redirects=True)
-        assert 'No entries here so far' not in rv.data
-        assert '&lt;Hello cat&gt;' in rv.data
-        assert '<strong>HTML</strong> allowed here' in rv.data
-        assert 'cat' in rv.data
-        assert '2015-01-02' in rv.data
-        assert '16:00:00' in rv.data
-        assert '2015-01-03' in rv.data
-        assert '20:00:00' in rv.data
+    def userPassword_content(self):
+        """
+        Get all the data in the userPassword table
+        """
+        with closing(meterage.connect_db()) as db:
+            cur = db.execute('select username, password from userPassword')
+            return [dict(username=row[0], password=row[1]) for row in cur.fetchall()]
+
+    #### Tests
+
+    def test_login_logout(self):
+        """
+        Test that all users may log in and log out
+        """
+        for entry in self.userPassword_content():
+            rv = self.login(entry['username'], entry['password'])
+            assert 'You were logged in' in rv.get_data()
+            rv = self.logout()
+            assert 'You were logged out' in rv.get_data()
+
+    def test_invalid(self):
+        """
+        Test that we get appropriate responses for invalid usernames and/or passwords
+        """
+        # test for invalid user
+        rv = self.login('adminx','default')
+        assert 'Invalid username' in rv.get_data()
+
+        # test for invalid password
+        rv = self.login('admin','defaultx')
+        assert 'Invalid password' in rv.get_data()
+
+        # test for invalid username and password
+        rv = self.login('adminx', 'defaultx')
+        assert 'Invalid username' in rv.get_data()
+
+    def test_messages(self):
+        """
+        Test all users may make posts, and the appropriate data are in the
+        page returned.
+        """
+        for entry in self.userPassword_content():
+            self.login(entry['username'], entry['password'])
+            rv = self.generic_post()
+            assert 'No entries here so far' not in rv.get_data()
+            assert '&lt;Hello&gt;' in rv.get_data()
+            assert '<strong>HTML</strong> allowed here' in rv.get_data()
+            with self.app.session_transaction() as sess:
+                # see http://flask.pocoo.org/docs/0.10/testing/#accessing-and-modifying-sessions for
+                # an explanation of accessing sessions during testing.
+                assert sess['username'] in rv.get_data()
+            assert '2015-01-01' in rv.get_data()
+            assert '09:00:00' in rv.get_data()
+            assert '2015-01-02' in rv.get_data()
+            assert '13:00:00' in rv.get_data()
 
 if __name__ == '__main__':
     unittest.main()
