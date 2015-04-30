@@ -9,15 +9,14 @@ def step_impl(context):
     log in as user "jim"
     """
     context.app.post('/login', data=dict(
-        username='jim',
-        password='bean'
+        username='hari',
+        password='seldon'
     ), follow_redirects=True)
 
     with context.app.session_transaction() as sess:
         # see http://flask.pocoo.org/docs/0.10/testing/#accessing-and-modifying-sessions for
         # an explanation of accessing sessions during testing.
         assert sess['logged_in'], "The user is not logged in."
-
 
 # WHENS
 
@@ -40,7 +39,7 @@ def step_impl(context, detail):
     # assert that <detail> is on the current page.
     assert detail in context.rv.get_data(), "{0} is not on the current page".format(detail)
 
-    # GET the pge to change <detail>
+    # GET the page to change <detail>
     context.rv = context.app.get('/users/<username>/change_{0}'.format(detail))
 
 
