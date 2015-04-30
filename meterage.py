@@ -2,6 +2,7 @@ from contextlib import closing
 from sqlite3 import dbapi2 as sqlite3
 from flask import Flask, request, session, g, redirect, url_for, \
     abort, render_template, flash
+from jinja2 import Markup
 # from os.path import isfile
 
 # configuration
@@ -140,6 +141,13 @@ def change_password():
             return render_template('change_password.html', success='Successfully changed password')
 
     return render_template('change_password.html', error=error)
+
+@app.template_filter('newlines')
+def newline_filter(s):
+    s = s.replace("\r\n", '<br />')
+    s = s.replace("\n", '<br />')
+    # Markup() is used to prevent '<' and '>' symbols from being interpreted as less-than or greater-than symbols
+    return Markup(s)
 
 
 if __name__ == '__main__':
