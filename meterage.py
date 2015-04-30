@@ -13,6 +13,7 @@ app.config.from_object(config)
 app.config.from_pyfile('config.py')
 app.config.from_envvar('FLASKR_SETTINGS', silent=True)
 
+
 def connect_db():
     """
     Make a connection to the database specified in the config.
