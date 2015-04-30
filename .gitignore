@@ -1,3 +1,13 @@
+# Pycharm idea folder
 .idea
-.DS_Store
 
+# Emacs autosave files
+*~ 
+
+# Virtual environment
+venv
+
+# Python compiled and Python optimised files
+*.pyc
+*.pyo
+>>>>>>> useradminweb
