@@ -82,7 +82,7 @@ class FlaskrTestCase(unittest.TestCase):
             cur = db.execute('select username, password from userPassword')
             return [dict(username=row[0], password=row[1]) for row in cur.fetchall()]
 
-    #### Tests
+    #### Basic tests
 
     def test_login_logout(self):
         """
@@ -99,11 +99,11 @@ class FlaskrTestCase(unittest.TestCase):
         Test that we get appropriate responses for invalid usernames and/or passwords
         """
         # test for invalid user
-        rv = self.login('adminx','default')
+        rv = self.login('adminx', 'default')
         assert 'Invalid username' in rv.get_data()
 
         # test for invalid password
-        rv = self.login('admin','defaultx')
+        rv = self.login('admin', 'defaultx')
         assert 'Invalid password' in rv.get_data()
 
         # test for invalid username and password
@@ -114,6 +114,7 @@ class FlaskrTestCase(unittest.TestCase):
         """
         Test all users may make posts, and the appropriate data are in the
         page returned.
+        Check that HTML is allowed in the text but not in the title"
         """
         for entry in self.userPassword_content():
             self.login(entry['username'], entry['password'])
@@ -129,6 +130,82 @@ class FlaskrTestCase(unittest.TestCase):
             assert '09:00:00' in rv.get_data()
             assert '2015-01-02' in rv.get_data()
             assert '13:00:00' in rv.get_data()
+
+    def test_message_maps_to_username(self):
+        """
+        check that username is printed along with message, and that
+        the username is the right one
+        """
+        self.login('admin', 'default')
+        rv = self.generic_post()
+        assert "by admin" in rv.get_data()
+
+    def test_read_log_without_login(self):
+        """
+        Ensure that someone who is not logged in can still read the logs
+        """
+        self.login('admin', 'default')
+        self.generic_post()
+        self.logout()
+        rv = self.app.get('/')
+        assert "&lt;Hello&gt" in rv.get_data()
+        assert "by admin" in rv.get_data()
+
+    #### Changing passwords tests
+
+    def test_change_password(self):
+        """
+        Test that the admin can change an existing user's password
+        """
+        # log in as the admin; only the admin can change passwords
+        self.login(username='admin',password='default')
+
+        rv = self.app.post('/change_password', data=dict(
+            username='hari',
+            password='1234',
+            confirm_password='1234'
+        ), follow_redirects=True)
+
+        assert 'Successfully changed user password' in rv.get_data()
+
+    def test_change_non_exist_password(self):
+        """
+        Test that trying to change the password of a user that does not exist
+        behaves as we expect
+        """
+        # log in as the admin; only the admin can change passwords
+        self.login(username='admin', password='default')
+
+        rv = self.app.post('/change_password', data=dict(
+            username='nonexist',
+            password='test',
+            confirm_password='test'
+        ), follow_redirects=True)
+
+        assert 'User does not exist' in rv.get_data()
+
+    def test_login_after_change(self):
+        """
+        Test for behaviour following a change of password.
+
+        """
+        # log in as the admin; only the admin can change passwords
+        self.login(username='admin', password='default')
+
+        # change hari's password
+        self.app.post('/change_password', data=dict(
+            username='hari',
+            password='1234',
+            confirm_password='1234'
+        ), follow_redirects=True)
+
+        # Test hari login with old password
+        rv = self.login('hari', 'seldon')
+        assert 'Invalid password' in rv.get_data()
+
+        # Test hari login with new password
+        rv = self.login('hari', '1234')
+        assert 'You were logged in' in rv.get_data()
 
 if __name__ == '__main__':
     unittest.main()
