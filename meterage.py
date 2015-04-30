@@ -5,16 +5,13 @@ from flask import Flask, request, session, g, redirect, url_for, \
 from jinja2 import Markup
 # from os.path import isfile
 
-# configuration
-DATABASE = 'db/flask.db'
-DEBUG = True
-SECRET_KEY = 'development key'
+import config
 
-app = Flask(__name__)
-app.config.from_object(__name__)
-
+# create application
+app = Flask(__name__, instance_relative_config=True)
+app.config.from_object(config)
+app.config.from_pyfile('config.py')
 app.config.from_envvar('FLASKR_SETTINGS', silent=True)
-
 
 def connect_db():
     """
