@@ -67,73 +67,70 @@ class FlaskrTestCase(unittest.TestCase):
     def test_messages(self):
         self.login('admin', 'default')
         rv = self.app.post('/add', data=dict(
-            title='<Hello>',
+            title='<Hi>',
             text='<strong>HTML</strong> allowed here',
             start_time= '<15:00>',
             end_time= '<17:30>',
-            comments= 'heko'
+
         ), follow_redirects=True)
         assert 'No entries here so far' not in rv.data
-        assert '&lt;Hello&gt;' in rv.data
+        assert '&lt;Hi&gt;' in rv.data
         assert '<strong>HTML</strong> allowed here' in rv.data
 
     def test_message_other_user(self):
         self.login('jim', 'bean')
         rv = self.app.post('/add', data=dict(
-            title='<C++_Exercise_01>',
+            title='<C++Exercise01>',
             text='<strong>HTML</strong> allowed here',
-            start_time= '<15:00>',
-            end_time= '<16:00>',
-            comments= 'hello'
         ), follow_redirects=True)
         assert 'No entries here so far' not in rv.data 
-        assert '&lt;C++_Exercise_01&gt; <span class=user> by jim' in rv.data
+        assert '&lt;C++Exercise01&gt;' in rv.data
         assert '<strong>HTML</strong> allowed here' in rv.data
-        assert '&lt;15:00&gt;' in rv.data
-        assert '&lt;16:00&gt;' in rv.data
+        assert 'jim' in rv.data
+
 
     def test_time(self):
+        from time import gmtime, strftime
         self.login('admin', 'default')
         rv = self.app.post('/add', data=dict(
-            title='<Hello>',
+            title='<Hi>',
             text='<strong>HTML</strong> allowed here',
-            start_time= '<15:00>',
-            end_time= '<17:30>',
-            comments='Hello'
         ), follow_redirects=True)
+        curr_time = strftime("%Y-%m-%d %H:%M:%S", gmtime())
         assert 'No entries here so far' not in rv.data
-        assert '&lt;Hello&gt;' in rv.data
+        assert '&lt;Hi&gt;' in rv.data
         assert 'by admin' in rv.data
-        assert '&lt;15:00&gt;' in rv.data
-        assert '&lt;17:30&gt;' in rv.data
+        assert curr_time in rv.data
 
     def test_comment(self):
         self.login('admin', 'default')
-        rv = self.app.post('/add', data= dict(
-        title='<Hello>',
-            text='<strong>HTML</strong> allowed here',
-            start_time= '<15:00>',
-            end_time= '<17:30>',
-            comments= '<reytru>'
+        self.app.post('/add', data=dict(
+            title='Hi',
+            text='<strong>HTML</strong> allowed here'
+        ), follow_redirects=True)
+        rv = self.app.post('/1/add_comments', data= dict(
+            comment_input = '<FinalVERSION>'
         ), follow_redirects=True)
         assert 'No entries here so far' not in rv.data
-        assert '&lt;Hello&gt;' in rv.data
+        assert '&lt;FinalVERSION&gt;' in rv.data
         assert 'by admin' in rv.data
-        assert '&lt;reytru&gt;' in rv.data
+       
         
     def test_end_time(self):
+        from time import gmtime, strftime
+
+
         self.login('admin', 'default')
-        rv = self.app.post('/add', data= dict(
-            title='<Hello>',
-            text='<strong>HTML</strong> allowed here',
-            start_time= '<15:00>',
-            end_time= '<17:30>',
-            comments= '<>'
+        self.app.post('/add', data= dict(
+            title='<Hi>',
+            text='<strong>HTML</strong> allowed here'
         ), follow_redirects=True)
+        rv = self.app.post('/1/add_end_time', follow_redirects=True)
+        curr_time = strftime("%Y-%m-%d %H:%M:%S", gmtime())
         assert 'No entries here so far' not in rv.data
-        assert '&lt;Hello&gt;' in rv.data
+        assert '&lt;Hi&gt;' in rv.data
         assert 'by admin' in rv.data
-        assert '&lt;17:30&gt;' in rv.data
+        assert 'End at: '+ curr_time in rv.data
 
         
 
