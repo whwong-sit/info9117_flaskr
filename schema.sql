@@ -6,6 +6,10 @@ create table entries (
   username text NOT NULL,
   start_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
   end_time TIMESTAMP
+  sdate text NOT NULL,
+  stime text NOT NULL,
+  edate text NOT NULL,
+  etime text NOT NULL
   );
 drop table if exists comments;
 create table comments (
@@ -16,6 +20,8 @@ create table comments (
   FOREIGN KEY (entry_id) REFERENCES entries(id)
 );
 
-
-
+create table userPassword (
+  username text not null,
+  password text not null
+);
 
