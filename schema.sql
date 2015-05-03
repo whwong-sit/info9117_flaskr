@@ -1,4 +1,7 @@
 drop table if exists entries;
+drop table if exists comments;
+drop table if exists userPassword;
+
 create table entries (
   id INTEGER PRIMARY KEY autoincrement,
   title text NOT NULL,
@@ -11,7 +14,6 @@ create table entries (
   edate text NOT NULL,
   etime text NOT NULL
   );
-drop table if exists comments;
 create table comments (
   comment_id INTEGER PRIMARY KEY autoincrement,
   comment_input TEXT(200),
