@@ -1,9 +1,3 @@
-# These are just for prototyping purposes
-from contextlib import closing
-import tempfile
-import os
-from sqlite3 import dbapi2 as sqlite3
-
 from flask_bcrypt import generate_password_hash, check_password_hash
 
 
@@ -62,26 +56,11 @@ class User(object):
         # print "setter of password called"
         self._password = generate_password_hash(plaintext)
 
-if __name__ == '__main__':
-
-    # initialise temporary database
-    db_fd, DATABASE = tempfile.mkstemp()
-    with closing(sqlite3.connect(DATABASE)) as db:
-        with file('schema.sql', mode='r') as f:
-            db.cursor().executescript(f.read())
-        db.commit()
-
-    # define some User objects
-    users = [User("admin", "default"), User("hari", "seldon")]
-
-    # add users to temporary database
-    with closing(sqlite3.connect(DATABASE)) as db:
-        for user in users:
-            print("Adding user {0} to the database".format(user.username))
-            db.execute('insert into userPassword (username, password) values (?, ?)',
-                       [user.username, user.password])
-        db.commit()
-
-    # close resources
-    os.close(db_fd)
-    os.unlink(DATABASE)
+    #### check password
+    def check_password(self, plaintext):
+        """
+        Check that a plaintext password is equal to the hashed password
+        :param plaintext: plaintext password to check
+        :return: Boolean value; if true, then the plaintext and hash correspond, else false.
+        """
+        return check_password_hash(self.password, plaintext)

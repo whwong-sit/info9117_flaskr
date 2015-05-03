@@ -3,9 +3,10 @@ import meterage
 import unittest
 import tempfile
 from contextlib import closing
+from models import User
 
 
-class FlaskrTestCase(unittest.TestCase):
+class MeterageTestCase(unittest.TestCase):
 
     def setUp(self):
         """
@@ -16,14 +17,17 @@ class FlaskrTestCase(unittest.TestCase):
         self.app = meterage.app.test_client()
         meterage.init_db()
 
-        # add users to the temporary database
+        # flat dictionary of users, so we have access to the plain text versions of the passwords
+        global users
+        users = {"admin": "default", "hari": "seldon"}
+
+        # add users to the temporary database, with their proper hashed passwords
         # Note that an admin and a normal user are added.
         with closing(meterage.connect_db()) as db:
-            db.execute('insert into userPassword (username, password) values (?, ?)',
-                       ['admin', 'default'])
-            db.execute('insert into userPassword (username, password) values (?, ?)',
-                       ['hari', 'seldon'])
-            db.commit()
+            for user in [User("admin", users["admin"]), User("hari", users["hari"])]:
+                db.execute('insert into userPassword (username, password) values (?, ?)',
+                           [user.username, user.password])
+                db.commit()
 
     def tearDown(self):
         """
@@ -65,6 +69,8 @@ class FlaskrTestCase(unittest.TestCase):
             etime='13:00:00'
         ), follow_redirects=True)
 
+    #### Basic tests
+
     def test_no_messages(self):
         """
         When we only have the userPassword table in the database populated,
@@ -74,22 +80,12 @@ class FlaskrTestCase(unittest.TestCase):
         rv = self.app.get('/')
         assert 'No entries here yet' in rv.get_data()
 
-    def userPassword_content(self):
-        """
-        Get all the data in the userPassword table
-        """
-        with closing(meterage.connect_db()) as db:
-            cur = db.execute('select username, password from userPassword')
-            return [dict(username=row[0], password=row[1]) for row in cur.fetchall()]
-
-    #### Basic tests
-
     def test_login_logout(self):
         """
         Test that all users may log in and log out
         """
-        for entry in self.userPassword_content():
-            rv = self.login(entry['username'], entry['password'])
+        for user in users:
+            rv = self.login(user, users[user])
             assert 'You were logged in' in rv.get_data()
             rv = self.logout()
             assert 'You were logged out' in rv.get_data()
@@ -116,8 +112,8 @@ class FlaskrTestCase(unittest.TestCase):
         page returned.
         Check that HTML is allowed in the text but not in the title"
         """
-        for entry in self.userPassword_content():
-            self.login(entry['username'], entry['password'])
+        for user in users:
+            self.login(user, users[user])
             rv = self.generic_post()
             assert 'No entries here so far' not in rv.get_data()
             assert '&lt;Hello&gt;' in rv.get_data()

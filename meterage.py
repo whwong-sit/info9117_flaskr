@@ -3,7 +3,11 @@ from sqlite3 import dbapi2 as sqlite3
 from flask import Flask, request, session, g, redirect, url_for, \
     abort, render_template, flash
 from jinja2 import Markup
-# from os.path import isfile
+from os.path import isfile
+
+from flask_bcrypt import check_password_hash
+
+from models import User
 
 import config
 
@@ -88,7 +92,9 @@ def login():
         if row is not None:
             # if the user is found
             user = {'username': row[0], 'password': row[1]}
-            if request.form['password'] != user['password']:
+
+            if not check_password_hash(user['password'], request.form['password']):
+                # if the password hash in the database does not correspond to the hashed form of the given password
                 error = 'Invalid password'
             else:
                 session['logged_in'] = True
@@ -132,13 +138,16 @@ def change_password():
         elif request.form['password'] != request.form['confirm_password']:
             error = 'Please enter same password twice'
         else:
+            # create the User object and add to the database
+            user = User(request.form['username'], request.form['password'])
             g.db.execute('update userPassword set password=? where username =?',
-                             [request.form['password'], request.form['username']])
+                         [user.password, user.username])
             g.db.commit()
             flash('Successfully changed user password')
             return render_template('change_password.html', success='Successfully changed password')
 
     return render_template('change_password.html', error=error)
+
 
 @app.template_filter('newlines')
 def newline_filter(s):
@@ -149,8 +158,17 @@ def newline_filter(s):
 
 
 if __name__ == '__main__':
-    # create the database if it's not already there.
-    # if not isfile(str(app.config['DATABASE'])):
-    #     app.logger.debug('creating database')
-    #     init_db()
+    # create and populate the database if it's not already there.
+    if not isfile(str(app.config['DATABASE'])):
+        app.logger.debug('creating database')
+        init_db()
+        users = [User("admin", "default"), User("hari", "seldon"), User("jim", "bean"), User("spock", "vulcan")]
+
+        with closing(connect_db()) as db:
+            for user in users:
+                app.logger.debug("Adding user {0} to the database.".format(user.username))
+                db.execute('insert into userPassword (username, password) values (?, ?)',
+                           [user.username, user.password])
+            db.commit()
+
     app.run()
