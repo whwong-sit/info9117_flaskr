@@ -64,19 +64,58 @@ class FlaskrTestCase(unittest.TestCase):
         rv = self.login('admin', 'defaultx')
         assert 'Invalid password' in rv.data
 
+
+#test email liked with gravata "daisy22229999@gmail.com"
     def test_messages(self):
         self.login('admin', 'default')
         rv = self.app.post('/add', data=dict(
             title='<Hello>',
             text='<strong>HTML</strong> allowed here',
+            username='admin',
             email='daisy22229999@gmail.com'
         ), follow_redirects=True)
+        print rv
         assert 'No entries here so far' not in rv.data
         assert '&lt;Hello&gt;' in rv.data
+        assert '<strong>HTML</strong> allowed here' in rv.data
+        assert 'admin' in rv.data
         assert 'daisy22229999@gmail.com' in rv.data
-        print rv.data
 
 
+
+#test email liked with gravata "daisy200029@gmail.com"
+    def test_messages(self):
+        self.login('admin', 'default')
+        rv = self.app.post('/add', data=dict(
+            title='<Hello>',
+            text='<strong>HTML</strong> allowed here',
+            username='admin',
+            email='daisy200029@gmail.com'
+        ), follow_redirects=True)
+        print rv
+        assert 'No entries here so far' not in rv.data
+        assert '&lt;Hello&gt;' in rv.data
+        assert '<strong>HTML</strong> allowed here' in rv.data
+        assert 'admin' in rv.data
+        assert 'daisy200029@gmail.com' in rv.data
+
+#test email liked without gravata
+    def test_messages(self):
+        self.login('admin', 'default')
+        rv = self.app.post('/add', data=dict(
+            title='<Hello>',
+            text='<strong>HTML</strong> allowed here',
+            username='admin',
+            email='tt@gmail.com'
+        ), follow_redirects=True)
+        print rv
+        assert 'No entries here so far' not in rv.data
+        assert '&lt;Hello&gt;' in rv.data
+        assert '<strong>HTML</strong> allowed here' in rv.data
+        assert 'admin' in rv.data
+        assert 'tt@gmail.com' in rv.data
+
+#test gravatar link 
     def avatar(self,email):
         return self.app.get("http://www.gravatar.com/avatar/" + hashlib.md5(email.lower()).hexdigest()+"?", follow_redirects=True)
 
