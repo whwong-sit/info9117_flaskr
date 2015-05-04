@@ -5,3 +5,4 @@ Feature: comment
      When create a entry
      And click add_comment
      Then the comment should appear
+     And the comment should note username

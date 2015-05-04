@@ -43,3 +43,7 @@ def step_impl(rv):
     from time import gmtime, strftime
     curr_time = strftime("%Y-%m-%d %H:%M:%S", gmtime())
     assert 'End at: '+ curr_time in rv.data
+
+@then('the comment should note username')
+def step_impl(rv):
+    assert 'by admin' in rv.data
