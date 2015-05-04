@@ -1,10 +1,13 @@
 from behave import *
 
 
-
 @given('the user is logged in')
-def step_impl(context):
-    rv = context.login('admin', 'default')
+def step_impl(context, admin, default):
+    rv = context.app.post('/login', data=dict(
+            username=admin,
+            password=default
+        ), follow_redirects=True)
+
     assert 'You were logged in' in rv.data
 
 @when('create a entry')
