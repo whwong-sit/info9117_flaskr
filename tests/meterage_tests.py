@@ -209,23 +209,23 @@ class FlaskrTestCase(unittest.TestCase):
 
     #### Gravatar Tests
 
-    def test_email_address_in_returned_data(self):
-        """
-        test whether an email address posted to the login page is returned in the results
-        """
-        for email in ["daisy22229999@gmail.com", "daisy200029@gmail.com", "tt@gmail.com"]:
-            self.login('admin', 'default')
-            rv = self.app.post('/add', data=dict(
-                title='<Hello>',
-                text='<strong>HTML</strong> allowed here',
-                username='admin',
-                email=email
-            ), follow_redirects=True)
-            assert 'No entries here so far' not in rv.get_data()
-            assert '&lt;Hello&gt;' in rv.get_data()
-            assert '<strong>HTML</strong> allowed here' in rv.get_data()
-            assert 'admin' in rv.get_data()
-            assert 'daisy22229999@gmail.com' in rv.get_data()
+    # def test_email_address_in_returned_data(self):
+    #     """
+    #     test whether an email address posted to the login page is returned in the results
+    #     """
+    #     for email in ["daisy22229999@gmail.com", "daisy200029@gmail.com", "tt@gmail.com"]:
+    #         self.login('admin', 'default')
+    #         rv = self.app.post('/add', data=dict(
+    #             title='<Hello>',
+    #             text='<strong>HTML</strong> allowed here',
+    #             username='admin',
+    #             email=email
+    #         ), follow_redirects=True)
+    #         assert 'No entries here so far' not in rv.get_data()
+    #         assert '&lt;Hello&gt;' in rv.get_data()
+    #         assert '<strong>HTML</strong> allowed here' in rv.get_data()
+    #         assert 'admin' in rv.get_data()
+    #         assert 'daisy22229999@gmail.com' in rv.get_data()
 
 if __name__ == '__main__':
     unittest.main()
