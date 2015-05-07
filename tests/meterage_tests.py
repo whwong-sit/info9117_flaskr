@@ -153,62 +153,6 @@ class BasicTests(MeterageBaseTestClass):
         assert "&lt;Hello&gt" in rv.get_data()
         assert "by admin" in rv.get_data()
 
-    #### Changing passwords tests
-
-    # def test_change_password(self):
-    #     """
-    #     Test that the admin can change an existing user's password
-    #     """
-    #     # log in as the admin; only the admin can change passwords
-    #     self.login(username='admin',password='default')
-    #
-    #     rv = self.app.post('/change_password', data=dict(
-    #         username='hari',
-    #         password='1234',
-    #         confirm_password='1234'
-    #     ), follow_redirects=True)
-    #
-    #     assert 'Successfully changed user password' in rv.get_data()
-    #
-    # def test_change_non_exist_password(self):
-    #     """
-    #     Test that trying to change the password of a user that does not exist
-    #     behaves as we expect
-    #     """
-    #     # log in as the admin; only the admin can change passwords
-    #     self.login(username='admin', password='default')
-    #
-    #     rv = self.app.post('/change_password', data=dict(
-    #         username='nonexist',
-    #         password='test',
-    #         confirm_password='test'
-    #     ), follow_redirects=True)
-    #
-    #     assert 'User does not exist' in rv.get_data()
-    #
-    # def test_login_after_change(self):
-    #     """
-    #     Test for behaviour following a change of password.
-    #
-    #     """
-    #     # log in as the admin; only the admin can change passwords
-    #     self.login(username='admin', password='default')
-    #
-    #     # change hari's password
-    #     self.app.post('/change_password', data=dict(
-    #         username='hari',
-    #         password='1234',
-    #         confirm_password='1234'
-    #     ), follow_redirects=True)
-    #
-    #     # Test hari login with old password
-    #     rv = self.login('hari', 'seldon')
-    #     assert 'Invalid password' in rv.get_data()
-    #
-    #     # Test hari login with new password
-    #     rv = self.login('hari', '1234')
-    #     assert 'You were logged in' in rv.get_data()
-
 
 class ChangePasswordsTests(MeterageBaseTestClass):
 
