@@ -5,7 +5,7 @@ from flask import Flask, request, session, g, redirect, url_for, \
 from jinja2 import Markup
 import urllib
 import hashlib
-# from os.path import isfile
+from os.path import isfile
 
 import config
 
@@ -51,9 +51,21 @@ def show_entries():
     Get all the information required in show_entries.html from the database and pipe it
     into show_entries.html
     """
-    cur = g.db.execute('select title, text, username, sdate, stime, edate, etime from entries order by id desc')
-    entries = [dict(title=row[0], text=row[1], username=row[2], sdate=row[3], stime=row[4], edate=row[5], etime=row[6])
-               for row in cur.fetchall()]
+    # cur = g.db.execute('select title, text, username, sdate, stime, edate, etime from entries order by id desc')
+    # entries = [dict(title=row[0], text=row[1], username=row[2], sdate=row[3], stime=row[4], edate=row[5], etime=row[6])
+    #            for row in cur.fetchall()]
+    # return render_template('show_entries.html', entries=entries)
+
+    # cur = g.db.execute('select gravataremail from userPassword where username=?', [entries['username']])
+    # entries = [dict(title=row[0], text=row[1], username=row[2], email=row[3], avimg=avatar(row[3])) for row in cur.fetchall()]
+    # return render_template('show_entries.html', entries=entries)
+
+    cur = g.db.execute('select entries.title, entries.text, userPassword.username, '
+                       'entries.sdate, entries.stime, entries.edate, entries.etime, userPassword.gravataremail'
+                       ' from entries inner join userPassword on entries.username=userPassword.username'
+                       ' order by entries.id desc')
+    entries = [dict(title=row[0], text=row[1], username=row[2], sdate=row[3], stime=row[4],
+                    edate=row[5], etime=row[6], gravataremail=row[7], avimg=avatar(row[7])) for row in cur.fetchall()]
     return render_template('show_entries.html', entries=entries)
 
 
@@ -158,7 +170,7 @@ def avatar(email, size=50):
 
 if __name__ == '__main__':
     # create the database if it's not already there.
-    # if not isfile(str(app.config['DATABASE'])):
-    #     app.logger.debug('creating database')
-    #     init_db()
+    if not isfile(str(app.config['DATABASE'])):
+        app.logger.debug('creating database')
+        init_db()
     app.run()
