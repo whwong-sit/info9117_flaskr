@@ -6,7 +6,10 @@ from contextlib import closing
 from models import User
 
 
-class MeterageTestCase(unittest.TestCase):
+class MeterageBaseTestClass(unittest.TestCase):
+    """
+    Base class for unit tests, with some convenient methods to inherit.
+    """
 
     def setUp(self):
         """
@@ -36,7 +39,7 @@ class MeterageTestCase(unittest.TestCase):
         os.close(self.db_fd)
         os.unlink(meterage.app.config['DATABASE'])
 
-    #### Some useful functions
+        #### Some useful functions
 
     def login(self, username, password):
         """
@@ -69,7 +72,8 @@ class MeterageTestCase(unittest.TestCase):
             etime='13:00:00'
         ), follow_redirects=True)
 
-    #### Basic tests
+
+class BasicTests(MeterageBaseTestClass):
 
     def test_no_messages(self):
         """
@@ -149,6 +153,63 @@ class MeterageTestCase(unittest.TestCase):
 
     #### Changing passwords tests
 
+    # def test_change_password(self):
+    #     """
+    #     Test that the admin can change an existing user's password
+    #     """
+    #     # log in as the admin; only the admin can change passwords
+    #     self.login(username='admin',password='default')
+    #
+    #     rv = self.app.post('/change_password', data=dict(
+    #         username='hari',
+    #         password='1234',
+    #         confirm_password='1234'
+    #     ), follow_redirects=True)
+    #
+    #     assert 'Successfully changed user password' in rv.get_data()
+    #
+    # def test_change_non_exist_password(self):
+    #     """
+    #     Test that trying to change the password of a user that does not exist
+    #     behaves as we expect
+    #     """
+    #     # log in as the admin; only the admin can change passwords
+    #     self.login(username='admin', password='default')
+    #
+    #     rv = self.app.post('/change_password', data=dict(
+    #         username='nonexist',
+    #         password='test',
+    #         confirm_password='test'
+    #     ), follow_redirects=True)
+    #
+    #     assert 'User does not exist' in rv.get_data()
+    #
+    # def test_login_after_change(self):
+    #     """
+    #     Test for behaviour following a change of password.
+    #
+    #     """
+    #     # log in as the admin; only the admin can change passwords
+    #     self.login(username='admin', password='default')
+    #
+    #     # change hari's password
+    #     self.app.post('/change_password', data=dict(
+    #         username='hari',
+    #         password='1234',
+    #         confirm_password='1234'
+    #     ), follow_redirects=True)
+    #
+    #     # Test hari login with old password
+    #     rv = self.login('hari', 'seldon')
+    #     assert 'Invalid password' in rv.get_data()
+    #
+    #     # Test hari login with new password
+    #     rv = self.login('hari', '1234')
+    #     assert 'You were logged in' in rv.get_data()
+
+
+class ChangePasswordsTests(MeterageBaseTestClass):
+
     def test_change_password(self):
         """
         Test that the admin can change an existing user's password
@@ -202,6 +263,33 @@ class MeterageTestCase(unittest.TestCase):
         # Test hari login with new password
         rv = self.login('hari', '1234')
         assert 'You were logged in' in rv.get_data()
+
+
+class HashedPasswordsTests(MeterageBaseTestClass):
+
+    def test_User_password_hashed_upon_initialising(self):
+        """
+        Check that initialising a User object results in automatic hashing of the plaintext password
+        """
+        raise NotImplementedError("Not implemented")
+
+    def test_hashed_password_added_to_database(self):
+        """
+        Check that the hashed password is added to the database, not the plain text.
+        """
+        raise NotImplementedError("Not implemented")
+
+    def test_hashed_password_is_not_plaintext(self):
+        """
+        Check that the password is not plain text when we try to, for example, reset it to something else.
+        """
+        raise NotImplementedError("Not implemented")
+
+    def test_entering_hash_does_not_succeed(self):
+        """
+        Test that entering the actual hash into the "password" box does not result in a successful login.
+        """
+        raise NotImplementedError("Not implemented")
 
 if __name__ == '__main__':
     unittest.main()
