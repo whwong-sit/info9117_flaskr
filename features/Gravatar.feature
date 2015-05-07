@@ -23,6 +23,6 @@ Feature: Gravatar image
 
   Scenario: Removing my Gravatar assignment
     Given the User is logged in
-    And the User makes a post
-    When the User removes their Gravatar assignment
+    When the User makes a post
+    And the User removes their Gravatar assignment
     Then their Gravatar is not longer displayed beside posts

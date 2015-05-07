@@ -1,22 +1,8 @@
 from behave import *
 import meterage
 
+
 #### GIVENS
-
-@given(u'the User is logged in')
-def step_impl(context):
-    """
-    log in as user "jim"
-    """
-    context.app.post('/login', data=dict(
-        username='hari',
-        password='seldon'
-    ), follow_redirects=True)
-
-    with context.app.session_transaction() as sess:
-        # see http://flask.pocoo.org/docs/0.10/testing/#accessing-and-modifying-sessions for
-        # an explanation of accessing sessions during testing.
-        assert sess['logged_in'], "The user is not logged in."
 
 #### WHENS
 
@@ -40,7 +26,6 @@ def step_impl(context, detail):
 
     # GET the page to change <detail>
     context.rv = context.app.get('/users/<username>/change_{0}'.format(detail))
-
 
 #### THENS
 
@@ -87,29 +72,3 @@ def step_impl(context, detail):
         assert data[detail] in meterage.USERS.values(), "new password is not in the USERS dictionary"
     elif detail == "username":
         assert data[detail] in meterage.USERS.keys(), "new username is not in the USERS dictionary"
-
-#### NEW STEPS FOR GRAVATARS
-
-@when(u'the User makes a post')
-def step_impl(context):
-    raise NotImplementedError(u'STEP: When the User makes a post')
-
-@then(u'the Gravatar is displayed alongside the post')
-def step_impl(context):
-    raise NotImplementedError(u'STEP: Then the Gravatar is displayed alongside the post')
-
-@when(u'the User clicks "Gravatar settings"')
-def step_impl(context):
-    raise NotImplementedError(u'STEP: When the User clicks "Gravatar settings"')
-
-@given(u'the User makes a post')
-def step_impl(context):
-    raise NotImplementedError(u'STEP: Given the User makes a post')
-
-@when(u'the User removes their Gravatar assignment')
-def step_impl(context):
-    raise NotImplementedError(u'STEP: When the User removes their Gravatar assignment')
-
-@then(u'their Gravatar is not longer displayed beside posts')
-def step_impl(context):
-    raise NotImplementedError(u'STEP: Then their Gravatar is not longer displayed beside posts')

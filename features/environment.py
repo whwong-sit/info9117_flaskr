@@ -2,6 +2,8 @@ import os
 import meterage
 import tempfile
 from contextlib import closing
+from models import User
+
 
 # These run before and after every step.
 def before_step(context, step):
@@ -50,14 +52,17 @@ def before_all(context):
     context.app = meterage.app.test_client()
     meterage.init_db()
 
+    # flat dictionary of users, so we have access to the plain text versions of the passwords
+    context.users = {"admin": "default", "hari": "seldon"}
+
     # add users to the temporary database
     # Note that an admin and a normal user are added.
     with closing(meterage.connect_db()) as db:
-        db.execute('insert into userPassword (username, password) values (?, ?)',
-                   ['admin', 'default'])
-        db.execute('insert into userPassword (username, password) values (?, ?)',
-                   ['hari', 'seldon'])
-        db.commit()
+        for user in context.users:
+            db.execute('insert into userPassword (username, password) values (?, ?)',
+                       [user, context.users[user]])
+            db.commit()
+
 
 def after_all(context):
     """
