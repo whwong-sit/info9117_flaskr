@@ -22,7 +22,7 @@
 <ul class=entries>
 {% for entry in entries %}
 <li><h2>{{ entry.title }} <span class=user> by {{ entry.username }} </span></h2><div class=datetime> start time:{{entry.sdate}} {{entry.stime}}
-end time:{{entry.edate}} {{entry.etime}}</div> {{ entry.text|safe }}
+end time:{{entry.edate}} {{entry.etime}}</div> {{ entry.text | newlines }}
 {% else %}
 <li><em>No entries here yet</em></li>
 {% endfor %}
