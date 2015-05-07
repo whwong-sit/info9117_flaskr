@@ -3,6 +3,8 @@ from sqlite3 import dbapi2 as sqlite3
 from flask import Flask, request, session, g, redirect, url_for, \
     abort, render_template, flash
 from jinja2 import Markup
+import urllib
+import hashlib
 # from os.path import isfile
 
 import config
@@ -146,6 +148,12 @@ def newline_filter(s):
     s = s.replace("\n", '<br />')
     # Markup() is used to prevent '<' and '>' symbols from being interpreted as less-than or greater-than symbols
     return Markup(s)
+
+
+def avatar(email, size=50):
+    gravatar_url = "http://www.gravatar.com/avatar/" + hashlib.md5(email.lower()).hexdigest()+"?"
+    gravatar_url += urllib.urlencode({'d':"monsterid",'s':str(size)})
+    return gravatar_url
 
 
 if __name__ == '__main__':
