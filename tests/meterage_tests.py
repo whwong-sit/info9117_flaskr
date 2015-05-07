@@ -22,7 +22,7 @@ class FlaskrTestCase(unittest.TestCase):
             db.execute('insert into userPassword (username, password, gravataremail) values (?, ?, ?)',
                        ['admin', 'default', 'daisy22229999@gmail.com'])
             db.execute('insert into userPassword (username, password, gravataremail) values (?, ?, ?)',
-                       ['hari', 'seldon', 'tt@gmail.com'])
+                       ['hari', 'seldon', 'nongravataremailaddress@gmail.com'])
             db.commit()
 
     def tearDown(self):
@@ -157,7 +157,6 @@ class FlaskrTestCase(unittest.TestCase):
         """
         Test that the admin can change an existing user's password
         """
-        # log in as the admin; only the admin can change passwords
         self.login(username='admin',password='default')
 
         rv = self.app.post('/change_password', data=dict(
@@ -173,7 +172,6 @@ class FlaskrTestCase(unittest.TestCase):
         Test that trying to change the password of a user that does not exist
         behaves as we expect
         """
-        # log in as the admin; only the admin can change passwords
         self.login(username='admin', password='default')
 
         rv = self.app.post('/change_password', data=dict(
@@ -226,6 +224,35 @@ class FlaskrTestCase(unittest.TestCase):
     #         assert '<strong>HTML</strong> allowed here' in rv.get_data()
     #         assert 'admin' in rv.get_data()
     #         assert 'daisy22229999@gmail.com' in rv.get_data()
+
+    def test_avatar(self):
+        """
+        Test that meterage.avatar() method does return the correct Gravatar
+        """
+        known_url = "http://www.gravatar.com/avatar/bf6c2e089dbd27ec1868027525bc42fe?s=50&d=monsterid"
+        self.assertEqual(meterage.avatar("daisy22229999@gmail.com"),
+                         "http://www.gravatar.com/avatar/bf6c2e089dbd27ec1868027525bc42fe?s=50&d=monsterid",
+                         "The Gravatar URL produced is incorrect")
+
+    def test_gravatar_shown(self):
+        """
+        Test that the gravatar is shown on show_entries.html
+        """
+        self.login("admin", "default")
+        rv = self.generic_post()
+        self.assertIn('<i><img src="http://www.gravatar.com/avatar/bf6c2e089dbd27ec1868027525bc42fe?s=50&amp;d=monsterid"></i>',
+                      rv.get_data(),
+                      "Image is displayed incorrectly on show_entries.html")
+
+    def test_non_gravatar_user(self):
+        """
+        Test that non-gravatar users still get some kind of image
+        """
+        self.login("hari", "seldon")
+        rv = self.generic_post()
+        self.assertIn('<i><img src="http://www.gravatar.com/avatar/',
+                      rv.get_data(),
+                      "Image is displayed incorrectly on show_entries.html")
 
 if __name__ == '__main__':
     unittest.main()

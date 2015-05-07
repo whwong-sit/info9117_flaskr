@@ -18,21 +18,38 @@ app.config.from_envvar('FLASKR_SETTINGS', silent=True)
 
 def connect_db():
     """
-    Make a connection to the database specified in the config.
+    Make a connection to the database
+
+    database specified in the config.
     """
     return sqlite3.connect(app.config['DATABASE'])
 
 
 def init_db():
     """
-    For initialising the database using schemal.sql.  This is usually called manually.
+    For initialising the database using schemal.sql.
+
+    This is usually called manually.
     """
     with closing(connect_db()) as db:
         with app.open_resource('schema.sql', mode='r') as f:
             db.cursor().executescript(f.read())
             db.execute("insert into userPassword values ('admin','default','daisy22229999@gmail.com')")
+            db.execute("insert into userPassword values ('hari','seldon','daisy200029@gmail.com')")
         db.commit()
 
+
+def avatar(email, size=50):
+    """
+    generate gravatar url from email
+
+    :param email: email address for gravatar
+    :param size: size of the image, deafaults to 50
+    :return: url of gravatar
+    """
+    gravatar_url = "http://www.gravatar.com/avatar/" + hashlib.md5(email.lower()).hexdigest()+"?"
+    gravatar_url += urllib.urlencode({'d':"monsterid",'s':str(size)})
+    return gravatar_url
 
 @app.before_request
 def before_request():
@@ -52,15 +69,6 @@ def show_entries():
     Get all the information required in show_entries.html from the database and pipe it
     into show_entries.html
     """
-    # cur = g.db.execute('select title, text, username, sdate, stime, edate, etime from entries order by id desc')
-    # entries = [dict(title=row[0], text=row[1], username=row[2], sdate=row[3], stime=row[4], edate=row[5], etime=row[6])
-    #            for row in cur.fetchall()]
-    # return render_template('show_entries.html', entries=entries)
-
-    # cur = g.db.execute('select gravataremail from userPassword where username=?', [entries['username']])
-    # entries = [dict(title=row[0], text=row[1], username=row[2], email=row[3], avimg=avatar(row[3])) for row in cur.fetchall()]
-    # return render_template('show_entries.html', entries=entries)
-
     cur = g.db.execute('select entries.title, entries.text, userPassword.username, '
                        'entries.sdate, entries.stime, entries.edate, entries.etime, userPassword.gravataremail'
                        ' from entries inner join userPassword on entries.username=userPassword.username'
@@ -161,12 +169,6 @@ def newline_filter(s):
     s = s.replace("\n", '<br />')
     # Markup() is used to prevent '<' and '>' symbols from being interpreted as less-than or greater-than symbols
     return Markup(s)
-
-
-def avatar(email, size=50):
-    gravatar_url = "http://www.gravatar.com/avatar/" + hashlib.md5(email.lower()).hexdigest()+"?"
-    gravatar_url += urllib.urlencode({'d':"monsterid",'s':str(size)})
-    return gravatar_url
 
 
 if __name__ == '__main__':
