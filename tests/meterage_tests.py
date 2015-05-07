@@ -19,10 +19,10 @@ class FlaskrTestCase(unittest.TestCase):
         # add users to the temporary database
         # Note that an admin and a normal user are added.
         with closing(meterage.connect_db()) as db:
-            db.execute('insert into userPassword (username, password) values (?, ?)',
-                       ['admin', 'default'])
-            db.execute('insert into userPassword (username, password) values (?, ?)',
-                       ['hari', 'seldon'])
+            db.execute('insert into userPassword (username, password, gravataremail) values (?, ?, ?)',
+                       ['admin', 'default', 'daisy22229999@gmail.com'])
+            db.execute('insert into userPassword (username, password, gravataremail) values (?, ?, ?)',
+                       ['hari', 'seldon', 'tt@gmail.com'])
             db.commit()
 
     def tearDown(self):
@@ -79,8 +79,8 @@ class FlaskrTestCase(unittest.TestCase):
         Get all the data in the userPassword table
         """
         with closing(meterage.connect_db()) as db:
-            cur = db.execute('select username, password from userPassword')
-            return [dict(username=row[0], password=row[1]) for row in cur.fetchall()]
+            cur = db.execute('select username, password, gravataremail from userPassword')
+            return [dict(username=row[0], password=row[1], gravataremail=row[2]) for row in cur.fetchall()]
 
     #### Basic tests
 
@@ -206,6 +206,26 @@ class FlaskrTestCase(unittest.TestCase):
         # Test hari login with new password
         rv = self.login('hari', '1234')
         assert 'You were logged in' in rv.get_data()
+
+    #### Gravatar Tests
+
+    def test_email_address_in_returned_data(self):
+        """
+        test whether an email address posted to the login page is returned in the results
+        """
+        for email in ["daisy22229999@gmail.com", "daisy200029@gmail.com", "tt@gmail.com"]:
+            self.login('admin', 'default')
+            rv = self.app.post('/add', data=dict(
+                title='<Hello>',
+                text='<strong>HTML</strong> allowed here',
+                username='admin',
+                email=email
+            ), follow_redirects=True)
+            assert 'No entries here so far' not in rv.get_data()
+            assert '&lt;Hello&gt;' in rv.get_data()
+            assert '<strong>HTML</strong> allowed here' in rv.get_data()
+            assert 'admin' in rv.get_data()
+            assert 'daisy22229999@gmail.com' in rv.get_data()
 
 if __name__ == '__main__':
     unittest.main()
