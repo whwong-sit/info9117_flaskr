@@ -1,5 +1,6 @@
 from behave import *
 import meterage
+from contextlib import closing
 
 
 #### GIVENS
@@ -68,7 +69,11 @@ def step_impl(context, detail):
 
     # TODO this needs to be made more robust, as at the moment it only deals with the flat dictionary
     # TODO mapping usernames to passwords; this is bound to soon change to a proper database implementation
-    if detail == "password":
-        assert data[detail] in meterage.USERS.values(), "new password is not in the USERS dictionary"
-    elif detail == "username":
-        assert data[detail] in meterage.USERS.keys(), "new username is not in the USERS dictionary"
+    with closing(meterage.connect_db()) as db:
+        cur = db.execute('select username, password, gravataremail from userPassword')
+        return [dict(username=row[0], password=row[1], gravataremail=row[2]) for row in cur.fetchall()]
+        for row in cur.fetchall():
+            if detail == "password":
+                assert data[detail] in row[1], "new password is not in the USERS dictionary"
+            elif detail == "username":
+                assert data[detail] in row[0], "new username is not in the USERS dictionary"

@@ -119,17 +119,17 @@ class FlaskrTestCase(unittest.TestCase):
         for entry in self.userPassword_content():
             self.login(entry['username'], entry['password'])
             rv = self.generic_post()
-            assert 'No entries here so far' not in rv.get_data()
-            assert '&lt;Hello&gt;' in rv.get_data()
-            assert '<strong>HTML</strong> allowed here' in rv.get_data()
+            self.assertNotIn('No entries here so far', rv.get_data())
+            self.assertIn('&lt;Hello&gt;', rv.get_data())
+            self.assertIn('<strong>HTML</strong> allowed here', rv.get_data())
             with self.app.session_transaction() as sess:
                 # see http://flask.pocoo.org/docs/0.10/testing/#accessing-and-modifying-sessions for
                 # an explanation of accessing sessions during testing.
-                assert sess['username'] in rv.get_data()
-            assert '2015-01-01' in rv.get_data()
-            assert '09:00:00' in rv.get_data()
-            assert '2015-01-02' in rv.get_data()
-            assert '13:00:00' in rv.get_data()
+                self.assertIn(sess['username'], rv.get_data())
+            self.assertIn('2015-01-01', rv.get_data())
+            self.assertIn('09:00:00', rv.get_data())
+            self.assertIn('2015-01-02', rv.get_data())
+            self.assertIn('13:00:00', rv.get_data())
 
     def test_message_maps_to_username(self):
         """
