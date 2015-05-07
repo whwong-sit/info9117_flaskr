@@ -1,7 +1,7 @@
 from behave import *
 import meterage
 
-# GIVENS
+#### GIVENS
 
 @given(u'the User is logged in')
 def step_impl(context):
@@ -18,7 +18,7 @@ def step_impl(context):
         # an explanation of accessing sessions during testing.
         assert sess['logged_in'], "The user is not logged in."
 
-# WHENS
+#### WHENS
 
 @when(u'the User navigates to the web interface')
 def step_impl(context):
@@ -29,7 +29,6 @@ def step_impl(context):
 
     # assert that this page actually exists
     assert context.rv.status_code != 404, "'/user/<username>/' page does not exist; you're getting a 404 error"
-
 
 @when(u'the User clicks "change {detail}"')
 def step_impl(context, detail):
@@ -43,7 +42,7 @@ def step_impl(context, detail):
     context.rv = context.app.get('/users/<username>/change_{0}'.format(detail))
 
 
-# THENS
+#### THENS
 
 @then(u'account details are displayed')
 def step_impl(context):
@@ -59,7 +58,6 @@ def step_impl(context):
         # an explanation of accessing sessions during testing.
         assert "Username: " + sess['username'] in context.rv.get_data(), "'Username: {0}' " \
                                                                          "is not on the page".format(sess['username'])
-
 
 @then(u'the User is able to edit and commit {detail}')
 def step_impl(context, detail):
@@ -89,3 +87,29 @@ def step_impl(context, detail):
         assert data[detail] in meterage.USERS.values(), "new password is not in the USERS dictionary"
     elif detail == "username":
         assert data[detail] in meterage.USERS.keys(), "new username is not in the USERS dictionary"
+
+#### NEW STEPS FOR GRAVATARS
+
+@when(u'the User makes a post')
+def step_impl(context):
+    raise NotImplementedError(u'STEP: When the User makes a post')
+
+@then(u'the Gravatar is displayed alongside the post')
+def step_impl(context):
+    raise NotImplementedError(u'STEP: Then the Gravatar is displayed alongside the post')
+
+@when(u'the User clicks "Gravatar settings"')
+def step_impl(context):
+    raise NotImplementedError(u'STEP: When the User clicks "Gravatar settings"')
+
+@given(u'the User makes a post')
+def step_impl(context):
+    raise NotImplementedError(u'STEP: Given the User makes a post')
+
+@when(u'the User removes their Gravatar assignment')
+def step_impl(context):
+    raise NotImplementedError(u'STEP: When the User removes their Gravatar assignment')
+
+@then(u'their Gravatar is not longer displayed beside posts')
+def step_impl(context):
+    raise NotImplementedError(u'STEP: Then their Gravatar is not longer displayed beside posts')
