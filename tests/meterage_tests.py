@@ -4,6 +4,7 @@ import unittest
 import tempfile
 from contextlib import closing
 from models import User
+from flask_bcrypt import generate_password_hash
 
 
 class MeterageBaseTestClass(unittest.TestCase):
@@ -27,7 +28,8 @@ class MeterageBaseTestClass(unittest.TestCase):
         # add users to the temporary database, with their proper hashed passwords
         # Note that an admin and a normal user are added.
         with closing(meterage.connect_db()) as db:
-            for user in [User("admin", users["admin"]), User("hari", users["hari"])]:
+            for user in users:
+                user = User(user, users[user])
                 db.execute('insert into userPassword (username, password) values (?, ?)',
                            [user.username, user.password])
                 db.commit()
@@ -271,25 +273,47 @@ class HashedPasswordsTests(MeterageBaseTestClass):
         """
         Check that initialising a User object results in automatic hashing of the plaintext password
         """
-        raise NotImplementedError("Not implemented")
+
+        user = User("bilbo", "baggins")
+        self.assertFalse(user.password == "baggins", "password has not been automatically hashed")
 
     def test_hashed_password_added_to_database(self):
         """
         Check that the hashed password is added to the database, not the plain text.
         """
-        raise NotImplementedError("Not implemented")
+        with closing(meterage.connect_db()) as db:
+            for user in users:
+                cur = db.execute('select username, password from userPassword where username=?', [user])
+                row = cur.fetchone()
+                self.assertFalse(row[1] == users[user], "Hashed password has not been added to the database")
+                cur.close()
 
     def test_hashed_password_is_not_plaintext(self):
         """
-        Check that the password is not plain text when we try to, for example, reset it to something else.
+        Check that the password is not plain text when we try to, for example, reset it.
+
+        Check other aspects of changing User object's password
         """
-        raise NotImplementedError("Not implemented")
+        user = User("xXx_Supa_Saiyan_xXx", "password1")
+        user.password = "dogsname"
+        self.assertFalse(user.password == "password1", "password not reset, password is plain text")
+        self.assertFalse(user.password == generate_password_hash("password1"), "password not reset")
+        self.assertFalse(user.password == "dogsname", "password is plain text")
+        self.assertTrue(user.check_password("dogsname"), "password not changed successfully")
 
     def test_entering_hash_does_not_succeed(self):
         """
         Test that entering the actual hash into the "password" box does not result in a successful login.
         """
-        raise NotImplementedError("Not implemented")
+
+        with closing(meterage.connect_db()) as db:
+            for user in users:
+                cur = db.execute('select username, password from userPassword where username=?', [user])
+                row = cur.fetchone()
+                rv = self.login(row[0], row[1])
+                self.assertTrue("Invalid password" in rv.get_data(), "Login did not fail as it should have")
+                cur.close()
+
 
 if __name__ == '__main__':
     unittest.main()

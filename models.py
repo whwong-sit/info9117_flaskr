@@ -23,15 +23,16 @@ class User(object):
     @property
     def username(self):
         """
-
-        :return: The
+        :return: The username
         """
         return self._username
 
     @username.setter
     def username(self, newname):
         """
-        Set the username.  This is as simple as it looks, simply making an assignment to
+        Set the username.
+
+        This is as simple as it looks, simply making an assignment to
         the _username field so it can be returned in the getter.
         """
         self._username = newname
@@ -41,7 +42,8 @@ class User(object):
     @property
     def password(self):
         """
-        Getter function for password.
+        Getter method for password.
+
         :return: The User object's hashed password
         """
         return self._password
@@ -50,6 +52,7 @@ class User(object):
     def password(self, plaintext):
         """
         Sets the user's password, converting the plain text argument to a hashed password.
+
         :param plaintext: the plain text being entered by the user, to be hased
         "
         """
@@ -59,7 +62,9 @@ class User(object):
     #### check password
     def check_password(self, plaintext):
         """
-        Check that a plaintext password is equal to the hashed password
+        Check that a plaintext password is equal to the hashed password.
+
+        At this stage, this method is not being used except in testing.
         :param plaintext: plaintext password to check
         :return: Boolean value; if true, then the plaintext and hash correspond, else false.
         """
