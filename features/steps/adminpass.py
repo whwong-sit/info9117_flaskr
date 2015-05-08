@@ -4,8 +4,35 @@ from contextlib import closing
 
 
 #### GIVENS
+@given(u'admin has changed a user password')
+def step_impl(context):
+    context.rv = context.app.post('/change_password', data=dict(
+        username='harri',
+        password='potter',
+        confirm_password='potter'
+    ), follow_redirects=True)
 
-#### WHENS
+
+    for s in ['harri','potter', 'potter']:
+        assert s in context.rv.get_data()
+    with context.app.session_transaction() as sess:
+        assert sess['username'] in context.rv.get_data()
+
+    with closing(meterage.connect_db()) as db:
+        cur = db.execute('select username, password from userPassword')
+        return [dict(username=row[0], password=row[1]) for row in cur.fetchall()]
+
+
+
+@given(u'the Admin is logged in')
+def step_impl(context):
+    context.app.post('/login', data=dict(
+        username='admin',
+        password='default'
+    ), follow_redirects=True)
+
+
+
 
 @when(u'the user login with old password')
 def step_impl(context):
@@ -18,43 +45,63 @@ def step_impl(context):
 @then(u'user login should fail')
 def step_impl(context):
     with context.app.session_transaction() as sess:
-     assert sess['logged_in'], "The user is not logged in."
+        assert sess['logged_in'], "The user is not logged in."
 
 
-@given(u'the Admin is logged in')
-def step_impl(context):
-    context.app.post('/login', data=dict(
-        username='admin',
-        password='default'
-    ), follow_redirects=True)
-
-
+# assert rv. data password sucessfully change  (refer adminpassword unit test)
 @when(u'the Admin goes to change password')
 def step_impl(context):
     context.rv = context.app.get('/change_password')
     assert context.rv.status_code != 404
 
 
-@then(u'a changing password form is displayed')
+
+
+@when(u'admin change  a user password')
 def step_impl(context):
-
-"""
- I am not sure about this~~~XD
-"""
-     with context.app.session_transaction() as sess:
-        assert "Username: " + sess['username'] in context.rv.get_data(), "'Username: {0}' " \
-                                                                         "is not on the page".format(sess['username'])
-        assert "Password: " + sess['password'] in context.rv.get_data(), "Password: {0}' " \
-                                                                         "is not on the page".format(sess['password'])
-        assert "Confirm_Password: " + sess['confirm_password'] in context.rv.get_data(), "Confirm_Password: {0}' " \
-                                                                         "is not on the page".format(sess['confirm_password'])
+    context.rv = context.app.post('/change_password', data=dict(
+        username='harri',
+        password='potter',
+        confirm_password='potter'
+    ), follow_redirects=True)
 
 
-@when(u'the Username given does not exist')
-def step_impl(context):
+    for s in ['harri','potter', 'potter']:
+        assert s in context.rv.get_data()
+
     with context.app.session_transaction() as sess:
-        assert "Username: " + sess['username'] in context.rv.get_data(), "'Username: {0}' " \
-                                                                         "is not on the page".format(sess['username'])
+        assert sess['username'] in context.rv.get_data()
+        assert 'Successfully changed user password' in context.rv.data.get_data()
+
+
+
+@then(u'the password successfully changed')
+def step_impl(context):
+    with closing(meterage.connect_db()) as db:
+        cur = db.execute('select username, password from userPassword')
+        return [dict(username=row[0], password=row[1]) for row in cur.fetchall()]
+        assert 'Successfully changed user password' in context.rv.data.get_data()
+
+@when(u'admin change  a user password with invalid username')
+def step_impl(context):
+
+    context.rv = context.app.post('/change_password', data=dict(
+        username='h',
+        password='potter',
+        confirm_password='potter'
+    ), follow_redirects=True)
+
+
+    for s in ['h','potter', 'potter']:
+        assert s in context.rv.get_data()
+    with context.app.session_transaction() as sess:
+        assert sess['username'] in context.rv.get_data()
+    with closing(meterage.connect_db()) as db:
+        cur = db.execute('select username, password from userPassword')
+        return [dict(username=row[0], password=row[1]) for row in cur.fetchall()]
+        assert 'Invalid username' in context.rv.data.get_data()
+
+
 
 
 @then(u'the change should fail')
