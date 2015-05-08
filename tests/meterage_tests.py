@@ -230,9 +230,7 @@ class FlaskrTestCase(unittest.TestCase):
         Test that meterage.avatar() method does return the correct Gravatar
         """
         known_url = "http://www.gravatar.com/avatar/bf6c2e089dbd27ec1868027525bc42fe?s=50&d=monsterid"
-        self.assertEqual(meterage.avatar("daisy22229999@gmail.com"),
-                         "http://www.gravatar.com/avatar/bf6c2e089dbd27ec1868027525bc42fe?s=50&d=monsterid",
-                         "The Gravatar URL produced is incorrect")
+        self.assertEqual(meterage.avatar("daisy22229999@gmail.com"), known_url, "The Gravatar URL produced is incorrect")
 
     def test_gravatar_shown(self):
         """
@@ -240,9 +238,8 @@ class FlaskrTestCase(unittest.TestCase):
         """
         self.login("admin", "default")
         rv = self.generic_post()
-        self.assertIn('<i><img src="http://www.gravatar.com/avatar/bf6c2e089dbd27ec1868027525bc42fe?s=50&amp;d=monsterid"></i>',
-                      rv.get_data(),
-                      "Image is displayed incorrectly on show_entries.html")
+        image = '<i><img src="http://www.gravatar.com/avatar/bf6c2e089dbd27ec1868027525bc42fe?s=50&amp;d=monsterid"></i>'
+        self.assertIn(image, rv.get_data(), "image is displayed incorrectly on show_entries.html")
 
     def test_non_gravatar_user(self):
         """
@@ -250,9 +247,8 @@ class FlaskrTestCase(unittest.TestCase):
         """
         self.login("hari", "seldon")
         rv = self.generic_post()
-        self.assertIn('<i><img src="http://www.gravatar.com/avatar/',
-                      rv.get_data(),
-                      "Image is displayed incorrectly on show_entries.html")
+        some_image = '<i><img src="http://www.gravatar.com/avatar/'
+        self.assertIn(some_image, rv.get_data(), "image is displayed incorrectly on show_entries.html")
 
 if __name__ == '__main__':
     unittest.main()
