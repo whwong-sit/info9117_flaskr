@@ -2,7 +2,7 @@ import os
 import flaskr
 import tempfile
 
-from contextlib import closing
+from contextlib import *
 
 # These run before and after every step.
 def before_step(context, step):

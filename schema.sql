@@ -15,7 +15,3 @@ create table comments (
   username text NOT NULL,
   FOREIGN KEY (entry_id) REFERENCES entries(id)
 );
-
-
-
-
