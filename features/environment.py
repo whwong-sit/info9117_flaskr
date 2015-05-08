@@ -3,6 +3,10 @@ import meterage
 import tempfile
 from contextlib import closing
 
+from flask_bcrypt import check_password_hash
+
+from models import User
+
 # These run before and after every step.
 def before_step(context, step):
     pass
@@ -49,14 +53,18 @@ def before_all(context):
     meterage.app.config['TESTING'] = True
     context.app = meterage.app.test_client()
     meterage.init_db()
+    #flat dictionary of users, so we have access to the plain text versions of the passwords
+    context.users = {"admin": "default", "hari": "seldon"}
 
     # add users to the temporary database
     # Note that an admin and a normal user are added.
     with closing(meterage.connect_db()) as db:
+        admin = User('admin', 'default')
         db.execute('insert into userPassword (username, password) values (?, ?)',
-                   ['admin', 'default'])
+                   [admin.username, admin.password])
+        user = User('hari', 'seldon')
         db.execute('insert into userPassword (username, password) values (?, ?)',
-                   ['hari', 'seldon'])
+                   [user.username, user.password])
         db.commit()
 
 def after_all(context):
