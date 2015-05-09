@@ -17,13 +17,12 @@ def step_impl(context):
         ), follow_redirects=True)
     context.response = rv
 
-
-@when('click the entry, the user would be able to add a comment each time ')
+@when('click the entry, the user would be able to add a comment each time')
 def step_impl(context):
-    rv = context.app.post('/1/add_comments', data= dict(
+    cv = context.app.post('/1/add_comments', data= dict(
             comment_input = '<FinalVERSION>'
         ), follow_redirects=True)
-    context.response = rv
+    context.response = cv
 
 
 @then('the comment should appear right after added')
