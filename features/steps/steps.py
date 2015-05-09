@@ -11,10 +11,11 @@ def step_impl(context):
 
 @when('the user add a new entry to log')
 def step_impl(context):
-    context.app.post('/add', data=dict(
+    rv = context.app.post('/add', data=dict(
             title='Hi',
             text='<strong>HTML</strong> allowed here'
         ), follow_redirects=True)
+    context.response = rv
 
 
 @when('click the entry, the user would be able to add a comment each time ')
