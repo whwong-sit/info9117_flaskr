@@ -1,6 +1,7 @@
 {% extends "layout.html" %}
 {% block body %}
   {% if session.logged_in %}
+<h3>My Dev Log</h3>
   <form action="{{ url_for('add_entry') }}" method=post class=add-entry>
       <dl>
         <dt>Title:
@@ -15,16 +16,32 @@
 		<dd><input type=time name=etime>
         <dt>Text:
         <dd><textarea name=text rows=5 cols=40></textarea>
-        <dd><input type=submit value=Share>
+        <dd><input type=submit class="btn purple" value="Share">
       </dl>
   </form>
+<hr>
 {% endif %}
-<ul class=entries>
+
+
+<h3 class="page-title">View Existing Development Log</h3>
+<ul class="chats" style="padding-top:10px">
 {% for entry in entries %}
-<li><h2>{{ entry.title }} <span class=user> by {{ entry.username }} </span></h2><div class=datetime> start time:{{entry.sdate}} {{entry.stime}}
-end time:{{entry.edate}} {{entry.etime}}</div> {{ entry.text|safe }}
-{% else %}
-<li><em>No entries here yet</em></li>
-{% endfor %}
+    <li class="in">
+        <img class="avatar" alt="" src="{{ url_for('static', filename='img/avatar1.jpg') }}">
+        <div class="message">
+            <span class="arrow"></span>
+            <a href="javascript:;"  class="name">{{ entry.title }}
+                <span class=user> by {{ entry.username }} </span>
+            </a>
+            <div class=datetime>
+                From:{{entry.sdate}} {{entry.stime}}
+                to:{{entry.edate}} {{entry.etime}}
+            </div>
+            </div>
+        {{ entry.text|safe }}
+    </li>
+    {% else %}
+        <li><em>No entries here yet</em></li>
+    {% endfor %}
 </ul>
 {% endblock %}
