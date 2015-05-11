@@ -2,6 +2,7 @@ from contextlib import closing
 from sqlite3 import dbapi2 as sqlite3
 from flask import Flask, request, session, g, redirect, url_for, \
     abort, render_template, flash
+<<<<<<< HEAD
 from jinja2 import Markup
 # from os.path import isfile
 
@@ -11,20 +12,40 @@ import config
 app = Flask(__name__, instance_relative_config=True)
 app.config.from_object(config)
 app.config.from_pyfile('config.py')
+=======
+
+# configuration
+DATABASE = 'db/flask.db'
+DEBUG = True
+SECRET_KEY = 'development key'
+# USERNAME = 'admin'
+# PASSWORD = 'default'
+USERS = {'admin': 'default', 'jim': 'bean', 'spock': 'vulcan'}
+
+app = Flask(__name__)
+app.config.from_object(__name__)
+
+>>>>>>> d19ef11f1b10b276e9737d1bfd7c657b01791a38
 app.config.from_envvar('FLASKR_SETTINGS', silent=True)
 
 
 def connect_db():
+<<<<<<< HEAD
     """
     Make a connection to the database specified in the config.
     """
+=======
+>>>>>>> d19ef11f1b10b276e9737d1bfd7c657b01791a38
     return sqlite3.connect(app.config['DATABASE'])
 
 
 def init_db():
+<<<<<<< HEAD
     """
     For initialising the database using schemal.sql.  This is usually called manually.
     """
+=======
+>>>>>>> d19ef11f1b10b276e9737d1bfd7c657b01791a38
     with closing(connect_db()) as db:
         with app.open_resource('schema.sql', mode='r') as f:
             db.cursor().executescript(f.read())
@@ -45,6 +66,7 @@ def teardown_request(exception):
 
 @app.route('/')
 def show_entries():
+<<<<<<< HEAD
     """
     Get all the information required in show_entries.html from the database and pipe it
     into show_entries.html
@@ -52,11 +74,17 @@ def show_entries():
     cur = g.db.execute('select title, text, username, sdate, stime, edate, etime from entries order by id desc')
     entries = [dict(title=row[0], text=row[1], username=row[2], sdate=row[3], stime=row[4], edate=row[5], etime=row[6])
                for row in cur.fetchall()]
+=======
+    cur = g.db.execute('select title, text, username, start_time, end_time,id from entries order by id desc')
+    entries = [dict(title=row[0], text=row[1], username=row[2], start_time=row[3], end_time=row[4], entry_id=row[5]) for
+               row in cur.fetchall()]
+>>>>>>> d19ef11f1b10b276e9737d1bfd7c657b01791a38
     return render_template('show_entries.html', entries=entries)
 
 
 @app.route('/add', methods=['POST'])
 def add_entry():
+<<<<<<< HEAD
     """
     Make a new entry, including title, text, username, start time and date (stime, sdate) and
     end time and date (etime, edate)
@@ -67,11 +95,19 @@ def add_entry():
     g.db.execute('insert into entries (title, text, username, sdate, stime, edate, etime) values (?,?,?,?,?,?,?)',
                  [request.form['title'], request.form['text'], session['username'], request.form['sdate'],
                   request.form['stime'], request.form['edate'], request.form['etime']])
+=======
+    if not session.get('logged_in'):
+        abort(401)
+
+    g.db.execute('insert into entries (title, text, username) values (?,?,?)',
+                 [request.form['title'], request.form['text'], session['username']])
+>>>>>>> d19ef11f1b10b276e9737d1bfd7c657b01791a38
     g.db.commit()
     flash('New entry was successfully posted')
     return redirect(url_for('show_entries'))
 
 
+<<<<<<< HEAD
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     """
@@ -99,6 +135,71 @@ def login():
             # TODO username needs to be made unique in the database,
             # TODO otherwise this method will malfunction
             error = 'Invalid username'
+=======
+@app.route('/<entry_id>/show_comments')
+def show_comments(entry_id):
+    cur = g.db.execute(
+        'SELECT DISTINCT comment_input, comments.username FROM comments, entries WHERE comments.entry_id = ' + entry_id + ' ORDER BY comment_id desc')
+    comments = [dict(comment_input=row[0], username=row[1]) for row in cur.fetchall()]
+
+    cur = g.db.execute(
+        'select title, text, username, start_time, end_time from entries where id = ' + entry_id + ' order by id desc')
+    entries1 = [dict(title=row[0], text=row[1], username=row[2], start_time=row[3], end_time=row[4]) for row in
+                cur.fetchall()]
+    return render_template('show_comments.html', entries1=entries1, comments=comments, entry_id=entry_id)
+
+
+@app.route('/<entry_id>/add_comments', methods=['POST'])
+def add_comments(entry_id):
+    if not session.get('logged_in'):
+        abort(401)
+
+    g.db.execute('insert into comments (comment_input, entry_id, username) values (?,?,?)',
+                 [request.form['comment_input'], entry_id, session['username']])
+
+    g.db.commit()
+    flash('New comment was successfully posted')
+    return redirect(url_for('show_comments', entry_id=entry_id))
+
+
+@app.route('/<entry_id>/add_end_time', methods=['POST'])
+def add_end_time(entry_id):
+    if not session.get('logged_in'):
+        abort(401)
+    #if end_time_null_check is True:
+    g.db.execute('UPDATE entries SET end_time=CURRENT_TIMESTAMP WHERE entries.id=' + entry_id + '')
+    g.db.commit()
+    flash('TASK ENDED')
+    return redirect(url_for('show_comments', entry_id=entry_id))
+   # else:
+        #flash('TASK ALREADY ENDED')
+        #return redirect(url_for('show_comments', entry_id=entry_id))
+
+
+
+@app.route('/<entry_id>/end_time_null_check')
+def end_time_null_check(entry_id):  #need to debug
+    cur = g.db.execute('select end_time from entries where id=' + entry_id)
+    end_time_fill = [dict(end_time=row[0]) for row in cur.fetchall()]
+    if end_time_fill is None:
+        return end_time_null_check is True
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    error = None
+    if request.method == 'POST':
+        username = request.form['username']
+        if username not in app.config['USERS'].keys():
+            error = 'Invalid username'
+        elif request.form['password'] != app.config['USERS'][username]:
+            error = 'Invalid password'
+        else:
+            session['logged_in'] = True
+            session['username'] = username
+            flash('You were logged in')
+            return redirect(url_for('show_entries'))
+>>>>>>> d19ef11f1b10b276e9737d1bfd7c657b01791a38
     return render_template('login.html', error=error)
 
 
@@ -109,6 +210,7 @@ def logout():
     return redirect(url_for('show_entries'))
 
 
+<<<<<<< HEAD
 @app.route('/change_password', methods=['GET', 'POST'])
 def change_password():
     """
@@ -154,3 +256,7 @@ if __name__ == '__main__':
     #     app.logger.debug('creating database')
     #     init_db()
     app.run()
+=======
+if __name__ == '__main__':
+    app.run('0.0.0.0', 5002)
+>>>>>>> d19ef11f1b10b276e9737d1bfd7c657b01791a38

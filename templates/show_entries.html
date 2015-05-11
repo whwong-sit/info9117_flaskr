@@ -15,16 +15,22 @@
 		<dd><input type=time name=etime>
         <dt>Text:
         <dd><textarea name=text rows=5 cols=40></textarea>
+
         <dd><input type=submit value=Share>
-      </dl>
+ </dl>
   </form>
 {% endif %}
 <ul class=entries>
 {% for entry in entries %}
+<<<<<<< HEAD
 <li><h2>{{ entry.title }} <span class=user> by {{ entry.username }} </span></h2><div class=datetime> start time:{{entry.sdate}} {{entry.stime}}
 end time:{{entry.edate}} {{entry.etime}}</div> {{ entry.text | newlines }}
+=======
+<li><h2><a href=" {{ url_for('show_comments', entry_id=entry.entry_id) }}">{{ entry.title }}</a> <span class=user> by {{ entry.username }} </span></h2> {{ entry.text|safe }} </li></h3>Started at: {{ entry.start_time }} | </span></h3> End at: {{ entry.end_time }}
+>>>>>>> d19ef11f1b10b276e9737d1bfd7c657b01791a38
 {% else %}
-<li><em>No entries here yet</em></li>
+<li><em>No entries here yet</em></li> 
 {% endfor %}
 </ul>
 {% endblock %}
+
