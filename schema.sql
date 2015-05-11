@@ -12,6 +12,6 @@ create table entries (
 );
 
 create table userPassword (
-username text not null,
-password text not null
+  username text not null,
+  password text not null
 );
