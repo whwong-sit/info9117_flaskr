@@ -9,7 +9,7 @@ DEBUG = True
 SECRET_KEY = 'development key'
 #USERNAME = 'admin'
 #PASSWORD = 'default'
-USERS = {'admin' : 'default', 'jim' : 'bean', 'spock' : 'vulcan'}
+USERS = {'admin': 'default', 'jim': 'bean', 'spock': 'vulcan'}
 
 app = Flask(__name__)
 app.config.from_object(__name__)
@@ -72,6 +72,10 @@ def logout():
     session.pop('logged_in', None)
     flash('You were logged out')
     return redirect(url_for('show_entries'))
+
+@app.route('/user/<username>')
+def user_details(username):
+    return render_template('manage_details.html')
 
 if __name__ == '__main__':
     app.run()
