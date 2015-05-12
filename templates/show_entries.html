@@ -2,8 +2,6 @@
 {% block body %}
   {% if session.logged_in %}
 
-  <a href="{{ url_for('user_details', username=session.username) }}">Manage Details</a>
-
   <form action="{{ url_for('add_entry') }}" method=post class=add-entry>
       <dl>
         <dt>Title:

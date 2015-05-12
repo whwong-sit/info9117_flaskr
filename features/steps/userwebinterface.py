@@ -26,7 +26,8 @@ def step_impl(context, detail):
     assert detail in context.rv.get_data(), "{0} is not on the current page".format(detail)
 
     # GET the page to change <detail>
-    context.rv = context.app.get('/users/<username>/change_{0}'.format(detail))
+    context.rv = context.app.get('/user/<username>/change_{0}'.format(detail))
+    assert context.rv.status_code != 404, '/user/<username>/change_{0}'.format(detail) + " does not exist"
 
 #### THENS
 
@@ -67,13 +68,11 @@ def step_impl(context, detail):
         then account details are displayed
     ''')
 
-    # TODO this needs to be made more robust, as at the moment it only deals with the flat dictionary
-    # TODO mapping usernames to passwords; this is bound to soon change to a proper database implementation
     with closing(meterage.connect_db()) as db:
         cur = db.execute('select username, password, gravataremail from userPassword')
         return [dict(username=row[0], password=row[1], gravataremail=row[2]) for row in cur.fetchall()]
         for row in cur.fetchall():
             if detail == "password":
-                assert data[detail] in row[1], "new password is not in the USERS dictionary"
+                assert data[detail] in row[1], "new password is not in the database"
             elif detail == "username":
-                assert data[detail] in row[0], "new username is not in the USERS dictionary"
+                assert data[detail] in row[0], "new username is not in the database"

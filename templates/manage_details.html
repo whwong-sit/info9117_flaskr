@@ -2,13 +2,13 @@
 {% block body %}
   <h2>Manage Details</h2>
   <!--{% if error %}<p class=error><strong>Error:</strong>{{ error }}</p>{% endif %}-->
-  <!--<form action="{{ url_for('login') }}" method=post>-->
-    <!--<dl>-->
-        <!--<dt>Username:-->
+  <form action="{{ url_for('login') }}" method=post>
+    <dl>
+        <dt>Username: {{ session.username }}
         <!--<dd><input type=text name=username>-->
-        <!--<dt>Password:-->
+        <dt>Gravatar Email: {{ session.gravataremail }}
         <!--<dd><input type=password name=password>-->
         <!--<dd><input type=submit value=Login>-->
-    <!--</dl>-->
-  <!--</form>-->
+    </dl>
+  </form>
 {% endblock %}

@@ -105,17 +105,19 @@ def login():
     error = None
     if request.method == 'POST':
         # get the username-password combination from the database
-        cur = g.db.execute('select username, password from userPassword where username=?', [request.form['username']])
+        cur = g.db.execute('select username, password, gravataremail from userPassword where username=?',
+                           [request.form['username']])
         row = cur.fetchone()
 
         if row is not None:
             # if the user is found
-            user = {'username': row[0], 'password': row[1]}
+            user = {'username': row[0], 'password': row[1], 'gravataremail': row[2]}
             if request.form['password'] != user['password']:
                 error = 'Invalid password'
             else:
                 session['logged_in'] = True
                 session['username'] = user['username']
+                session['gravataremail'] = user['gravataremail']
                 flash('You were logged in')
                 return redirect(url_for('show_entries'))
         else:
@@ -130,6 +132,11 @@ def logout():
     session.pop('logged_in', None)
     flash('You were logged out')
     return redirect(url_for('show_entries'))
+
+
+@app.route('/user/<username>')
+def manage_details(username):
+    return render_template('manage_details.html')
 
 
 @app.route('/change_password', methods=['GET', 'POST'])
