@@ -5,6 +5,7 @@ import tempfile
 from contextlib import closing
 from models import User
 from flask_bcrypt import generate_password_hash
+from time import gmtime, strftime
 
 
 class MeterageBaseTestClass(unittest.TestCase):
@@ -69,9 +70,9 @@ class MeterageBaseTestClass(unittest.TestCase):
             title='<Hello>',
             text='<strong>HTML</strong> allowed here',
             sdate='2015-01-01',
-            stime='09:00:00',
+            start_time='<15:00>',
             edate='2015-01-02',
-            etime='13:00:00'
+            end_time='<17:30>'
         ), follow_redirects=True)
 
 
@@ -121,17 +122,17 @@ class BasicTests(MeterageBaseTestClass):
         for user in users:
             self.login(user, users[user])
             rv = self.generic_post()
-            assert 'No entries here so far' not in rv.get_data()
-            assert '&lt;Hello&gt;' in rv.get_data()
-            assert '<strong>HTML</strong> allowed here' in rv.get_data()
+            self.assertNotIn('No entries here so far', rv.get_data(), 'Post unsuccessful')
+            self.assertIn('&lt;Hello&gt;', rv.get_data())
+            self.assertIn('<strong>HTML</strong> allowed here', rv.get_data())
             with self.app.session_transaction() as sess:
                 # see http://flask.pocoo.org/docs/0.10/testing/#accessing-and-modifying-sessions for
                 # an explanation of accessing sessions during testing.
-                assert sess['username'] in rv.get_data()
-            assert '2015-01-01' in rv.get_data()
-            assert '09:00:00' in rv.get_data()
-            assert '2015-01-02' in rv.get_data()
-            assert '13:00:00' in rv.get_data()
+                self.assertIn(sess['username'], rv.get_data())
+            self.assertIn('2015-01-01', rv.get_data())
+            self.assertIn('15:00', rv.get_data())
+            self.assertIn('2015-01-02', rv.get_data())
+            self.assertIn('17:30', rv.get_data())
 
     def test_message_maps_to_username(self):
         """
@@ -140,7 +141,7 @@ class BasicTests(MeterageBaseTestClass):
         """
         self.login('admin', 'default')
         rv = self.generic_post()
-        assert "by admin" in rv.get_data()
+        self.assertIn("by admin", rv.get_data())
 
     def test_read_log_without_login(self):
         """
@@ -258,6 +259,44 @@ class HashedPasswordsTests(MeterageBaseTestClass):
                 self.assertTrue("Invalid password" in rv.get_data(), "Login did not fail as it should have")
                 cur.close()
 
+
+class TimeAndCommentTests(MeterageBaseTestClass):
+
+    def test_time(self):
+        self.login('admin', 'default')
+        curr_time = strftime("%Y-%m-%d %H:%M:%S", gmtime())
+        rv = self.app.post('/add', data=dict(
+            title='<Hello>',
+            text='<strong>HTML</strong> allowed here',
+            sdate='2015-01-01',
+            start_time='<15:00>',
+            edate='2015-01-02',
+            end_time=curr_time
+        ), follow_redirects=True)
+        self.assertNotIn('No entries here so far', rv.get_data(), 'Post unsuccessful')
+        self.assertIn('&lt;Hello&gt;', rv.get_data())
+        self.assertIn('by admin', rv.get_data())
+        self.assertIn(curr_time, rv.get_data())
+
+    def test_comment(self):
+        self.login('admin', 'default')
+        self.generic_post()
+        rv = self.app.post('/1/add_comments', data= dict(
+            comment_input='<FinalVERSION>'
+        ), follow_redirects=True)
+        self.assertNotIn('No entries here so far', rv.get_data(), 'Post unsuccessful')
+        self.assertIn('&lt;FinalVERSION&gt;', rv.get_data())
+        self.assertIn('by admin', rv.get_data())
+
+    def test_end_time(self):
+        self.login('admin', 'default')
+        self.generic_post()
+        rv = self.app.post('/1/add_end_time', follow_redirects=True)
+        curr_time = strftime("%Y-%m-%d %H:%M:%S", gmtime())
+        self.assertNotIn('No entries here so far', rv.get_data(), 'Post unsuccessful')
+        self.assertIn('&lt;Hello&gt;', rv.get_data())
+        self.assertIn('by admin', rv.get_data())
+        self.assertIn('End at: ' + curr_time, rv.get_data())
 
 if __name__ == '__main__':
     unittest.main()

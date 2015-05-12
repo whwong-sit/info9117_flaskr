@@ -1,4 +1,5 @@
 from behave import *
+from time import gmtime, strftime
 import meterage
 
 # GIVENS
@@ -17,6 +18,14 @@ def step_impl(context):
         # see http://flask.pocoo.org/docs/0.10/testing/#accessing-and-modifying-sessions for
         # an explanation of accessing sessions during testing.
         assert sess['logged_in'], "The user is not logged in."
+
+
+@given(u'the user has logged in already')
+def step_impl(context):
+    context.app.post('/login', data=dict(
+            username='admin',
+            password='default'
+        ), follow_redirects=True)
 
 # WHENS
 
@@ -41,6 +50,35 @@ def step_impl(context, detail):
 
     # GET the page to change <detail>
     context.rv = context.app.get('/users/<username>/change_{0}'.format(detail))
+
+
+@when(u'the user add a new entry to log')
+def step_impl(context):
+    # note that this is a post *with no start time specified*
+    rv = context.app.post('/add', data=dict(
+        title='<Hello>',
+        text='<strong>HTML</strong> allowed here',
+        sdate='2015-01-01',
+        # start_time='<15:00>',
+        start_time='',
+        edate='2015-01-02',
+        end_time='<17:30>'
+    ), follow_redirects=True)
+    context.response = rv
+
+
+@when(u'click the entry, the user would be able to add a comment each time')
+def step_impl(context):
+    cv = context.app.post('/1/add_comments', data=dict(
+        comment_input='<FinalVERSION>'
+    ), follow_redirects=True)
+    context.response = cv
+
+
+@when(u'the user press end_task')
+def step_impl(context):
+    rv = context.app.post('/1/add_end_time', follow_redirects=True)
+    context.response=rv
 
 
 # THENS
@@ -89,3 +127,24 @@ def step_impl(context, detail):
         assert data[detail] in meterage.USERS.values(), "new password is not in the USERS dictionary"
     elif detail == "username":
         assert data[detail] in meterage.USERS.keys(), "new username is not in the USERS dictionary"
+
+
+@then(u'the comment should appear right after added')
+def step_impl(context):
+    assert '&lt;FinalVERSION&gt;' in context.response.get_data()
+
+
+@then(u'the username should displayed right next to the comment')
+def step_impl(context):
+    assert 'by admin' in context.response.get_data()
+
+
+@then(u'start time will auto_sign')
+def step_impl(context):
+    print(context.response.get_data())
+    assert strftime("%Y-%m-%d %H:%M", gmtime()) in context.response.get_data()
+
+
+@then(u'end time should auto_sign')
+def step_impl(context):
+    assert 'End at: '+ strftime("%Y-%m-%d %H:%M:%S", gmtime()) in context.response.get_data()

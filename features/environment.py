@@ -73,4 +73,3 @@ def after_all(context):
     """
     os.close(context.db_fd)
     os.unlink(meterage.app.config['DATABASE'])
-

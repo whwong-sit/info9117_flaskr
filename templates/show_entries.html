@@ -8,21 +8,26 @@
 		<dt>Start date:
 		<dd><input type=date name=sdate>
 		<dt>Start time:
-		<dd><input type=time name=stime>
+		<dd><input type=time name=start_time>
 		<dt>End date:
 		<dd><input type=date name=edate>
 		<dt>End time:
-		<dd><input type=time name=etime>
+		<dd><input type=time name=end_time>
         <dt>Text:
         <dd><textarea name=text rows=5 cols=40></textarea>
+
         <dd><input type=submit value=Share>
-      </dl>
+ </dl>
   </form>
 {% endif %}
 <ul class=entries>
 {% for entry in entries %}
-<li><h2>{{ entry.title }} <span class=user> by {{ entry.username }} </span></h2><div class=datetime> start time:{{entry.sdate}} {{entry.stime}}
-end time:{{entry.edate}} {{entry.etime}}</div> {{ entry.text | newlines }}
+    <li><h2><a href="{{ url_for('show_comments', entry_id=entry.id) }}">{{ entry.title }}</a> <span class=user> by {{ entry.username }} </span></h2>
+
+        <div class=datetime> start time:{{entry.sdate}} {{entry.start_time}}
+            end time:{{entry.edate}} {{entry.end_time}}
+        </div>
+        {{ entry.text | newlines }}
 {% else %}
 <li><em>No entries here yet</em></li>
 {% endfor %}
