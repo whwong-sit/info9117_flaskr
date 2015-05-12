@@ -85,7 +85,7 @@ class BasicTests(MeterageBaseTestClass):
         we check show_entries.html (i.e. the root page)
         """
         rv = self.app.get('/')
-        assert 'No entries here yet' in rv.get_data()
+        self.assertIn('No entries here yet', rv.get_data(), 'Incorrect page displayed when there are no messages')
 
     def test_login_logout(self):
         """
@@ -93,9 +93,9 @@ class BasicTests(MeterageBaseTestClass):
         """
         for user in users:
             rv = self.login(user, users[user])
-            assert 'You were logged in' in rv.get_data()
+            self.assertIn('You were logged in', rv.get_data())
             rv = self.logout()
-            assert 'You were logged out' in rv.get_data()
+            self.assertIn('You were logged out', rv.get_data())
 
     def test_invalid(self):
         """
@@ -103,15 +103,15 @@ class BasicTests(MeterageBaseTestClass):
         """
         # test for invalid user
         rv = self.login('adminx', 'default')
-        assert 'Invalid username' in rv.get_data()
+        self.assertIn('Invalid username', rv.get_data())
 
         # test for invalid password
         rv = self.login('admin', 'defaultx')
-        assert 'Invalid password' in rv.get_data()
+        self.assertIn('Invalid password', rv.get_data())
 
         # test for invalid username and password
         rv = self.login('adminx', 'defaultx')
-        assert 'Invalid username' in rv.get_data()
+        self.assertIn('Invalid username', rv.get_data())
 
     def test_messages(self):
         """
@@ -170,7 +170,7 @@ class ChangePasswordsTests(MeterageBaseTestClass):
             confirm_password='1234'
         ), follow_redirects=True)
 
-        assert 'Successfully changed user password' in rv.get_data()
+        self.assertIn('Successfully changed user password', rv.get_data())
 
     def test_change_non_exist_password(self):
         """
@@ -186,7 +186,7 @@ class ChangePasswordsTests(MeterageBaseTestClass):
             confirm_password='test'
         ), follow_redirects=True)
 
-        assert 'User does not exist' in rv.get_data()
+        self.assertIn('User does not exist', rv.get_data())
 
     def test_login_after_change(self):
         """
@@ -205,11 +205,11 @@ class ChangePasswordsTests(MeterageBaseTestClass):
 
         # Test hari login with old password
         rv = self.login('hari', 'seldon')
-        assert 'Invalid password' in rv.get_data()
+        self.assertIn('Invalid password', rv.get_data())
 
         # Test hari login with new password
         rv = self.login('hari', '1234')
-        assert 'You were logged in' in rv.get_data()
+        self.assertIn('You were logged in', rv.get_data())
 
 
 class HashedPasswordsTests(MeterageBaseTestClass):
@@ -220,7 +220,7 @@ class HashedPasswordsTests(MeterageBaseTestClass):
         """
 
         user = User("bilbo", "baggins")
-        self.assertFalse(user.password == "baggins", "password has not been automatically hashed")
+        self.assertNotEqual(user.password, "baggins", "password has not been automatically hashed")
 
     def test_hashed_password_added_to_database(self):
         """
@@ -241,9 +241,9 @@ class HashedPasswordsTests(MeterageBaseTestClass):
         """
         user = User("xXx_Supa_Saiyan_xXx", "password1")
         user.password = "dogsname"
-        self.assertFalse(user.password == "password1", "password not reset, password is plain text")
-        self.assertFalse(user.password == generate_password_hash("password1"), "password not reset")
-        self.assertFalse(user.password == "dogsname", "password is plain text")
+        self.assertNotEqual(user.password, "password1", "password not reset, password is plain text")
+        self.assertNotEqual(user.password, generate_password_hash("password1"), "password not reset")
+        self.assertNotEqual(user.password, "dogsname", "password is plain text")
         self.assertTrue(user.check_password("dogsname"), "password not changed successfully")
 
     def test_entering_hash_does_not_succeed(self):
@@ -256,7 +256,7 @@ class HashedPasswordsTests(MeterageBaseTestClass):
                 cur = db.execute('select username, password from userPassword where username=?', [user])
                 row = cur.fetchone()
                 rv = self.login(row[0], row[1])
-                self.assertTrue("Invalid password" in rv.get_data(), "Login did not fail as it should have")
+                self.assertIn("Invalid password", rv.get_data(), "Login did not fail as it should have")
                 cur.close()
 
 

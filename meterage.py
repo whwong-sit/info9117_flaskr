@@ -51,9 +51,12 @@ def show_entries():
     Get all the information required in show_entries.html from the database and pipe it
     into show_entries.html
     """
-    cur = g.db.execute('select title, text, username, sdate, start_time, edate, end_time, id from entries order by id desc')
-    entries = [dict(title=row[0], text=row[1], username=row[2], sdate=row[3], start_time=row[4], edate=row[5], end_time=row[6], id=row[7])
-               for row in cur.fetchall()]
+    cur = g.db.execute(
+        'select title, text, username, sdate, start_time, edate, end_time, id from entries order by id desc')
+    entries = [
+        dict(title=row[0], text=row[1], username=row[2], sdate=row[3], start_time=row[4], edate=row[5], end_time=row[6],
+             id=row[7])
+        for row in cur.fetchall()]
     return render_template('show_entries.html', entries=entries)
 
 

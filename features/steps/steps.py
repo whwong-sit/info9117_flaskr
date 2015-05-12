@@ -75,7 +75,7 @@ def step_impl(context):
     context.response = cv
 
 
-@when(u'the user press end_task')
+@when(u'the user presses end_task')
 def step_impl(context):
     rv = context.app.post('/1/add_end_time', follow_redirects=True)
     context.response=rv
@@ -139,12 +139,12 @@ def step_impl(context):
     assert 'by admin' in context.response.get_data()
 
 
-@then(u'start time will auto_sign')
+@then(u'start time will auto sign')
 def step_impl(context):
     print(context.response.get_data())
     assert strftime("%Y-%m-%d %H:%M", gmtime()) in context.response.get_data()
 
 
-@then(u'end time should auto_sign')
+@then(u'end time should auto sign')
 def step_impl(context):
     assert 'End at: '+ strftime("%Y-%m-%d %H:%M:%S", gmtime()) in context.response.get_data()
