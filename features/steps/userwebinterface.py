@@ -1,6 +1,7 @@
 from behave import *
 import meterage
 from contextlib import closing
+from re import sub
 
 
 #### GIVENS
@@ -17,13 +18,13 @@ def step_impl(context):
     # assert that this page actually exists
     assert context.rv.status_code != 404, "'/user/<username>/' page does not exist; you're getting a 404 error"
 
-@when(u'the User clicks "change {detail}"')
-def step_impl(context, detail):
+@when(u'the User clicks "edit details"')
+def step_impl(context):
     """
-    Check that detail is on this page, and then go to the page to change <detail>
+    Check that the edit details button is present, and that clicking it results
+    in being taken to the relevant page
     """
-    # assert that <detail> is on the current page.
-    assert detail in context.rv.get_data(), "{0} is not on the current page".format(detail)
+
 
     # GET the page to change <detail>
     context.rv = context.app.get('/user/<username>/change_{0}'.format(detail))
@@ -34,17 +35,15 @@ def step_impl(context, detail):
 @then(u'account details are displayed')
 def step_impl(context):
     """
-    Assert that the string "Username: <username>" is present somewhere in rv.get_data()
-
-    We also need to assert that any other information associated with a user is displayed on the page;
-    at the moment, the only thing associated with a user is their username (and also their posts, but this
-    is not perhaps what we might display on the account settings page)
+    Assert that information associated with the logged in user, including username and Gravatar email,
+    is on the web interface page.
     """
     with context.app.session_transaction() as sess:
         # see http://flask.pocoo.org/docs/0.10/testing/#accessing-and-modifying-sessions for
         # an explanation of accessing sessions during testing.
-        assert "Username: " + sess['username'] in context.rv.get_data(), "'Username: {0}' " \
-                                                                         "is not on the page".format(sess['username'])
+        for detail in ["Username", sess['username'], "Gravatar Email", sess['gravataremail']]:
+            # assert all these strings are present in rv.get_data() when stripped of HTML junk
+            assert detail in sub('<[^>]*>', '', context.rv.get_data()), "{0} not displayed".format(detail)
 
 @then(u'the User is able to edit and commit {detail}')
 def step_impl(context, detail):

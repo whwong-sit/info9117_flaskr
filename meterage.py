@@ -134,9 +134,13 @@ def logout():
     return redirect(url_for('show_entries'))
 
 
-@app.route('/user/<username>')
+@app.route('/user/<username>', methods=['GET', 'POST'])
 def manage_details(username):
-    return render_template('manage_details.html')
+    if request.method == 'GET':
+        return render_template('manage_details.html')
+    if request.method == 'POST':
+        return "words"
+
 
 
 @app.route('/change_password', methods=['GET', 'POST'])

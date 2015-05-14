@@ -1,14 +1,36 @@
 {% extends "layout.html" %}
 {% block body %}
+<head>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+<script>
+$(document).ready(function(){
+    $("button").click(function(){
+        $(".hidden").toggle();
+        $("button").toggle();
+    });
+});
+</script>
+</head>
+<body>
+
   <h2>Manage Details</h2>
-  <!--{% if error %}<p class=error><strong>Error:</strong>{{ error }}</p>{% endif %}-->
-  <form action="{{ url_for('login') }}" method=post>
-    <dl>
-        <dt>Username: {{ session.username }}
-        <!--<dd><input type=text name=username>-->
-        <dt>Gravatar Email: {{ session.gravataremail }}
-        <!--<dd><input type=password name=password>-->
-        <!--<dd><input type=submit value=Login>-->
-    </dl>
+
+  <form action="{{ url_for('manage_details', username=session.username) }}" method=post>
+
+      <table>
+          <tr>
+              <td><b>Username</b>:</td>
+              <td>{{ session.username }}</td>
+          </tr>
+          <tr>
+              <td><b>Gravatar Email</b>:</td>
+              <td>{{ session.gravataremail }}</td>
+          </tr>
+      </table>
+
+    <input class="hidden" type=submit value="save">
   </form>
+
+  <button>edit details</button>
+
 {% endblock %}
