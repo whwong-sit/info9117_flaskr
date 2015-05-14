@@ -136,11 +136,24 @@ def logout():
 
 @app.route('/user/<username>', methods=['GET', 'POST'])
 def manage_details(username):
+    """
+    Allow for a user to change theri username and Gravatar email.  When more details are added, this
+    will be updated
+    :param username: the current user's username
+    :return: manage_details
+    """
     if request.method == 'GET':
         return render_template('manage_details.html')
-    if request.method == 'POST':
-        return "words"
-
+    if request.form.keys()[2] == 'save':
+        g.db.execute('update userPassword set gravataremail=?, username=? where username =?',
+                     [request.form['gravataremail'], request.form['username'], session['username']])
+        g.db.execute('update entries set username=? where username=?',
+                     [request.form['username'], session['username']])
+        g.db.commit()
+        session['username'] = request.form['username']
+        session['gravataremail'] = request.form['gravataremail']
+        flash('Successfully changed user details')
+    return render_template('manage_details.html')
 
 
 @app.route('/change_password', methods=['GET', 'POST'])
@@ -173,6 +186,7 @@ def change_password():
             return render_template('change_password.html', success='Successfully changed password')
 
     return render_template('change_password.html', error=error)
+
 
 @app.template_filter('newlines')
 def newline_filter(s):

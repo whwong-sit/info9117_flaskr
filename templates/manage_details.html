@@ -7,6 +7,7 @@ $(document).ready(function(){
     $("button").click(function(){
         $(".hidden").toggle();
         $("button").toggle();
+        $("span").toggle();
     });
 });
 </script>
@@ -20,15 +21,16 @@ $(document).ready(function(){
       <table>
           <tr>
               <td><b>Username</b>:</td>
-              <td>{{ session.username }}</td>
+              <td><span>{{ session.username }}</span><input class="hidden" type="text" name="username" value="{{ session.username }}"></td>
           </tr>
           <tr>
               <td><b>Gravatar Email</b>:</td>
-              <td>{{ session.gravataremail }}</td>
+              <td><span>{{ session.gravataremail }}</span><input class="hidden" type="email" name="gravataremail" value="{{ session.gravataremail }}"></td>
           </tr>
       </table>
 
-    <input class="hidden" type=submit value="save">
+    <input class="hidden" type=submit value="save" name="save">
+    <input class="hidden" type="submit" value="cancel" name="cancel">
   </form>
 
   <button>edit details</button>
