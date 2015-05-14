@@ -1,5 +1,6 @@
 drop table if exists entries;
 drop table if exists userPassword;
+
 create table entries (
   id integer primary key autoincrement,
   title text not null,
