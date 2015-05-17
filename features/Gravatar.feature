@@ -18,11 +18,11 @@ Feature: Gravatar image
   Scenario: Managing my details
     Given the User is logged in
     When the User navigates to the web interface
-    And the User clicks "Gravatar settings"
-    Then the User is able to edit and commit Gravatar settings
+    Then the User is able to edit and commit Gravatar email
+    # note that this "Then" is covered in UserAccountWebInterface.feature
 
   Scenario: Removing my Gravatar assignment
     Given the User is logged in
     When the User makes a post
     And the User removes their Gravatar assignment
-    Then their Gravatar is not longer displayed beside posts
+    Then their Gravatar is no longer displayed beside posts

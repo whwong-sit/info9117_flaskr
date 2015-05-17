@@ -74,4 +74,3 @@ def step_impl(context, detail):
                         assert data["gravataremail"] == row["gravataremail"], "new Gravatar email is not in the database"
                     elif detail == "username":
                         assert data[detail] == row["username"], "new username is not in the database"
-
