@@ -23,15 +23,12 @@ def step_impl(context):
         return [dict(username=row[0], password=row[1]) for row in cur.fetchall()]
 
 
-
 @given(u'the Admin is logged in')
 def step_impl(context):
     context.app.post('/login', data=dict(
         username='admin',
         password='default'
     ), follow_redirects=True)
-
-
 
 
 @when(u'the user login with old password')

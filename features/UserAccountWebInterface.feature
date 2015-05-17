@@ -19,9 +19,8 @@ Feature: User account web interface
   Scenario Outline: Edit details
     Given the User is logged in
     When the User navigates to the web interface
-    And the User clicks "edit details"
     Then the User is able to edit and commit <detail>
   Examples:
-    | detail   |
-    | username |
-    | password |
+    | detail         |
+    | username       |
+    | Gravatar email |

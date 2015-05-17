@@ -34,8 +34,6 @@ def init_db():
     with closing(connect_db()) as db:
         with app.open_resource('schema.sql', mode='r') as f:
             db.cursor().executescript(f.read())
-            db.execute("insert into userPassword values ('admin','default','daisy22229999@gmail.com')")
-            db.execute("insert into userPassword values ('hari','seldon','daisy200029@gmail.com')")
         db.commit()
 
 
@@ -137,22 +135,29 @@ def logout():
 @app.route('/user/<username>', methods=['GET', 'POST'])
 def manage_details(username):
     """
-    Allow for a user to change theri username and Gravatar email.  When more details are added, this
+    Allow for a user to change their username and Gravatar email.  When more details are added, this
     will be updated
     :param username: the current user's username
     :return: manage_details
     """
-    if request.method == 'GET':
-        return render_template('manage_details.html')
-    if request.form.keys()[2] == 'save':
-        g.db.execute('update userPassword set gravataremail=?, username=? where username =?',
-                     [request.form['gravataremail'], request.form['username'], session['username']])
-        g.db.execute('update entries set username=? where username=?',
-                     [request.form['username'], session['username']])
-        g.db.commit()
-        session['username'] = request.form['username']
-        session['gravataremail'] = request.form['gravataremail']
-        flash('Successfully changed user details')
+
+    if not session.get('logged_in'):
+        abort(401)
+
+    if 'save' in request.form.keys():
+        # this also necessarily means that we are dealing with a POST request
+        if request.form['username'] in ['', None]:
+            # TODO Check that username is unique
+            flash('Username must not be empty')
+        else:
+            g.db.execute('update userPassword set gravataremail=?, username=? where username =?',
+                         [request.form['gravataremail'], request.form['username'], session['username']])
+            g.db.execute('update entries set username=? where username=?',
+                         [request.form['username'], session['username']])
+            g.db.commit()
+            session['username'] = request.form['username']
+            session['gravataremail'] = request.form['gravataremail']
+            flash('Successfully changed user details')
     return render_template('manage_details.html')
 
 
@@ -201,4 +206,14 @@ if __name__ == '__main__':
     if not isfile(str(app.config['DATABASE'])):
         app.logger.debug('creating database')
         init_db()
+        # insert some users
+        usernames = ["admin", "hari"]
+        passwords = ["default", "seldon"]
+        gravataremails = ['daisy22229999@gmail.com', 'daisy200029@gmail.com']
+        with closing(connect_db()) as db:
+            for username, password, gravataremail in zip(usernames, passwords, gravataremails):
+                db.execute('insert into userPassword (username, password, gravataremail) values (?, ?, ?)',
+                           [username, password, gravataremail])
+                app.logger.debug("Adding user {0} to the database.".format(username))
+                db.commit()
     app.run()

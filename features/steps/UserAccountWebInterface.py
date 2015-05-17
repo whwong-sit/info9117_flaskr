@@ -18,18 +18,6 @@ def step_impl(context):
     # assert that this page actually exists
     assert context.rv.status_code != 404, "'/user/<username>/' page does not exist; you're getting a 404 error"
 
-@when(u'the User clicks "edit details"')
-def step_impl(context):
-    """
-    Check that the edit details button is present, and that clicking it results
-    in being taken to the relevant page
-    """
-
-
-    # GET the page to change <detail>
-    context.rv = context.app.get('/user/<username>/change_{0}'.format(detail))
-    assert context.rv.status_code != 404, '/user/<username>/change_{0}'.format(detail) + " does not exist"
-
 #### THENS
 
 @then(u'account details are displayed')
@@ -44,6 +32,7 @@ def step_impl(context):
         for detail in ["Username", sess['username'], "Gravatar Email", sess['gravataremail']]:
             # assert all these strings are present in rv.get_data() when stripped of HTML junk
             assert detail in sub('<[^>]*>', '', context.rv.get_data()), "{0} not displayed".format(detail)
+            context.username = sess['username']
 
 @then(u'the User is able to edit and commit {detail}')
 def step_impl(context, detail):
@@ -54,12 +43,17 @@ def step_impl(context, detail):
     and it is relying on usernames and passwords being in the flat little dictionary they are currently in.
     This is bound to be one of the first things to change.
     """
-    # create the data to be sent in the POST to the change_{detail} page's POST method
-    data = {detail: "xXx_New_Detail_xXx"}
+    # create the data to be sent in the POST to the user/<username>/ page's POST method
+
+    if detail == "Gravatar email":
+        data = dict(gravataremail="xXx_New_Detail_xXx", username="whatever", save="save")
+    elif detail == "username":
+        data = dict(gravataremail="doesntmatter@somethingelse.com", username="xXx_New_Detail_xXx", save="save")
 
     # This should take the new value of <detail> and put it through the
-    # POST method of /users/<username>/change_{detail}
-    context.app.post('/users/<username>/change_{0}'.format(detail), data=data, follow_redirects=True)
+    # POST method of /users/<username>/
+    rv = context.app.post('/user/<username>', data=data, follow_redirects=True)
+    # print(rv.get_data())
 
     # this ensures that the session's username is still functioning
     context.execute_steps(u'''
@@ -68,10 +62,16 @@ def step_impl(context, detail):
     ''')
 
     with closing(meterage.connect_db()) as db:
-        cur = db.execute('select username, password, gravataremail from userPassword')
-        return [dict(username=row[0], password=row[1], gravataremail=row[2]) for row in cur.fetchall()]
-        for row in cur.fetchall():
-            if detail == "password":
-                assert data[detail] in row[1], "new password is not in the database"
-            elif detail == "username":
-                assert data[detail] in row[0], "new username is not in the database"
+        with context.app.session_transaction() as sess:
+        # see http://flask.pocoo.org/docs/0.10/testing/#accessing-and-modifying-sessions for
+        # an explanation of accessing sessions during testing.
+            cur = db.execute('select username, gravataremail from userPassword')
+            rows = [dict(username=row[0], gravataremail=row[1]) for row in cur.fetchall()]
+            assert rows, "userPassword table has not been populated"
+            for row in rows:
+                if row["username"] == sess["username"]:
+                    if detail == "Gravatar email":
+                        assert data["gravataremail"] == row["gravataremail"], "new Gravatar email is not in the database"
+                    elif detail == "username":
+                        assert data[detail] == row["username"], "new username is not in the database"
+

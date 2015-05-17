@@ -12,7 +12,6 @@ Feature: As an Administrator,
     When the Admin goes to change password with invalid username
     Then the change should fail
 
-
   Scenario:user cannot use the old password to log in
     Given admin has changed a user password
     When the user login with old password
