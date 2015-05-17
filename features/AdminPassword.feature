@@ -4,15 +4,16 @@ Feature: As an Administrator,
   Scenario: Admin change password
     Given the Admin is logged in
     When the Admin goes to change password
-    And admin change  a user password
+    And admin changes a user password
     Then the password successfully changed
 
   Scenario: The user does not exist
     Given the Admin is logged in
-    When the Admin goes to change password with invalid username
-    Then the change should fail
+    When the Admin goes to change password
+    And the Admin enters an invalid username
+    Then the change fails
 
   Scenario:user cannot use the old password to log in
     Given admin has changed a user password
     When the user login with old password
-    Then user login should fail
+    Then user login fails
