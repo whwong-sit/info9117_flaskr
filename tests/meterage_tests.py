@@ -22,18 +22,19 @@ class MeterageBaseTestClass(unittest.TestCase):
         self.app = meterage.app.test_client()
         meterage.init_db()
 
-        # flat dictionary of users, so we have access to the plain text versions of the passwords
         global users
-        users = {"admin": "default", "hari": "seldon"}
+        usernames = ["admin", "hari"]
+        passwords = ["default", "seldon"]
+        gravataremails = ["daisy22229999@gmail.com", "nongravataremailaddress@gmail.com"]
+        users = zip(usernames, passwords, gravataremails)
 
-        # add users to the temporary database, with their proper hashed passwords
-        # Note that an admin and a normal user are added.
+        # add an admin and a normal user to the database
         with closing(meterage.connect_db()) as db:
-            for user in users:
-                user = User(user, users[user])
-                db.execute('insert into userPassword (username, password) values (?, ?)',
-                           [user.username, user.password])
-                db.commit()
+            for username, password, gravataremail in users:
+                user = User(username, password, gravataremail)
+                db.execute('insert into userPassword (username, password, gravataremail) values (?, ?, ?)',
+                           [user.username, user.password, user.gravataremail])
+            db.commit()
 
     def tearDown(self):
         """
@@ -75,6 +76,13 @@ class MeterageBaseTestClass(unittest.TestCase):
             end_time='<17:30>'
         ), follow_redirects=True)
 
+    def userPassword_content(self):
+        """
+        Get all the data in the userPassword table
+        """
+        with closing(meterage.connect_db()) as db:
+            cur = db.execute('select username, password, gravataremail from userPassword')
+            return [dict(username=row[0], password=row[1], gravataremail=row[2]) for row in cur.fetchall()]
 
 class BasicTests(MeterageBaseTestClass):
 
@@ -92,7 +100,7 @@ class BasicTests(MeterageBaseTestClass):
         Test that all users may log in and log out
         """
         for user in users:
-            rv = self.login(user, users[user])
+            rv = self.login(users[1][0], users[1][1])
             self.assertIn('You were logged in', rv.get_data())
             rv = self.logout()
             self.assertIn('You were logged out', rv.get_data())
@@ -119,8 +127,8 @@ class BasicTests(MeterageBaseTestClass):
         page returned.
         Check that HTML is allowed in the text but not in the title"
         """
-        for user in users:
-            self.login(user, users[user])
+        for username, password, gravataremail in users:
+            self.login(username, password)
             rv = self.generic_post()
             self.assertNotIn('No entries here so far', rv.get_data(), 'Post unsuccessful')
             self.assertIn('&lt;Hello&gt;', rv.get_data())
@@ -154,14 +162,12 @@ class BasicTests(MeterageBaseTestClass):
         assert "&lt;Hello&gt" in rv.get_data()
         assert "by admin" in rv.get_data()
 
-
 class ChangePasswordsTests(MeterageBaseTestClass):
 
     def test_change_password(self):
         """
         Test that the admin can change an existing user's password
         """
-        # log in as the admin; only the admin can change passwords
         self.login(username='admin',password='default')
 
         rv = self.app.post('/change_password', data=dict(
@@ -177,7 +183,6 @@ class ChangePasswordsTests(MeterageBaseTestClass):
         Test that trying to change the password of a user that does not exist
         behaves as we expect
         """
-        # log in as the admin; only the admin can change passwords
         self.login(username='admin', password='default')
 
         rv = self.app.post('/change_password', data=dict(
@@ -211,7 +216,6 @@ class ChangePasswordsTests(MeterageBaseTestClass):
         rv = self.login('hari', '1234')
         self.assertIn('You were logged in', rv.get_data())
 
-
 class HashedPasswordsTests(MeterageBaseTestClass):
 
     def test_User_password_hashed_upon_initialising(self):
@@ -219,7 +223,7 @@ class HashedPasswordsTests(MeterageBaseTestClass):
         Check that initialising a User object results in automatic hashing of the plaintext password
         """
 
-        user = User("bilbo", "baggins")
+        user = User("bilbo", "baggins", "bilbo@hobbiton.tolk")
         self.assertNotEqual(user.password, "baggins", "password has not been automatically hashed")
 
     def test_hashed_password_added_to_database(self):
@@ -228,9 +232,9 @@ class HashedPasswordsTests(MeterageBaseTestClass):
         """
         with closing(meterage.connect_db()) as db:
             for user in users:
-                cur = db.execute('select username, password from userPassword where username=?', [user])
+                cur = db.execute('select username, password from userPassword where username=?', [user[0]])
                 row = cur.fetchone()
-                self.assertFalse(row[1] == users[user], "Hashed password has not been added to the database")
+                self.assertFalse(row[1] == user[1], "Hashed password has not been added to the database")
                 cur.close()
 
     def test_hashed_password_is_not_plaintext(self):
@@ -239,7 +243,7 @@ class HashedPasswordsTests(MeterageBaseTestClass):
 
         Check other aspects of changing User object's password
         """
-        user = User("xXx_Supa_Saiyan_xXx", "password1")
+        user = User("xXx_Supa_Saiyan_xXx", "password1", "swag@yolo.net")
         user.password = "dogsname"
         self.assertNotEqual(user.password, "password1", "password not reset, password is plain text")
         self.assertNotEqual(user.password, generate_password_hash("password1"), "password not reset")
@@ -253,12 +257,11 @@ class HashedPasswordsTests(MeterageBaseTestClass):
 
         with closing(meterage.connect_db()) as db:
             for user in users:
-                cur = db.execute('select username, password from userPassword where username=?', [user])
+                cur = db.execute('select username, password from userPassword where username=?', [user[0]])
                 row = cur.fetchone()
                 rv = self.login(row[0], row[1])
                 self.assertIn("Invalid password", rv.get_data(), "Login did not fail as it should have")
                 cur.close()
-
 
 class TimeAndCommentTests(MeterageBaseTestClass):
 
@@ -297,6 +300,36 @@ class TimeAndCommentTests(MeterageBaseTestClass):
         self.assertIn('&lt;Hello&gt;', rv.get_data())
         self.assertIn('by admin', rv.get_data())
         self.assertIn('End at: ' + curr_time, rv.get_data())
+
+class GravatarTests(MeterageBaseTestClass):
+
+    def test_avatar(self):
+        """
+        Test that meterage.avatar() method does return the correct Gravatar
+        """
+        known_url = "http://www.gravatar.com/avatar/bf6c2e089dbd27ec1868027525bc42fe?s=50&d=monsterid"
+        self.assertEqual(meterage.avatar("daisy22229999@gmail.com"), known_url, "The Gravatar URL produced is incorrect")
+
+    def test_gravatar_shown(self):
+        """
+        Test that the gravatar is shown on show_entries.html
+        """
+        self.login("admin", "default")
+        rv = self.generic_post()
+        image = '<i><img src="http://www.gravatar.com/avatar/bf6c2e089dbd27ec1868027525bc42fe?s=50&amp;d=monsterid">'
+        self.assertIn(image, rv.get_data(), "image is displayed incorrectly on show_entries.html")
+
+    def test_non_gravatar_user(self):
+        """
+        Test that non-gravatar users still get some kind of image
+        """
+        self.login("hari", "seldon")
+        rv = self.generic_post()
+        some_image = '<i><img src="http://www.gravatar.com/avatar/'
+        self.assertIn(some_image, rv.get_data(), "image is displayed incorrectly on show_entries.html")
+
+class UserWebInterfaceTests(MeterageBaseTestClass):
+    pass
 
 if __name__ == '__main__':
     unittest.main()

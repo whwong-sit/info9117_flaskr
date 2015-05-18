@@ -1,0 +1,38 @@
+{% extends "layout.html" %}
+{% block body %}
+<head>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+<script>
+$(document).ready(function(){
+    $("button").click(function(){
+        $(".hidden").toggle();
+        $("button").toggle();
+        $("span").toggle();
+    });
+});
+</script>
+</head>
+<body>
+
+  <h2>Manage Details</h2>
+
+  <form action="{{ url_for('manage_details', username=session.username) }}" method=post>
+
+      <table>
+          <tr>
+              <td><b>Username</b>:</td>
+              <td><span>{{ session.username }}</span><input class="hidden" type="text" name="username" value="{{ session.username }}"></td>
+          </tr>
+          <tr>
+              <td><b>Gravatar Email</b>:</td>
+              <td><span>{{ session.gravataremail }}</span><input class="hidden" type="email" name="gravataremail" value="{{ session.gravataremail }}"></td>
+          </tr>
+      </table>
+
+    <input class="hidden" type=submit value="save" name="save">
+    <input class="hidden" type=submit value="cancel" name="cancel">
+  </form>
+
+  <button>edit details</button>
+
+{% endblock %}

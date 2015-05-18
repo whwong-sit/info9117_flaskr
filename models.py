@@ -3,9 +3,9 @@ from flask_bcrypt import generate_password_hash, check_password_hash
 
 class User(object):
     """
-    Defines a user with associated username and password.
+    Defines a user with associated username, password and Gravatar email address.
 
-    I am treating _username and _password as private fields of the class, but this is purely an
+    I am treating _username, _password and _gravataremail as private fields of the class, but this is purely an
     implementation detail.  You simply need to make an assignment to a User object's "password"
     field like so:
 
@@ -14,9 +14,10 @@ class User(object):
     and the setter function is automatically called.
     """
 
-    def __init__(self, username, password):
+    def __init__(self, username, password, gravataremail):
         self.username = username
         self.password = password
+        self.gravataremail = gravataremail
 
     #### username
 
@@ -56,10 +57,29 @@ class User(object):
         :param plaintext: the plain text being entered by the user, to be hased
         "
         """
-        # print "setter of password called"
         self._password = generate_password_hash(plaintext)
 
+    #### Gravatar email address
+
+    @property
+    def gravataremail(self):
+        """
+        :return: The Gravatar email address
+        """
+        return self._gravataremail
+
+    @gravataremail.setter
+    def gravataremail(self, newemail):
+        """
+        Set the Gravatar email
+
+        This is as simple as it looks, simply making an assignment to
+        the _gravataremail field so it can be returned in the getter.
+        """
+        self._gravataremail = newemail
+
     #### check password
+
     def check_password(self, plaintext):
         """
         Check that a plaintext password is equal to the hashed password.
