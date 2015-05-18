@@ -70,9 +70,7 @@ class MeterageBaseTestClass(unittest.TestCase):
         return self.app.post('/add', data=dict(
             title='<Hello>',
             text='<strong>HTML</strong> allowed here',
-            sdate='2015-01-01',
             start_time='<15:00>',
-            edate='2015-01-02',
             end_time='<17:30>'
         ), follow_redirects=True)
 
@@ -137,9 +135,7 @@ class BasicTests(MeterageBaseTestClass):
                 # see http://flask.pocoo.org/docs/0.10/testing/#accessing-and-modifying-sessions for
                 # an explanation of accessing sessions during testing.
                 self.assertIn(sess['username'], rv.get_data())
-            self.assertIn('2015-01-01', rv.get_data())
             self.assertIn('15:00', rv.get_data())
-            self.assertIn('2015-01-02', rv.get_data())
             self.assertIn('17:30', rv.get_data())
 
     def test_message_maps_to_username(self):
@@ -271,9 +267,7 @@ class TimeAndCommentTests(MeterageBaseTestClass):
         rv = self.app.post('/add', data=dict(
             title='<Hello>',
             text='<strong>HTML</strong> allowed here',
-            sdate='2015-01-01',
             start_time='<15:00>',
-            edate='2015-01-02',
             end_time=curr_time
         ), follow_redirects=True)
         self.assertNotIn('No entries here so far', rv.get_data(), 'Post unsuccessful')

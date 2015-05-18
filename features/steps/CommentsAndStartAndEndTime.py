@@ -19,10 +19,8 @@ def step_impl(context):
     rv = context.app.post('/add', data=dict(
         title='<Hello>',
         text='<strong>HTML</strong> allowed here',
-        sdate='2015-01-01',
         # start_time='<15:00>',
         start_time='',
-        edate='2015-01-02',
         end_time='<17:30>'
     ), follow_redirects=True)
     context.response = rv

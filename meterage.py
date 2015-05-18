@@ -70,11 +70,11 @@ def show_entries():
     into show_entries.html
     """
     cur = g.db.execute('select entries.title, entries.text, userPassword.username, '
-                       'entries.sdate, entries.start_time, entries.edate, entries.end_time, userPassword.gravataremail, entries.id'
+                       'entries.start_time, entries.end_time, userPassword.gravataremail, entries.id'
                        ' from entries inner join userPassword on entries.username=userPassword.username'
                        ' order by entries.id desc')
-    entries = [dict(title=row[0], text=row[1], username=row[2], sdate=row[3], start_time=row[4],
-                    edate=row[5], end_time=row[6], gravataremail=row[7], avimg=avatar(row[7]), id=row[8]) for row in cur.fetchall()]
+    entries = [dict(title=row[0], text=row[1], username=row[2], start_time=row[3],
+                    end_time=row[4], gravataremail=row[5], avimg=avatar(row[5]), id=row[6]) for row in cur.fetchall()]
     return render_template('show_entries.html', entries=entries)
 
 
@@ -89,14 +89,13 @@ def add_entry():
 
     if request.form['start_time'] == '':
         # use the default time (current time)
-        g.db.execute('insert into entries (title, text, username, sdate, edate, end_time) values (?,?,?,?,?,?)',
-                     [request.form['title'], request.form['text'], session['username'], request.form['sdate'],
-                      request.form['edate'], request.form['end_time']])
+        g.db.execute('insert into entries (title, text, username, end_time) values (?,?,?,?)',
+                     [request.form['title'], request.form['text'], session['username'], request.form['end_time']])
     else:
-        g.db.execute('insert into entries (title, text, username, sdate, start_time, edate, end_time)'
-                     ' values (?,?,?,?,?,?,?)',
-                     [request.form['title'], request.form['text'], session['username'], request.form['sdate'],
-                      request.form['start_time'], request.form['edate'], request.form['end_time']])
+        g.db.execute('insert into entries (title, text, username, start_time, end_time)'
+                     ' values (?,?,?,?,?)',
+                     [request.form['title'], request.form['text'], session['username'], request.form['start_time'],
+                      request.form['end_time']])
     g.db.commit()
     flash('New entry was successfully posted')
     return redirect(url_for('show_entries'))

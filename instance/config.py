@@ -1,4 +1,4 @@
-DATABASE = 'db/flask.db'
+DATABASE = 'db/meterage.db'
 
 # this needs to be set for sessions to be enabled.
 # See http://flask.pocoo.org/docs/0.10/quickstart/#sessions
