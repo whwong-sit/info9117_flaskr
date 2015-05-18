@@ -8,11 +8,7 @@ create table entries (
   title text not null,
   text text not null,
   username text not null,
-  sdate text not null,
-  -- stime text not null,
   start_time timestamp default current_timestamp not null,
-  edate text not null,
-  -- etime text not null
   end_time timestamp
 );
 
