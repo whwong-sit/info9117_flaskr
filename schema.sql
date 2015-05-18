@@ -18,8 +18,11 @@ create table entries (
 
 -- store user information
 create table userPassword (
-  username text not null,
-  password text not null
+  username text not null unique,
+  password text not null,
+  emailAddr text,
+  flag_admin boolean not null default false,
+  flag_approval boolean not null default false
 );
 
 -- store comments on entries

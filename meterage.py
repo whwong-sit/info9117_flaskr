@@ -225,8 +225,8 @@ if __name__ == '__main__':
         with closing(connect_db()) as db:
             for user in users:
                 app.logger.debug("Adding user {0} to the database.".format(user.username))
-                db.execute('insert into userPassword (username, password) values (?, ?)',
-                           [user.username, user.password])
+                db.execute('insert into userPassword (username, password,flag_approval) values (?, ?, ?)',
+                           [user.username, user.password, True])
             db.commit()
 
     app.run()
