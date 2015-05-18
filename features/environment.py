@@ -27,11 +27,35 @@ def after_scenario(context, scenario):
 
 # These run before and after each feature file is exercised.
 def before_feature(context, feature):
-    pass
+    """
+    Create a new test client, initialise a database and activate TESTING mode
+    """
+    context.db_fd, meterage.app.config['DATABASE'] = tempfile.mkstemp()
+    meterage.app.config['TESTING'] = True
+    context.app = meterage.app.test_client()
+    meterage.init_db()
+
+    #flat dictionary of users, so we have access to the plain text versions of the passwords
+    context.users = {"admin": "default", "hari": "seldon"}
+
+    # add users to the temporary database
+    # Note that an admin and a normal user are added.
+    with closing(meterage.connect_db()) as db:
+        admin = User('admin', 'default', 'admin@unix.org')
+        db.execute('insert into userPassword (username, password, gravataremail) values (?, ?, ?)',
+                   [admin.username, admin.password, admin.gravataremail])
+        user = User('hari', 'seldon', 'hari@stroustrup.com')
+        db.execute('insert into userPassword (username, password, gravataremail) values (?, ?, ?)',
+                   [user.username, user.password, user.gravataremail])
+        db.commit()
 
 
 def after_feature(context, feature):
-    pass
+    """
+    Close temporary file and remove from filesystem
+    """
+    os.close(context.db_fd)
+    os.unlink(meterage.app.config['DATABASE'])
 
 
 # These run before and after a section tagged with the given name. They are invoked
@@ -46,30 +70,12 @@ def after_tag(context, tag):
 
 # These run before and after the whole shooting match.
 def before_all(context):
-    """
-    Create a new test client, initialise a database and activate TESTING mode
-    """
-    context.db_fd, meterage.app.config['DATABASE'] = tempfile.mkstemp()
-    meterage.app.config['TESTING'] = True
-    context.app = meterage.app.test_client()
-    meterage.init_db()
-    #flat dictionary of users, so we have access to the plain text versions of the passwords
-    context.users = {"admin": "default", "hari": "seldon"}
-
-    # add users to the temporary database
-    # Note that an admin and a normal user are added.
-    with closing(meterage.connect_db()) as db:
-        admin = User('admin', 'default')
-        db.execute('insert into userPassword (username, password) values (?, ?)',
-                   [admin.username, admin.password])
-        user = User('hari', 'seldon')
-        db.execute('insert into userPassword (username, password) values (?, ?)',
-                   [user.username, user.password])
-        db.commit()
+    pass
 
 def after_all(context):
-    """
-    Close temporary file and remove from filesystem
-    """
-    os.close(context.db_fd)
-    os.unlink(meterage.app.config['DATABASE'])
+    pass
+
+
+def after_all(context):
+    pass
+

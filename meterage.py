@@ -1,3 +1,5 @@
+import urllib
+import hashlib
 from contextlib import closing
 from sqlite3 import dbapi2 as sqlite3
 from flask import Flask, request, session, g, redirect, url_for, \
@@ -18,20 +20,36 @@ app.config.from_envvar('FLASKR_SETTINGS', silent=True)
 
 def connect_db():
     """
-    Make a connection to the database specified in the config.
+    Make a connection to the database
+
+    database specified in the config.
     """
     return sqlite3.connect(app.config['DATABASE'])
 
 
 def init_db():
     """
-    For initialising the database using schemal.sql.  This is usually called manually.
+    For initialising the database using schemal.sql.
+
+    This is usually called manually.
     """
     with closing(connect_db()) as db:
         with app.open_resource('schema.sql', mode='r') as f:
             db.cursor().executescript(f.read())
         db.commit()
 
+
+def avatar(email, size=50):
+    """
+    generate gravatar url from email
+
+    :param email: email address for gravatar
+    :param size: size of the image, deafaults to 50
+    :return: url of gravatar
+    """
+    gravatar_url = "http://www.gravatar.com/avatar/" + hashlib.md5(email.lower()).hexdigest()+"?"
+    gravatar_url += urllib.urlencode({'d':"monsterid",'s':str(size)})
+    return gravatar_url
 
 @app.before_request
 def before_request():
@@ -51,12 +69,12 @@ def show_entries():
     Get all the information required in show_entries.html from the database and pipe it
     into show_entries.html
     """
-    cur = g.db.execute(
-        'select title, text, username, sdate, start_time, edate, end_time, id from entries order by id desc')
-    entries = [
-        dict(title=row[0], text=row[1], username=row[2], sdate=row[3], start_time=row[4], edate=row[5], end_time=row[6],
-             id=row[7])
-        for row in cur.fetchall()]
+    cur = g.db.execute('select entries.title, entries.text, userPassword.username, '
+                       'entries.sdate, entries.start_time, entries.edate, entries.end_time, userPassword.gravataremail, entries.id'
+                       ' from entries inner join userPassword on entries.username=userPassword.username'
+                       ' order by entries.id desc')
+    entries = [dict(title=row[0], text=row[1], username=row[2], sdate=row[3], start_time=row[4],
+                    edate=row[5], end_time=row[6], gravataremail=row[7], avimg=avatar(row[7]), id=row[8]) for row in cur.fetchall()]
     return render_template('show_entries.html', entries=entries)
 
 
@@ -67,7 +85,6 @@ def add_entry():
     end time and date (etime, edate)
     """
     if not session.get('logged_in'):
-        # If someone tries to access the page without being logged in
         abort(401)
 
     if request.form['start_time'] == '':
@@ -94,13 +111,13 @@ def login():
     """
     error = None
     if request.method == 'POST':
-        # get the username-password combination from the database
-        cur = g.db.execute('select username, password from userPassword where username=?', [request.form['username']])
+        cur = g.db.execute('select username, password, gravataremail from userPassword where username=?',
+                           [request.form['username']])
         row = cur.fetchone()
 
         if row is not None:
             # if the user is found
-            user = {'username': row[0], 'password': row[1]}
+            user = {'username': row[0], 'password': row[1], 'gravataremail': row[2]}
 
             if not check_password_hash(user['password'], request.form['password']):
                 # if the password hash in the database does not correspond to the hashed form of the given password
@@ -108,6 +125,7 @@ def login():
             else:
                 session['logged_in'] = True
                 session['username'] = user['username']
+                session['gravataremail'] = user['gravataremail']
                 flash('You were logged in')
                 return redirect(url_for('show_entries'))
         else:
@@ -173,6 +191,35 @@ def logout():
     return redirect(url_for('show_entries'))
 
 
+@app.route('/user/<username>', methods=['GET', 'POST'])
+def manage_details(username):
+    """
+    Allow for a user to change their username and Gravatar email.  When more details are added, this
+    will be updated
+    :param username: the current user's username
+    :return: manage_details
+    """
+
+    if not session.get('logged_in'):
+        abort(401)
+
+    if 'save' in request.form.keys():
+        # this also necessarily means that we are dealing with a POST request
+        if request.form['username'] in ['', None]:
+            # TODO Check that username is unique
+            flash('Username must not be empty')
+        else:
+            g.db.execute('update userPassword set gravataremail=?, username=? where username =?',
+                         [request.form['gravataremail'], request.form['username'], session['username']])
+            g.db.execute('update entries set username=? where username=?',
+                         [request.form['username'], session['username']])
+            g.db.commit()
+            session['username'] = request.form['username']
+            session['gravataremail'] = request.form['gravataremail']
+            flash('Successfully changed user details')
+    return render_template('manage_details.html')
+
+
 @app.route('/change_password', methods=['GET', 'POST'])
 def change_password():
     """
@@ -197,7 +244,7 @@ def change_password():
             error = 'Please enter same password twice'
         else:
             # create the User object and add to the database
-            user = User(request.form['username'], request.form['password'])
+            user = User(request.form['username'], request.form['password'], session['gravataremail'])
             g.db.execute('update userPassword set password=? where username =?',
                          [user.password, user.username])
             g.db.commit()
@@ -220,13 +267,18 @@ if __name__ == '__main__':
     if not isfile(str(app.config['DATABASE'])):
         app.logger.debug('creating database')
         init_db()
-        users = [User("admin", "default"), User("hari", "seldon"), User("jim", "bean"), User("spock", "vulcan")]
+
+        usernames = ["admin", "hari", "jim", "spock"]
+        passwords = ["default", "seldon", "bean", "vulcan"]
+        gravataremails = ['daisy22229999@gmail.com', 'daisy200029@gmail.com', "jimbean@whisky.biz", "livelong@prosper.edu.au"]
 
         with closing(connect_db()) as db:
-            for user in users:
+            for username, password, gravataremail in zip(usernames, passwords, gravataremails):
+                user = User(username, password, gravataremail)
                 app.logger.debug("Adding user {0} to the database.".format(user.username))
-                db.execute('insert into userPassword (username, password) values (?, ?)',
-                           [user.username, user.password])
+                db.execute('insert into userPassword (username, password, gravataremail) values (?, ?, ?)',
+                           [user.username, user.password, user.gravataremail])
             db.commit()
 
     app.run()
+

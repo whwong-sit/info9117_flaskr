@@ -23,4 +23,5 @@ h3               {font-size: 1.1em;}
 .comments li h2  { margin-left: -1em; }
 .add-comments{ font-size: 0.9em; border-bottom: 1px solid #ccc;}
 .add-comments d1   { font-weight: bold; }
+.hidden         { display: none; }
 

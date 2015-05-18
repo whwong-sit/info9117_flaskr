@@ -19,7 +19,8 @@ create table entries (
 -- store user information
 create table userPassword (
   username text not null,
-  password text not null
+  password text not null,
+  gravataremail text not null
 );
 
 -- store comments on entries

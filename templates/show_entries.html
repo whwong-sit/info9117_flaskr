@@ -1,6 +1,7 @@
 {% extends "layout.html" %}
 {% block body %}
   {% if session.logged_in %}
+
   <form action="{{ url_for('add_entry') }}" method=post class=add-entry>
       <dl>
         <dt>Title:
@@ -22,7 +23,7 @@
 {% endif %}
 <ul class=entries>
 {% for entry in entries %}
-    <li><h2><a href="{{ url_for('show_comments', entry_id=entry.id) }}">{{ entry.title }}</a> <span class=user> by {{ entry.username }} </span></h2>
+    <li><h2><i><img src="{{entry.avimg}}"></i><a href="{{ url_for('show_comments', entry_id=entry.id) }}">{{ entry.title }}</a> <span class=user> by {{ entry.username }} </span></h2>
 
         <div class=datetime> start time:{{entry.sdate}} {{entry.start_time}}
             end time:{{entry.edate}} {{entry.end_time}}
