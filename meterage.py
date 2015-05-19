@@ -136,16 +136,16 @@ def login():
 @app.route('/<entry_id>/show_comments')
 def show_comments(entry_id):
     cur = g.db.execute(
-        'SELECT DISTINCT comment_input, comments.username FROM comments, entries WHERE comments.entry_id = '
+        'SELECT DISTINCT comment_input, username, comment_time FROM comments WHERE entry_id = '
         + entry_id + ' ORDER BY comment_id desc')
-    comments = [dict(comment_input=row[0], username=row[1]) for row in cur.fetchall()]
+    comments = [dict(comment_input=row[0], username=row[1], comment_time=row[2]) for row in cur.fetchall()]
 
     cur = g.db.execute(
         'select title, text, username, start_time, end_time from entries where id = ' + entry_id + ' order by id desc')
     entries1 = [dict(title=row[0], text=row[1], username=row[2], start_time=row[3], end_time=row[4]) for row in
                 cur.fetchall()]
     end_time_is_null = end_time_null_check(entry_id)
-    return render_template('show_comments.html', entries1=entries1, comments=comments, entry_id=entry_id,task_ended= not end_time_is_null)
+    return render_template('show_comments.html', entries1=entries1, comments=comments, entry_id=entry_id, task_ended= not end_time_is_null)
 
 
 @app.route('/<entry_id>/add_comments', methods=['POST'])

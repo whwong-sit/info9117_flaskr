@@ -25,5 +25,6 @@ create table comments (
   comment_input text(200),
   entry_id integer,
   username text not null,
+  comment_time timestamp default current_timestamp not null,
   foreign key (entry_id) references entries(id)
 );

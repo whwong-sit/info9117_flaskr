@@ -35,7 +35,8 @@
 
     <ul class=comments>
         {% for comment in comments %}
-        <li>{{ comment.comment_input }} <span class=user> by {{ comment.username }} </span></li>
+        <li>{{ comment.comment_input }}</li>
+        <li>Commented at: {{ comment.comment_time }}<span class=user> by {{ comment.username }} </span></li>
         {% else %}
         <li><em>No Comment Yet</em></li>
         {% endfor %}
