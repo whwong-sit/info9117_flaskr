@@ -10,8 +10,7 @@ def step_impl(context):
     log in as user "hari"
     """
 
-    # TODO finish this.  Used to test that this user was not somehow created in the change password
-    # method.
+    # TODO finish this.  Used to test that this user was not somehow created in the change password method.
     with closing(meterage.connect_db()) as db:
         cur = db.execute('select password from userPassword where username=?', ['h'])
 
