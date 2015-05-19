@@ -1,5 +1,4 @@
-Feature: As an Administrator,
-        I want to change user passwords dynamically.
+Feature: As an Administrator, I want to change user passwords dynamically.
 
   Scenario: Admin change password
     Given the Admin is logged in

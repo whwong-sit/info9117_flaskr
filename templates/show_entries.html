@@ -6,6 +6,11 @@
       <dl>
         <dt>Title:
         <dd><input type=text size=30 name=title>
+		<dt>Start time:
+		<dd><input type=time name=start_time>
+		<dt>End time:
+		<dd><input type=time name=end_time>
+        <dt>Text:
         <dd><textarea name=text rows=5 cols=40></textarea>
 
         <dd><input type=submit value=Share>
@@ -14,7 +19,12 @@
 {% endif %}
 <ul class=entries>
 {% for entry in entries %}
-<li><h2><a href=" {{ url_for('show_comments', entry_id=entry.id) }}">{{ entry.title }}</a> <span class=user> by {{ entry.username }} </span></h2> {{ entry.text|safe }} </li></h3>Started at: {{ entry.start_time }} | </span></h3> End at: {{ entry.end_time }}
+    <li><h2><i><img src="{{entry.avimg}}"></i><a href="{{ url_for('show_comments', entry_id=entry.id) }}">{{ entry.title }}</a> <span class=user> by {{ entry.username }} </span></h2>
+
+        <div class=datetime> start time: {{entry.start_time}}
+            end time:{{entry.end_time}}
+        </div>
+        {{ entry.text | newlines }}
 {% else %}
 <li><em>No entries here yet</em></li>
 {% endfor %}
