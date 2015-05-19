@@ -144,7 +144,8 @@ def show_comments(entry_id):
         'select title, text, username, start_time, end_time from entries where id = ' + entry_id + ' order by id desc')
     entries1 = [dict(title=row[0], text=row[1], username=row[2], start_time=row[3], end_time=row[4]) for row in
                 cur.fetchall()]
-    return render_template('show_comments.html', entries1=entries1, comments=comments, entry_id=entry_id)
+    end_time_is_null = end_time_null_check(entry_id)
+    return render_template('show_comments.html', entries1=entries1, comments=comments, entry_id=entry_id,task_ended= not end_time_is_null)
 
 
 @app.route('/<entry_id>/add_comments', methods=['POST'])
@@ -164,22 +165,22 @@ def add_comments(entry_id):
 def add_end_time(entry_id):
     if not session.get('logged_in'):
         abort(401)
-    # if end_time_null_check is True:
-    g.db.execute('UPDATE entries SET end_time=CURRENT_TIMESTAMP WHERE entries.id=' + entry_id + '')
-    g.db.commit()
-    flash('TASK ENDED')
+    end_time_is_null = end_time_null_check(entry_id)
+    if end_time_is_null is True:
+        g.db.execute('UPDATE entries SET end_time=CURRENT_TIMESTAMP WHERE entries.id=' + entry_id + '')
+        g.db.commit()
+        flash('TASK ENDED')
+    else:
+        flash('TASK ALREADY ENDED')
+
     return redirect(url_for('show_comments', entry_id=entry_id))
-    # else:
-        # flash('TASK ALREADY ENDED')
-        # return redirect(url_for('show_comments', entry_id=entry_id))
 
 
 @app.route('/<entry_id>/end_time_null_check')
 def end_time_null_check(entry_id):  # need to debug
     cur = g.db.execute('select end_time from entries where id=' + entry_id)
     end_time_fill = [dict(end_time=row[0]) for row in cur.fetchall()]
-    if end_time_fill is None:
-        return end_time_null_check is True
+    return end_time_fill[0]['end_time'] is None
 
 
 @app.route('/logout')

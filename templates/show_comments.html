@@ -12,12 +12,13 @@
     {% endfor%}
 </ul>
 
-
+{% if not task_ended %}
 <form action="{{ url_for('add_end_time', entry_id=entry_id) }}" method=post class=add_end_time>
     </dl>
     <dt>Press to end task:
         <input type=submit value=EndTask!>
 </form>
+{% endif %}
 
 <form action="{{ url_for('add_comments', entry_id=entry_id) }}" method=post class=add_comments>
     <dl>
