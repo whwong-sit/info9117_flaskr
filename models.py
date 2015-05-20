@@ -3,9 +3,9 @@ from flask_bcrypt import generate_password_hash, check_password_hash
 
 class User(object):
     """
-    Defines a user with associated username, password and Gravatar email address.
+    Defines a user with associated username, password, Gravatar email address, admin access, and approval from admin for log in.
 
-    I am treating _username, _password and _gravataremail as private fields of the class, but this is purely an
+    I am treating _username, _password, _gravataremail, _flag_admin, and _flag_approval as private fiel, _flag_admin, and _flag_approvalds of the class, but this is purely an
     implementation detail.  You simply need to make an assignment to a User object's "password"
     field like so:
 
@@ -14,10 +14,12 @@ class User(object):
     and the setter function is automatically called.
     """
 
-    def __init__(self, username, password, gravataremail):
+    def __init__(self, username, password, gravataremail, flag_admin, flag_approval):
         self.username = username
         self.password = password
         self.gravataremail = gravataremail
+        self.flag_admin = flag_admin
+        self.flag_approval = flag_approval
 
     #### username
 
