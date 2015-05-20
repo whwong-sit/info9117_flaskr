@@ -312,7 +312,7 @@ def add_new_user():
             error = 'Please enter same password twice'
         else:
             # create the User object and add to the database
-            user = User(request.form['username'], request.form['password'], request.form['email'], False, False)
+            user = User(request.form['username'], request.form['password'], request.form['email'], False, True)
             g.db.execute('insert into userPassword (username, password, gravataremail, flag_admin, flag_approval) values (?, ?, ?, ?, ?)',
                                [user.username, user.password, user.gravataremail, user.flag_admin, user.flag_approval])
             g.db.commit()
@@ -341,8 +341,8 @@ def approve_new_user():
             # grant approval for access to user 
             g.db.execute('update userPassword set flag_approval=? where username=?', [True, newuser])
             g.db.commit()
-            flash('Successfully grant access to new user')
-            return render_template('approve_new_user.html', success='Successfully grant access to new user')
+            flash('Successfully granted access to user')
+            return render_template('approve_new_user.html', success='Successfully grant access to user')
     return render_template('approve_new_user.html', error=error)
 
 @app.template_filter('newlines')
