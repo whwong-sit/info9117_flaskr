@@ -70,9 +70,7 @@ class MeterageBaseTestClass(unittest.TestCase):
         return self.app.post('/add', data=dict(
             title='<Hello>',
             text='<strong>HTML</strong> allowed here',
-            sdate='2015-01-01',
             start_time='<15:00>',
-            edate='2015-01-02',
             end_time='<17:30>'
         ), follow_redirects=True)
 
@@ -83,6 +81,7 @@ class MeterageBaseTestClass(unittest.TestCase):
         with closing(meterage.connect_db()) as db:
             cur = db.execute('select username, password, gravataremail from userPassword')
             return [dict(username=row[0], password=row[1], gravataremail=row[2]) for row in cur.fetchall()]
+
 
 class BasicTests(MeterageBaseTestClass):
 
@@ -137,9 +136,7 @@ class BasicTests(MeterageBaseTestClass):
                 # see http://flask.pocoo.org/docs/0.10/testing/#accessing-and-modifying-sessions for
                 # an explanation of accessing sessions during testing.
                 self.assertIn(sess['username'], rv.get_data())
-            self.assertIn('2015-01-01', rv.get_data())
             self.assertIn('15:00', rv.get_data())
-            self.assertIn('2015-01-02', rv.get_data())
             self.assertIn('17:30', rv.get_data())
 
     def test_message_maps_to_username(self):
@@ -162,13 +159,14 @@ class BasicTests(MeterageBaseTestClass):
         assert "&lt;Hello&gt" in rv.get_data()
         assert "by admin" in rv.get_data()
 
+
 class ChangePasswordsTests(MeterageBaseTestClass):
 
     def test_change_password(self):
         """
         Test that the admin can change an existing user's password
         """
-        self.login(username='admin',password='default')
+        self.login(username='admin', password='default')
 
         rv = self.app.post('/change_password', data=dict(
             username='hari',
@@ -215,6 +213,7 @@ class ChangePasswordsTests(MeterageBaseTestClass):
         # Test hari login with new password
         rv = self.login('hari', '1234')
         self.assertIn('You were logged in', rv.get_data())
+
 
 class HashedPasswordsTests(MeterageBaseTestClass):
 
@@ -263,6 +262,7 @@ class HashedPasswordsTests(MeterageBaseTestClass):
                 self.assertIn("Invalid password", rv.get_data(), "Login did not fail as it should have")
                 cur.close()
 
+
 class TimeAndCommentTests(MeterageBaseTestClass):
 
     def test_time(self):
@@ -271,9 +271,7 @@ class TimeAndCommentTests(MeterageBaseTestClass):
         rv = self.app.post('/add', data=dict(
             title='<Hello>',
             text='<strong>HTML</strong> allowed here',
-            sdate='2015-01-01',
             start_time='<15:00>',
-            edate='2015-01-02',
             end_time=curr_time
         ), follow_redirects=True)
         self.assertNotIn('No entries here so far', rv.get_data(), 'Post unsuccessful')
@@ -308,7 +306,7 @@ class GravatarTests(MeterageBaseTestClass):
         Test that meterage.avatar() method does return the correct Gravatar
         """
         known_url = "http://www.gravatar.com/avatar/bf6c2e089dbd27ec1868027525bc42fe?s=50&d=monsterid"
-        self.assertEqual(meterage.avatar("daisy22229999@gmail.com"), known_url, "The Gravatar URL produced is incorrect")
+        self.assertEqual(meterage.avatar("daisy22229999@gmail.com"), known_url, "Gravatar URL produced is incorrect")
 
     def test_gravatar_shown(self):
         """
@@ -328,8 +326,20 @@ class GravatarTests(MeterageBaseTestClass):
         some_image = '<i><img src="http://www.gravatar.com/avatar/'
         self.assertIn(some_image, rv.get_data(), "image is displayed incorrectly on show_entries.html")
 
+
 class UserWebInterfaceTests(MeterageBaseTestClass):
-    pass
+
+    def test_web_interface_accessible(self):
+        pass
+
+    def test_can_change_username(self):
+        pass
+
+    def test_can_change_gravatar_email(self):
+        pass
+
+    def test_username_unique(self):
+        pass
 
 if __name__ == '__main__':
     unittest.main()

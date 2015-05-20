@@ -10,8 +10,7 @@ def step_impl(context):
     log in as user "hari"
     """
 
-    # TODO finish this.  Used to test that this user was not somehow created in the change password
-    # method.
+    # TODO finish this.  Used to test that this user was not somehow created in the change password method.
     with closing(meterage.connect_db()) as db:
         cur = db.execute('select password from userPassword where username=?', ['h'])
 
@@ -47,14 +46,11 @@ def step_impl(context):
     context.rv = context.app.post('/add', data=dict(
         title='<Hello>',
         text='<strong>HTML</strong> allowed here',
-        sdate='2015-01-01',
         start_time='09:00:00',
-        edate='2015-01-02',
         end_time='13:00:00'
     ), follow_redirects=True)
 
-    for s in ['&lt;Hello&gt;', '2015-01-01', '09:00:00', '2015-01-02', '13:00:00',
-              '<strong>HTML</strong> allowed here']:
+    for s in ['&lt;Hello&gt;', '09:00:00', '13:00:00', '<strong>HTML</strong> allowed here']:
         assert s in context.rv.get_data()
     assert 'No entries here so far' not in context.rv.get_data()
     with context.app.session_transaction() as sess:
