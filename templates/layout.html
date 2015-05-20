@@ -14,7 +14,7 @@
         <a href="{{ url_for('manage_details', username=session.username) }}"><h3 align=left> {{ session.username }}</h3>
         </a>
 		{% if (session.username=="admin") %}
-		<a href=" {{ url_for('change_password') }}">change password</a>
+		<a href=" {{ url_for('admin') }}">admin portal</a>
 		{% endif %}
 	</div>
 	{% endif %}
