@@ -251,6 +251,10 @@ def change_password():
 
     return render_template('change_password.html', error=error)
 
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    error = None
+    return render_template('register.html', error=error)
 
 @app.template_filter('newlines')
 def newline_filter(s):
@@ -269,11 +273,11 @@ if __name__ == '__main__':
         usernames = ["admin", "hari", "jim", "spock"]
         passwords = ["default", "seldon", "bean", "vulcan"]
         gravataremails = ['daisy22229999@gmail.com', 'daisy200029@gmail.com', "jimbean@whisky.biz", "livelong@prosper.edu.au"]
-        flag_admin=[True, False, False, False]
-        flag_approval=[True, True, True, True]
+        flag_admins=[True, False, False, False]
+        flag_approvals=[True, True, True, True]
 
         with closing(connect_db()) as db:
-            for username, password, gravataremail, flag_admin, flag_approval in zip(usernames, passwords, gravataremails, flag_admin, flag_approval):
+            for username, password, gravataremail, flag_admin, flag_approval in zip(usernames, passwords, gravataremails, flag_admins, flag_approvals):
                 user = User(username, password, gravataremail, flag_admin, flag_approval)
                 app.logger.debug("Adding user {0} to the database.".format(user.username))
                 db.execute('insert into userPassword (username, password, gravataremail, flag_admin, flag_approval) values (?, ?, ?, ?, ?)',
