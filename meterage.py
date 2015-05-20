@@ -253,7 +253,30 @@ def change_password():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
+    """
+    Allows new user to register for log in. If the username input already exists,
+    new user has to register again with a different username. If that user is not present,
+    it checks that the password corresponds to the confirmation password given.
+    If all of this holds, then the new user is created.
+    """
     error = None
+    if request.method == 'POST':
+        newuser = request.form['username']
+        cursor = g.db.execute('select username from userPassword where username=?', [newuser])
+        row = cursor.fetchone()
+        
+        if row is not None:
+            error = 'Username has already been used'
+        elif request.form['password'] != request.form['confirm_password']:
+            error = 'Please enter same password twice'
+        else:
+            # create the User object and add to the database
+            user = User(request.form['username'], request.form['password'], request.form['email'], False, False)
+            g.db.execute('insert into userPassword (username, password, gravataremail, flag_admin, flag_approval) values (?, ?, ?, ?, ?)',
+                               [user.username, user.password, user.gravataremail, user.flag_admin, user.flag_approval])
+            g.db.commit()
+            flash('Successfully registered')
+            return render_template('register.html', success='Successfully registered')
     return render_template('register.html', error=error)
 
 @app.template_filter('newlines')
