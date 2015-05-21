@@ -200,7 +200,7 @@ def add_end_time(entry_id):
         abort(401)
     end_time_is_null = end_time_null_check(entry_id)
     if end_time_is_null is True:
-        g.db.execute('UPDATE entries SET end_time=CURRENT_TIMESTAMP WHERE entries.id=' + entry_id + '')
+        g.db.execute('UPDATE entries SET end_time=DATETIME(current_timestamp, "localtime") WHERE entries.id=' + entry_id + '')
         g.db.commit()
         flash('TASK ENDED')
     else:

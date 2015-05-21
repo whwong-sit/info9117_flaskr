@@ -9,7 +9,7 @@ create table entries (
   title text not null,
   text text not null,
   username text not null,
-  start_time timestamp default current_timestamp not null,
+  start_time timestamp default (datetime(current_timestamp,'localtime')),
   end_time timestamp,
   task_des text
 );
@@ -27,7 +27,7 @@ create table comments (
   comment_input text(200),
   entry_id integer,
   username text not null,
-  comment_time timestamp default current_timestamp not null,
+  comment_time timestamp default (datetime(current_timestamp,'localtime')),
   foreign key (entry_id) references entries(id)
 );
 
