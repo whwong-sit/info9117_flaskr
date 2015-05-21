@@ -2,7 +2,6 @@ from flask import request, session, g, redirect, url_for, abort, render_template
 from jinja2 import Markup
 from flask_bcrypt import check_password_hash
 from . import *
-from . import User
 
 @app.before_request
 def before_request():
@@ -11,9 +10,9 @@ def before_request():
 
 @app.teardown_request
 def teardown_request(exception):
-    db = getattr(g, 'db', None)
-    if db is not None:
-        db.close()
+    database = getattr(g, 'db', None)
+    if database is not None:
+        database.close()
 
 
 @app.route('/')
@@ -22,12 +21,13 @@ def show_entries():
     Get all the information required in show_entries.html from the database and pipe it
     into show_entries.html
     """
-    cur = g.db.execute('select entries.title, entries.text, userPassword.username, '
-                       'entries.start_time, entries.end_time, userPassword.gravataremail, entries.id'
-                       ' from entries inner join userPassword on entries.username=userPassword.username'
-                       ' order by entries.id desc')
-    entries = [dict(title=row[0], text=row[1], username=row[2], start_time=row[3],
-                    end_time=row[4], gravataremail=row[5], avimg=avatar(row[5]), id=row[6]) for row in cur.fetchall()]
+    entries = Entry.query.order_by(-Entry.id).all()
+    # cur = g.db.execute('select entries.title, entries.text, userPassword.username, '
+    #                    'entries.start_time, entries.end_time, userPassword.gravataremail, entries.id'
+    #                    ' from entries inner join userPassword on entries.username=userPassword.username'
+    #                    ' order by entries.id desc')
+    # entries = [dict(title=row[0], text=row[1], username=row[2], start_time=row[3],
+    #                 end_time=row[4], gravataremail=row[5], avimg=avatar(row[5]), id=row[6]) for row in cur.fetchall()]
     return render_template('show_entries.html', entries=entries)
 
 
@@ -39,15 +39,12 @@ def add_entry():
 
     if request.form['start_time'] == '':
         # use the default time (current time)
-        g.db.execute('insert into entries (title, text, username, end_time) values (?,?,?,?)',
-                     [request.form['title'], request.form['text'], session['username'], request.form['end_time']])
-
+        db.session.add(Entry(request.form['title'], request.form['text'], None, request.form['end_time']))
+        db.session.commit()
     else:
-        g.db.execute('insert into entries (title, text, username, start_time, end_time)'
-                     ' values (?,?,?,?,?)',
-                     [request.form['title'], request.form['text'], session['username'], request.form['start_time'],
-                      request.form['end_time']])
-    g.db.commit()
+        db.session.add(Entry(request.form['title'], request.form['text'], request.form['start_time'],
+                             request.form['end_time']))
+        db.session.commit()
 
     flash('New entry was successfully posted')
     return redirect(url_for('show_entries'))
@@ -62,26 +59,20 @@ def login():
     """
     error = None
     if request.method == 'POST':
-        cur = g.db.execute('select username, password, gravataremail from userPassword where username=?',
-                           [request.form['username']])
-        row = cur.fetchone()
+        user = User.query.filter_by(_username=request.form['username']).first()
 
-        if row is not None:
+        if user is not None:
             # if the user is found
-            user = {'username': row[0], 'password': row[1], 'gravataremail': row[2]}
-
-            if not check_password_hash(user['password'], request.form['password']):
+            if not check_password_hash(user.password, request.form['password']):
                 # if the password hash in the database does not correspond to the hashed form of the given password
                 error = 'Invalid password'
             else:
                 session['logged_in'] = True
-                session['username'] = user['username']
-                session['gravataremail'] = user['gravataremail']
+                session['username'] = user.username
+                session['gravataremail'] = user.gravataremail
                 flash('You were logged in')
                 return redirect(url_for('show_entries'))
         else:
-            # TODO username needs to be made unique in the database,
-            # TODO otherwise this method will malfunction
             error = 'Invalid username'
     return render_template('login.html', error=error)
 

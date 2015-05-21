@@ -1,22 +1,24 @@
-__all__ = ['app', 'connect_db', 'init_db', 'User', 'avatar']
+__all__ = ['app', 'connect_db', 'User', 'avatar', 'db', 'Entry']
 
 from flask import Flask
-from sqlite3 import dbapi2 as sqlite3
-from contextlib import closing
-from os.path import isfile, abspath, dirname
+from os.path import isfile, abspath, dirname, join
 import urllib
 import hashlib
-
+from flask_sqlalchemy import SQLAlchemy
 import config
+
+basedir = abspath(dirname(__file__))
 
 # create application
 app = Flask("Meterage",
             instance_relative_config=True,
-            template_folder=abspath(dirname(__file__))+ "/templates",
-            static_folder=abspath(dirname(__file__))+ "/static")
+            template_folder=join(basedir, "templates"),
+            static_folder=join(basedir, "static"))
 app.config.from_object(config)
 app.config.from_pyfile('config.py')
 app.config.from_envvar('FLASKR_SETTINGS', silent=True)
+
+db = SQLAlchemy(app)
 
 # useful functions
 def connect_db():
@@ -25,18 +27,7 @@ def connect_db():
 
     database specified in the config.
     """
-    return sqlite3.connect(app.config['DATABASE'])
-
-def init_db():
-    """
-    For initialising the database using schemal.sql.
-
-    This is usually called manually.
-    """
-    with closing(connect_db()) as db:
-        with app.open_resource('schema.sql', mode='r') as f:
-            db.cursor().executescript(f.read())
-        db.commit()
+    # return sqlite3.connect(app.config['DATABASE'])
 
 def avatar(email, size=50):
     """
@@ -51,22 +42,20 @@ def avatar(email, size=50):
     return gravatar_url
 
 # imports
-from models import User
+from models import User, Entry
 import views
 
 # generate database
 if not isfile(str(app.config['DATABASE'])):
     app.logger.debug('creating database')
-    init_db()
+    db.create_all()
 
     usernames = ["admin", "hari", "jim", "spock"]
     passwords = ["default", "seldon", "bean", "vulcan"]
     gravataremails = ['daisy22229999@gmail.com', 'daisy200029@gmail.com', "jimbean@whisky.biz", "livelong@prosper.edu.au"]
 
-    with closing(connect_db()) as db:
-        for username, password, gravataremail in zip(usernames, passwords, gravataremails):
-            user = User(username, password, gravataremail)
-            app.logger.debug("Adding {0} to the database.".format(user))
-            db.execute('insert into userPassword (username, password, gravataremail) values (?, ?, ?)',
-                       [user.username, user.password, user.gravataremail])
-        db.commit()
+    for username, password, gravataremail in zip(usernames, passwords, gravataremails):
+        user = User(username, password, gravataremail)
+        app.logger.debug("Adding {0} to the database.".format(user))
+        db.session.add(user)
+    db.session.commit()

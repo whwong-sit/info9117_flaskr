@@ -1,7 +1,10 @@
 from flask_bcrypt import generate_password_hash, check_password_hash
+from . import db
+from sqlalchemy.ext.hybrid import hybrid_property
+from datetime import datetime
 
 
-class User(object):
+class User(db.Model):
     """
     Defines a user with associated username, password and Gravatar email address.
 
@@ -14,6 +17,13 @@ class User(object):
     and the setter function is automatically called.
     """
 
+    __tablename__ = "users"
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    _username = db.Column(db.String(64), index=True, unique=True)
+    _password = db.Column(db.String(128))
+    _gravataremail = db.Column(db.String(120), index=True, unique=True)
+
     def __repr__(self):
         return '<User {0}>'.format(self.username)
 
@@ -24,7 +34,7 @@ class User(object):
 
     #### username
 
-    @property
+    @hybrid_property
     def username(self):
         """
         :return: The username
@@ -43,7 +53,7 @@ class User(object):
 
     #### password
 
-    @property
+    @hybrid_property
     def password(self):
         """
         Getter method for password.
@@ -64,7 +74,7 @@ class User(object):
 
     #### Gravatar email address
 
-    @property
+    @hybrid_property
     def gravataremail(self):
         """
         :return: The Gravatar email address
@@ -92,3 +102,30 @@ class User(object):
         :return: Boolean value; if true, then the plaintext and hash correspond, else false.
         """
         return check_password_hash(self.password, plaintext)
+
+class Entry(db.Model):
+
+    __tablename__ = "entries"
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    title = db.Column(db.String(128))
+    text = db.Column(db.Text)
+    username = db.Column(db.String(64), db.ForeignKey("users._username"))
+    # start_time = db.Column(db.DateTime)
+    # end_time = db.Column(db.DateTime)
+    start_time = db.Column(db.String(16))
+    end_time = db.Column(db.String(16))
+    # gravataremail = db.Column(db.String(120), db.ForeignKey("_gravataremail"))
+
+    def __repr__(self):
+        return "<Entry {0}>".format(self.title)
+
+    def __init__(self, title, text, start_time=None, end_time=None):
+        self.title = title
+        self.text = text
+        # TODO do some parsing of the incoming time data
+        if start_time is None or start_time is "":
+            self.start_time = datetime.now()
+        else:
+            self.start_time = start_time
+        self.end_time = end_time
