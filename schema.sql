@@ -1,6 +1,7 @@
 drop table if exists entries;
 drop table if exists userPassword;
 drop table if exists comments;
+drop table if exists userRoles;
 
 -- store entries
 create table entries (
@@ -9,7 +10,8 @@ create table entries (
   text text not null,
   username text not null,
   start_time timestamp default current_timestamp not null,
-  end_time timestamp
+  end_time timestamp,
+  task_des text
 );
 
 -- store user information
@@ -28,3 +30,10 @@ create table comments (
   comment_time timestamp default current_timestamp not null,
   foreign key (entry_id) references entries(id)
 );
+
+create table userRoles(
+role_id integer primary key autoincrement,
+user_role text,
+entry_id integer,
+foreign key (entry_id) references entries(id)
+)

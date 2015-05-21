@@ -47,9 +47,10 @@ def avatar(email, size=50):
     :param size: size of the image, deafaults to 50
     :return: url of gravatar
     """
-    gravatar_url = "http://www.gravatar.com/avatar/" + hashlib.md5(email.lower()).hexdigest()+"?"
-    gravatar_url += urllib.urlencode({'d':"monsterid",'s':str(size)})
+    gravatar_url = "http://www.gravatar.com/avatar/" + hashlib.md5(email.lower()).hexdigest() + "?"
+    gravatar_url += urllib.urlencode({'d': "monsterid", 's': str(size)})
     return gravatar_url
+
 
 @app.before_request
 def before_request():
@@ -70,30 +71,30 @@ def show_entries():
     into show_entries.html
     """
     cur = g.db.execute('select entries.title, entries.text, userPassword.username, '
-                       'entries.start_time, entries.end_time, userPassword.gravataremail, entries.id'
+                       'entries.start_time, entries.end_time, userPassword.gravataremail, entries.id, task_des'
                        ' from entries inner join userPassword on entries.username=userPassword.username'
                        ' order by entries.id desc')
     entries = [dict(title=row[0], text=row[1], username=row[2], start_time=row[3],
-                    end_time=row[4], gravataremail=row[5], avimg=avatar(row[5]), id=row[6]) for row in cur.fetchall()]
+                    end_time=row[4], gravataremail=row[5], avimg=avatar(row[5]), id=row[6], task_des=row[7]) for row in
+               cur.fetchall()]
     return render_template('show_entries.html', entries=entries)
 
 
 @app.route('/add', methods=['POST'])
 def add_entry():
-
     if not session.get('logged_in'):
         abort(401)
 
     if request.form['start_time'] == '':
         # use the default time (current time)
-        g.db.execute('insert into entries (title, text, username, end_time) values (?,?,?,?)',
-                     [request.form['title'], request.form['text'], session['username'], request.form['end_time']])
+        g.db.execute('insert into entries (title, text, username, task_des) values (?,?,?,?)',
+                     [request.form['title'], request.form['text'], session['username'], request.form['task_des']])
 
     else:
-        g.db.execute('insert into entries (title, text, username, start_time, end_time)'
+        g.db.execute('insert into entries (title, text, username, start_time, task_des)'
                      ' values (?,?,?,?,?)',
                      [request.form['title'], request.form['text'], session['username'], request.form['start_time'],
-                      request.form['end_time']])
+                      request.form['task_des']])
     g.db.commit()
 
     flash('New entry was successfully posted')
@@ -144,8 +145,16 @@ def show_comments(entry_id):
         'select title, text, username, start_time, end_time from entries where id = ' + entry_id + ' order by id desc')
     entries1 = [dict(title=row[0], text=row[1], username=row[2], start_time=row[3], end_time=row[4]) for row in
                 cur.fetchall()]
+
+    cur = g.db.execute(
+        'SELECT DISTINCT user_role from userRoles WHERE entry_id = '
+        + entry_id + ' ORDER BY role_id desc')
+    roles = [dict(user_role=row[0]) for row in cur.fetchall()]
+
     end_time_is_null = end_time_null_check(entry_id)
-    return render_template('show_comments.html', entries1=entries1, comments=comments, entry_id=entry_id, task_ended= not end_time_is_null)
+    #end_time_is_owner = end_time_owner_check(entry_id)
+    return render_template('show_comments.html', entries1=entries1, comments=comments, roles=roles, entry_id=entry_id,
+                           task_ended=not end_time_is_null)#, owner_acc=end_time_is_owner)
 
 
 @app.route('/<entry_id>/add_comments', methods=['POST'])
@@ -160,6 +169,18 @@ def add_comments(entry_id):
     flash('New comment was successfully posted')
     return redirect(url_for('show_comments', entry_id=entry_id))
 
+
+@app.route('/<entry_id>/add_roles', methods=['POST'])
+def add_roles(entry_id):
+    if not session.get('logged_in'):
+        abort(401)
+
+    g.db.execute('insert into userRoles (user_role, entry_id) values (?,?)',
+                 [request.form['user_role'], entry_id])
+
+    g.db.commit()
+    flash('New role was successfully posted')
+    return redirect(url_for('show_comments', entry_id=entry_id))
 
 @app.route('/<entry_id>/add_end_time', methods=['POST'])
 def add_end_time(entry_id):
@@ -181,6 +202,14 @@ def end_time_null_check(entry_id):  # need to debug
     cur = g.db.execute('select end_time from entries where id=' + entry_id)
     end_time_fill = [dict(end_time=row[0]) for row in cur.fetchall()]
     return end_time_fill[0]['end_time'] is None
+
+
+#@app.route('/<entry_id>/end_time_owner_check')
+#def end_time_owner_check(entry_id):  # need to debug
+#    cur = g.db.execute('select username from entries where id=' + entry_id)
+#    owner_fill = [dict(username=row[0]) for row in cur.fetchall()]
+#    if owner_fill == session['username']:
+#        return True
 
 
 @app.route('/logout')
@@ -269,7 +298,8 @@ if __name__ == '__main__':
 
         usernames = ["admin", "hari", "jim", "spock"]
         passwords = ["default", "seldon", "bean", "vulcan"]
-        gravataremails = ['daisy22229999@gmail.com', 'daisy200029@gmail.com', "jimbean@whisky.biz", "livelong@prosper.edu.au"]
+        gravataremails = ['daisy22229999@gmail.com', 'daisy200029@gmail.com', "jimbean@whisky.biz",
+                          "livelong@prosper.edu.au"]
 
         with closing(connect_db()) as db:
             for username, password, gravataremail in zip(usernames, passwords, gravataremails):
