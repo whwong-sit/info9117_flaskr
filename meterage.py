@@ -182,6 +182,18 @@ def add_roles(entry_id):
     flash('New role was successfully posted')
     return redirect(url_for('show_comments', entry_id=entry_id))
 
+@app.route('/<entry_id>/delete_roles', methods=['POST'])
+def delete_roles(entry_id):
+    if not session.get('logged_in'):
+        abort(401)
+
+    g.db.execute('delete from userRoles where entry_id='+entry_id)#+' and role_id = 1')# in (select MAX(role_id) from userRoles where entry_id=' +entry_id)
+
+    g.db.commit()
+    flash('Roles has been reset')
+    return redirect(url_for('show_comments', entry_id=entry_id))
+
+
 @app.route('/<entry_id>/add_end_time', methods=['POST'])
 def add_end_time(entry_id):
     if not session.get('logged_in'):
