@@ -1,0 +1,116 @@
+from behave import *
+import meterage
+from contextlib import closing
+
+
+#### GIVENS
+
+@given(u'user has registered for login')
+def step_impl(context):
+
+    context.execute_steps(u'''
+        Given the Admin is logged in
+		When the Admin goes to change password
+		And admin changes a user password
+		Then the password successfully changed
+    ''')
+@Given(u'the user goes to register page')
+def step_impl(context):
+    context.rv = context.app.get('/register')
+    assert context.rv.status_code != 404, "register page does not exist"
+	
+@Given(u'admin goes to approving page and approve new user ')
+def step_impl(context):
+	context.rv = context.app.get('/approve_new_user')
+	assert context.rv.status_code != 404, "approve_new_user page does not exist"
+	 
+	context.rv = context.app.post('/approve_new_user', data=dict(
+        username='daisy'
+		), follow_redirects=True)
+	assert 'Successfully grant access to user' in context.rv.get_data()
+
+
+	
+	
+#### WHENS
+@when(u'the user is logged in')
+def step_impl(context):
+    context.app.post('/login', data=dict(
+        username='daisy',
+        password='liu'
+    ), follow_redirects=True)
+
+	
+
+	
+@when(u'the user register for login')
+def step_impl(context):
+    """
+    POST a new password to the change_password page for the user hari
+    """
+    context.rv = context.app.post('/register', data=dict(
+        username='daisy',
+        password='liu',
+        confirm_password='liu',
+		email='liu@gmail.com'
+		
+    ), follow_redirects=True)
+
+    assert 'Successfully added new user' in context.rv.get_data()
+	
+
+@when(u'the Admin goes to adding_new_user page')
+def step_impl(context):
+    context.rv = context.app.get('/add_new_user')
+    assert context.rv.status_code != 404, "add_new_user page does not exist"
+	
+
+	
+@when(u'the Admin add new user for login')
+def step_impl(context):
+    """
+    POST a new password to the change_password page for the user hari
+    """
+    context.rv = context.app.post('/add_new_user', data=dict(
+        username='Edword',
+        password='kaho',
+        confirm_password='kaho',
+		email='kaho@gmail.com'
+		
+    ), follow_redirects=True)
+
+    assert 'Successfully added new user' in context.rv.get_data()
+
+	
+####THENS
+
+@then(u'the user login successfully ')
+def step_impl(context):
+
+    # logout of Admin account
+    context.app.get('/logout')
+
+    # attempt a login as user 'hari'
+    context.app.post('/login', data=dict(
+        username='daisy',
+        password='liu'
+    ), follow_redirects=True)
+
+    with context.app.session_transaction() as sess:
+        assert 'logged_in' not in sess.keys(), "The user is able to log in"
+
+
+@then(u'the user login fails')
+def step_impl(context):
+
+    # logout of Admin account
+    context.app.get('/logout')
+
+    # attempt a login as user 'hari'
+    context.app.post('/login', data=dict(
+        username='daisy',
+        password='liu'
+    ), follow_redirects=True)
+
+    with context.app.session_transaction() as sess:
+        assert 'logged_in' not in sess.keys(), "The user is able to log in"

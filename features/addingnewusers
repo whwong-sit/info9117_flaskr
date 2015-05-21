@@ -1,0 +1,24 @@
+Feature: As an Administrator, I want the ability to add new users or for users to add themselves and only really be added upon my approval
+
+  Scenario: User register for login
+    Given the user goes to register page
+    When the user register for login
+    Then the user login successfully
+
+  Scenario: Admin add new user
+    Given the Admin is logged in
+	When the Admin goes to adding_new_user page
+	And the Admin add new user for login
+	Then adding new user performed successfully
+
+  Scenario:user register with admin's approval
+    Given user has registered for login
+	Given admin goes to approving page and approve new user
+	When user is logged in
+	Then the user login successfully
+	
+
+  Scenario:user register without admin's approval
+    Given user has registered for login
+	When the user is logged in
+	Then the user login fails
