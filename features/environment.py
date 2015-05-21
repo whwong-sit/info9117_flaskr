@@ -1,11 +1,10 @@
 import os
-import meterage
 import tempfile
 from contextlib import closing
 
-from flask_bcrypt import check_password_hash
+import meterage
+from meterage.models import User
 
-from models import User
 
 # These run before and after every step.
 def before_step(context, step):

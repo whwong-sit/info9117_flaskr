@@ -1,11 +1,13 @@
 import os
-import meterage
 import unittest
 import tempfile
 from contextlib import closing
-from models import User
-from flask_bcrypt import generate_password_hash
 from time import gmtime, strftime
+
+from flask_bcrypt import generate_password_hash
+
+import meterage
+from meterage import User, avatar
 
 
 class MeterageBaseTestClass(unittest.TestCase):
@@ -299,6 +301,7 @@ class TimeAndCommentTests(MeterageBaseTestClass):
         self.assertIn('by admin', rv.get_data())
         self.assertIn('End at: ' + curr_time, rv.get_data())
 
+
 class GravatarTests(MeterageBaseTestClass):
 
     def test_avatar(self):
@@ -306,7 +309,7 @@ class GravatarTests(MeterageBaseTestClass):
         Test that meterage.avatar() method does return the correct Gravatar
         """
         known_url = "http://www.gravatar.com/avatar/bf6c2e089dbd27ec1868027525bc42fe?s=50&d=monsterid"
-        self.assertEqual(meterage.avatar("daisy22229999@gmail.com"), known_url, "Gravatar URL produced is incorrect")
+        self.assertEqual(avatar("daisy22229999@gmail.com"), known_url, "Gravatar URL produced is incorrect")
 
     def test_gravatar_shown(self):
         """

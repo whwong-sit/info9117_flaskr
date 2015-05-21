@@ -1,55 +1,8 @@
-import urllib
-import hashlib
-from contextlib import closing
-from sqlite3 import dbapi2 as sqlite3
-from flask import Flask, request, session, g, redirect, url_for, \
-    abort, render_template, flash
+from flask import request, session, g, redirect, url_for, abort, render_template, flash
 from jinja2 import Markup
-from os.path import isfile
 from flask_bcrypt import check_password_hash
-from models import User
-
-import config
-
-# create application
-app = Flask(__name__, instance_relative_config=True)
-app.config.from_object(config)
-app.config.from_pyfile('config.py')
-app.config.from_envvar('FLASKR_SETTINGS', silent=True)
-
-
-def connect_db():
-    """
-    Make a connection to the database
-
-    database specified in the config.
-    """
-    return sqlite3.connect(app.config['DATABASE'])
-
-
-def init_db():
-    """
-    For initialising the database using schemal.sql.
-
-    This is usually called manually.
-    """
-    with closing(connect_db()) as db:
-        with app.open_resource('schema.sql', mode='r') as f:
-            db.cursor().executescript(f.read())
-        db.commit()
-
-
-def avatar(email, size=50):
-    """
-    generate gravatar url from email
-
-    :param email: email address for gravatar
-    :param size: size of the image, deafaults to 50
-    :return: url of gravatar
-    """
-    gravatar_url = "http://www.gravatar.com/avatar/" + hashlib.md5(email.lower()).hexdigest()+"?"
-    gravatar_url += urllib.urlencode({'d':"monsterid",'s':str(size)})
-    return gravatar_url
+from . import *
+from . import User
 
 @app.before_request
 def before_request():
@@ -259,24 +212,4 @@ def newline_filter(s):
     # Markup() is used to prevent '<' and '>' symbols from being interpreted as less-than or greater-than symbols
     return Markup(s)
 
-
-if __name__ == '__main__':
-    # create and populate the database if it's not already there.
-    if not isfile(str(app.config['DATABASE'])):
-        app.logger.debug('creating database')
-        init_db()
-
-        usernames = ["admin", "hari", "jim", "spock"]
-        passwords = ["default", "seldon", "bean", "vulcan"]
-        gravataremails = ['daisy22229999@gmail.com', 'daisy200029@gmail.com', "jimbean@whisky.biz", "livelong@prosper.edu.au"]
-
-        with closing(connect_db()) as db:
-            for username, password, gravataremail in zip(usernames, passwords, gravataremails):
-                user = User(username, password, gravataremail)
-                app.logger.debug("Adding user {0} to the database.".format(user.username))
-                db.execute('insert into userPassword (username, password, gravataremail) values (?, ?, ?)',
-                           [user.username, user.password, user.gravataremail])
-            db.commit()
-
-    app.run()
 

@@ -1,15 +1,7 @@
+from contextlib import closing
 from behave import *
 import meterage
-from contextlib import closing
-from sqlite3 import dbapi2 as sqlite3
-from flask import Flask, request, session, g, redirect, url_for, \
-    abort, render_template, flash
-from jinja2 import Markup
-from os.path import isfile
 
-from flask_bcrypt import check_password_hash
-
-from models import User
 
 # GIVENS
 
@@ -19,7 +11,7 @@ def step_impl(context):
     with closing(meterage.connect_db()) as db:
         cur = db.execute('select username, password from userPassword')
         context.hasheduser = [dict(username=row[0], password=row[1]) for row in cur.fetchall()]
-        assert context.hasheduser[0]['username']=='admin', print (context.hasheduser)
+        assert context.hasheduser[0]['username']=='admin', context.hasheduser
 	
 @given(u'the admin is login')
 def step_impl(context):
@@ -43,7 +35,7 @@ def step_impl(context):
     with closing(meterage.connect_db()) as db:
         cur = db.execute('select username, password from userPassword')
         context.hasheduser = [dict(username=row[0], password=row[1]) for row in cur.fetchall()]
-        assert context.hasheduser[0]['username']=='admin', print (context.hasheduser)
+        assert context.hasheduser[0]['username']=='admin', context.hasheduser
 
 # WHENS
 

@@ -14,6 +14,9 @@ class User(object):
     and the setter function is automatically called.
     """
 
+    def __repr__(self):
+        return '<User {0}>'.format(self.username)
+
     def __init__(self, username, password, gravataremail):
         self.username = username
         self.password = password
