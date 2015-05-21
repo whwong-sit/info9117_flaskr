@@ -118,7 +118,7 @@ def step_impl(context):
    with context.app.session_transaction() as sess:
       assert 'logged_in' not in sess.keys(), "The user is able to log in"
 				
-@then(u'Admin adding new user performed successfully')
+@then(u'adding new user performed successfully')
 def step_impl(context):
   assert 'Successfully added new user' in context.rv.get_data()
 

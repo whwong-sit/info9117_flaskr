@@ -9,7 +9,7 @@ Feature: As an Administrator, I want the ability to add new users or for users t
     Given the Admin is logged in
 	When the Admin goes to adding_new_user page
 	And the Admin add new user for login
-	Then Admin adding new user performed successfully
+	Then adding new user performed successfully
 
   Scenario:user login and the account with admins approval
 	Given admin has approved a new user
