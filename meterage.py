@@ -86,14 +86,13 @@ def add_entry():
 
     if request.form['start_time'] == '':
         # use the default time (current time)
-        g.db.execute('insert into entries (title, text, username, end_time) values (?,?,?,?)',
-                     [request.form['title'], request.form['text'], session['username'], request.form['end_time']])
+        g.db.execute('insert into entries (title, text, username) values (?,?,?)',
+                     [request.form['title'], request.form['text'], session['username']])
 
     else:
-        g.db.execute('insert into entries (title, text, username, start_time, end_time)'
-                     ' values (?,?,?,?,?)',
-                     [request.form['title'], request.form['text'], session['username'], request.form['start_time'],
-                      request.form['end_time']])
+        g.db.execute('insert into entries (title, text, username, start_time)'
+                     ' values (?,?,?,?)',
+                     [request.form['title'], request.form['text'], session['username'], request.form['start_time']])
     g.db.commit()
 
     flash('New entry was successfully posted')
@@ -278,5 +277,4 @@ if __name__ == '__main__':
                            [user.username, user.password, user.gravataremail])
             db.commit()
 
-    app.run()
-
+    app.run(host='0.0.0.0',port=5000)
