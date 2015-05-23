@@ -3,7 +3,6 @@ from . import db
 from sqlalchemy.ext.hybrid import hybrid_property
 from datetime import datetime
 
-
 class User(db.Model):
     """
     Defines a user with associated username, password and Gravatar email address.
@@ -32,8 +31,6 @@ class User(db.Model):
         self.password = password
         self.gravataremail = gravataremail
 
-    #### username
-
     @hybrid_property
     def username(self):
         """
@@ -50,8 +47,6 @@ class User(db.Model):
         the _username field so it can be returned in the getter.
         """
         self._username = newname
-
-    #### password
 
     @hybrid_property
     def password(self):
@@ -72,8 +67,6 @@ class User(db.Model):
         """
         self._password = generate_password_hash(plaintext)
 
-    #### Gravatar email address
-
     @hybrid_property
     def gravataremail(self):
         """
@@ -91,8 +84,6 @@ class User(db.Model):
         """
         self._gravataremail = newemail
 
-    #### check password
-
     def check_password(self, plaintext):
         """
         Check that a plaintext password is equal to the hashed password.
@@ -107,22 +98,26 @@ class Entry(db.Model):
 
     __tablename__ = "entries"
 
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    author = db.relationship('User', backref='entries', lazy='joined')
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+
+    username = db.Column(db.String(64))
     title = db.Column(db.String(128))
     text = db.Column(db.Text)
-    username = db.Column(db.String(64), db.ForeignKey("users._username"))
-    # start_time = db.Column(db.DateTime)
-    # end_time = db.Column(db.DateTime)
     start_time = db.Column(db.String(16))
     end_time = db.Column(db.String(16))
-    # gravataremail = db.Column(db.String(120), db.ForeignKey("_gravataremail"))
+    # start_time = db.Column(db.DateTime)
+    # end_time = db.Column(db.DateTime)
 
     def __repr__(self):
         return "<Entry {0}>".format(self.title)
 
-    def __init__(self, title, text, start_time=None, end_time=None):
+    def __init__(self, title, text, username, uid, start_time=None, end_time=None):
         self.title = title
         self.text = text
+        self.user_id = uid
+        self.username = username
         # TODO do some parsing of the incoming time data
         if start_time is None or start_time is "":
             self.start_time = datetime.now()

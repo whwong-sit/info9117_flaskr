@@ -1,19 +1,7 @@
-from flask import request, session, g, redirect, url_for, abort, render_template, flash
+from flask import request, g, redirect, url_for, abort, render_template, flash
 from jinja2 import Markup
 from flask_bcrypt import check_password_hash
 from . import *
-
-@app.before_request
-def before_request():
-    g.db = connect_db()
-
-
-@app.teardown_request
-def teardown_request(exception):
-    database = getattr(g, 'db', None)
-    if database is not None:
-        database.close()
-
 
 @app.route('/')
 def show_entries():
@@ -21,14 +9,7 @@ def show_entries():
     Get all the information required in show_entries.html from the database and pipe it
     into show_entries.html
     """
-    entries = Entry.query.order_by(-Entry.id).all()
-    # cur = g.db.execute('select entries.title, entries.text, userPassword.username, '
-    #                    'entries.start_time, entries.end_time, userPassword.gravataremail, entries.id'
-    #                    ' from entries inner join userPassword on entries.username=userPassword.username'
-    #                    ' order by entries.id desc')
-    # entries = [dict(title=row[0], text=row[1], username=row[2], start_time=row[3],
-    #                 end_time=row[4], gravataremail=row[5], avimg=avatar(row[5]), id=row[6]) for row in cur.fetchall()]
-    return render_template('show_entries.html', entries=entries)
+    return render_template('show_entries.html', entries=Entry.query.order_by(-Entry.id).all())
 
 
 @app.route('/add', methods=['POST'])
@@ -39,12 +20,13 @@ def add_entry():
 
     if request.form['start_time'] == '':
         # use the default time (current time)
-        db.session.add(Entry(request.form['title'], request.form['text'], None, request.form['end_time']))
-        db.session.commit()
-    else:
-        db.session.add(Entry(request.form['title'], request.form['text'], request.form['start_time'],
+        db.session.add(Entry(request.form['title'], request.form['text'], session['username'], session['uid'], None,
                              request.form['end_time']))
-        db.session.commit()
+
+    else:
+        db.session.add(Entry(request.form['title'], request.form['text'], session['username'], session['uid'],
+                             request.form['start_time'], request.form['end_time']))
+    db.session.commit()
 
     flash('New entry was successfully posted')
     return redirect(url_for('show_entries'))
@@ -70,6 +52,7 @@ def login():
                 session['logged_in'] = True
                 session['username'] = user.username
                 session['gravataremail'] = user.gravataremail
+                session['uid'] = user.id
                 flash('You were logged in')
                 return redirect(url_for('show_entries'))
         else:

@@ -1,6 +1,6 @@
-__all__ = ['app', 'connect_db', 'User', 'avatar', 'db', 'Entry']
+__all__ = ['app', 'connect_db', 'User', 'avatar', 'db', 'Entry', 'session']
 
-from flask import Flask
+from flask import Flask, session
 from os.path import isfile, abspath, dirname, join
 import urllib
 import hashlib
