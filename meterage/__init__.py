@@ -1,9 +1,7 @@
-__all__ = ['app', 'connect_db', 'User', 'avatar', 'db', 'Entry', 'session', 'Comment']
+__all__ = ['app', 'connect_db', 'User', 'db', 'Entry', 'session', 'Comment']
 
 from flask import Flask, session
 from os.path import isfile, abspath, dirname, join
-import urllib
-import hashlib
 from flask_sqlalchemy import SQLAlchemy
 import config
 
@@ -30,17 +28,17 @@ def connect_db():
     # TODO redo this
     # return sqlite3.connect(app.config['DATABASE'])
 
-def avatar(email, size=50):
-    """
-    generate gravatar url from email
-
-    :param email: email address for gravatar
-    :param size: size of the image, deafaults to 50
-    :return: url of gravatar
-    """
-    gravatar_url = "http://www.gravatar.com/avatar/" + hashlib.md5(email.lower()).hexdigest()+"?"
-    gravatar_url += urllib.urlencode({'d':"monsterid",'s':str(size)})
-    return gravatar_url
+# def avatar(email, size=50):
+#     """
+#     generate gravatar url from email
+#
+#     :param email: email address for gravatar
+#     :param size: size of the image, deafaults to 50
+#     :return: url of gravatar
+#     """
+#     gravatar_url = "http://www.gravatar.com/avatar/" + hashlib.md5(email.lower()).hexdigest()+"?"
+#     gravatar_url += urllib.urlencode({'d':"monsterid",'s':str(size)})
+#     return gravatar_url
 
 # imports; these seem to have to be *here*
 from models import User, Entry, Comment

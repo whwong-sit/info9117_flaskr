@@ -3,6 +3,8 @@ from jinja2 import Markup
 from flask_bcrypt import check_password_hash
 from . import *
 from datetime import datetime
+import hashlib, urllib
+
 
 @app.route('/')
 def show_entries():
@@ -10,7 +12,6 @@ def show_entries():
     Get all the information required in show_entries.html from the database and pipe it
     into show_entries.html
     """
-    # TODO get Gravatars working
     return render_template('show_entries.html', entries=Entry.query.order_by(-Entry.id).all())
 
 
@@ -174,3 +175,9 @@ def newline_filter(s):
     s = s.replace("\n", '<br />')
     # Markup() is used to prevent '<' and '>' symbols from being interpreted as less-than or greater-than symbols
     return Markup(s)
+
+@app.template_filter('gravataremail')
+def gravatar_filter(email, size=50):
+    gravatar_url = "http://www.gravatar.com/avatar/" + hashlib.md5(email.lower()).hexdigest()+"?"
+    gravatar_url += urllib.urlencode({'d': "monsterid", 's': str(size)})
+    return gravatar_url
