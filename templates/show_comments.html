@@ -11,13 +11,36 @@
     </h3> Started at: {{ entry.start_time }} | </span></h3> End at: {{ entry.end_time }}
     {% endfor%}
 </ul>
-
-
+{% if not task_ended %}
 <form action="{{ url_for('add_end_time', entry_id=entry_id) }}" method=post class=add_end_time>
     </dl>
     <dt>Press to end task:
         <input type=submit value=EndTask!>
 </form>
+{% endif %}
+
+<form action="{{ url_for('add_roles', entry_id=entry_id) }}" method=post class=add_roles>
+
+        <dt>Roles:
+        <dd><textarea name=user_role rows=1 cols=15></textarea>
+
+        <dd><input type=submit value=Add>
+
+</form>
+<form action="{{ url_for('delete_roles', entry_id=entry_id) }}" method=post class=delete_roles>
+        <dd><input type=submit value=Reset>
+
+</form>
+
+<div style="height:50; width:560px; background:white; word-wrap: break-word; word-break: normal;">
+    <ul class=roles>
+        {% for role in roles %}
+        <li>{{ role.user_role }}</li>
+        {% else %}
+        <li><em>No Role Defined</em></li>
+        {% endfor %}
+    </ul>
+</div>
 
 <form action="{{ url_for('add_comments', entry_id=entry_id) }}" method=post class=add_comments>
     <dl>
@@ -29,12 +52,14 @@
 </form>
 
 {% endif %}
+
 <br>
 <div style="height:50; width:560px; background:white; word-wrap: break-word; word-break: normal;">
 
     <ul class=comments>
         {% for comment in comments %}
-        <li>{{ comment.comment_input }} <span class=user> by {{ comment.username }} </span></li>
+        <li>{{ comment.comment_input }}</li>
+        <li>Commented at: {{ comment.comment_time }}<span class=user> by {{ comment.username }} </span></li>
         {% else %}
         <li><em>No Comment Yet</em></li>
         {% endfor %}

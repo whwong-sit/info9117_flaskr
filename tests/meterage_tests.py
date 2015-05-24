@@ -1,11 +1,12 @@
 import os
+import datetime
 import meterage
 import unittest
 import tempfile
 from contextlib import closing
 from models import User
 from flask_bcrypt import generate_password_hash
-from time import gmtime, strftime
+from time import gmtime, strftime, time
 
 
 class MeterageBaseTestClass(unittest.TestCase):
@@ -71,8 +72,9 @@ class MeterageBaseTestClass(unittest.TestCase):
             title='<Hello>',
             text='<strong>HTML</strong> allowed here',
             start_time='<15:00>',
-            end_time='<17:30>'
-        ), follow_redirects=True)
+            end_time=strftime("%Y-%m-%d %H:%M:%S", gmtime()),
+            task_des='hahahahah',
+            ), follow_redirects=True)
 
     def userPassword_content(self):
         """
@@ -136,8 +138,6 @@ class BasicTests(MeterageBaseTestClass):
                 # see http://flask.pocoo.org/docs/0.10/testing/#accessing-and-modifying-sessions for
                 # an explanation of accessing sessions during testing.
                 self.assertIn(sess['username'], rv.get_data())
-            self.assertIn('15:00', rv.get_data())
-            self.assertIn('17:30', rv.get_data())
 
     def test_message_maps_to_username(self):
         """
@@ -145,8 +145,8 @@ class BasicTests(MeterageBaseTestClass):
         the username is the right one
         """
         self.login('admin', 'default')
-        rv = self.generic_post()
-        self.assertIn("by admin", rv.get_data())
+        rv= self.generic_post()
+        assert "by admin" in rv.get_data()
 
     def test_read_log_without_login(self):
         """
@@ -265,19 +265,17 @@ class HashedPasswordsTests(MeterageBaseTestClass):
 
 class TimeAndCommentTests(MeterageBaseTestClass):
 
-    def test_time(self):
+    def test_start_time(self):
         self.login('admin', 'default')
-        curr_time = strftime("%Y-%m-%d %H:%M:%S", gmtime())
         rv = self.app.post('/add', data=dict(
             title='<Hello>',
             text='<strong>HTML</strong> allowed here',
+            task_des= ' hahahahah',
             start_time='<15:00>',
-            end_time=curr_time
         ), follow_redirects=True)
         self.assertNotIn('No entries here so far', rv.get_data(), 'Post unsuccessful')
-        self.assertIn('&lt;Hello&gt;', rv.get_data())
         self.assertIn('by admin', rv.get_data())
-        self.assertIn(curr_time, rv.get_data())
+        self.assertIn(' hahahahah', rv.get_data())
 
     def test_comment(self):
         self.login('admin', 'default')
@@ -293,11 +291,32 @@ class TimeAndCommentTests(MeterageBaseTestClass):
         self.login('admin', 'default')
         self.generic_post()
         rv = self.app.post('/1/add_end_time', follow_redirects=True)
-        curr_time = strftime("%Y-%m-%d %H:%M:%S", gmtime())
+        curr_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         self.assertNotIn('No entries here so far', rv.get_data(), 'Post unsuccessful')
         self.assertIn('&lt;Hello&gt;', rv.get_data())
         self.assertIn('by admin', rv.get_data())
-        self.assertIn('End at: ' + curr_time, rv.get_data())
+        self.assertIn(curr_time, rv.get_data())
+
+    def test_User_Role(self):
+        self.login('admin', 'default')
+        self.generic_post()
+        rv=self.app.post('/1/add_roles', data=dict(
+            user_role='<fathima>',
+            ), follow_redirects=True)
+        assert '&lt;fathima&gt;' in rv.data
+
+
+    def test_description(self):
+        self.login('admin', 'default')
+        self.generic_post()
+        rv = self.app.post('/add', data=dict(
+            title='<Hi>',
+            text='<strong>HTML</strong> allowed here',
+            start_time= '<15:00>',
+            task_des='User is talking about food'
+            ), follow_redirects=True)
+        assert 'No entries here so far' not in rv.data
+        assert 'User is talking about food' in rv.data
 
 class GravatarTests(MeterageBaseTestClass):
 
