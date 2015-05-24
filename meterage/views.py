@@ -2,7 +2,7 @@ from flask import request, g, redirect, url_for, abort, render_template, flash
 from jinja2 import Markup
 from flask_bcrypt import check_password_hash
 from . import *
-import datetime
+from datetime import datetime
 
 @app.route('/')
 def show_entries():
@@ -24,7 +24,6 @@ def add_entry():
         # use the default time (current time)
         db.session.add(Entry(request.form['title'], request.form['text'], session['username'], session['uid'], None,
                              request.form['end_time']))
-
     else:
         db.session.add(Entry(request.form['title'], request.form['text'], session['username'], session['uid'],
                              request.form['start_time'], request.form['end_time']))
@@ -65,16 +64,7 @@ def login():
 
 @app.route('/<entry_id>/show_comments')
 def show_comments(entry_id):
-    # cur = g.db.execute(
-    #     'SELECT DISTINCT comment_input, comments.username FROM comments, entries WHERE comments.entry_id = '
-    #     + entry_id + ' ORDER BY comment_id desc')
-    # comments = [dict(comment_input=row[0], username=row[1]) for row in cur.fetchall()]
     comments = Comment.query.filter_by(entry_id=entry_id).order_by(-Comment.id).all()
-
-    # cur = g.db.execute(
-    #     'select title, text, username, start_time, end_time from entries where id = ' + entry_id + ' order by id desc')
-    # entries = [dict(title=row[0], text=row[1], username=row[2], start_time=row[3], end_time=row[4]) for row in
-    #             cur.fetchall()]
     entries = Entry.query.order_by(-Entry.id).all()
     return render_template('show_comments.html', entries1=entries, comments=comments, entry_id=entry_id)
 
@@ -84,11 +74,7 @@ def add_comments(entry_id):
         abort(401)
 
     db.session.add(Comment(session['username'], request.form['comment_input'], entry_id))
-    # g.db.execute('insert into comments (comment_input, entry_id, username) values (?,?,?)',
-    #              [request.form['comment_input'], entry_id, session['username']])
     db.session.commit()
-
-    # g.db.commit()
     flash('New comment was successfully posted')
     return redirect(url_for('show_comments', entry_id=entry_id))
 
@@ -98,9 +84,9 @@ def add_end_time(entry_id):
     if not session.get('logged_in'):
         abort(401)
     # if end_time_null_check is True:
-    Entry.query.filter_by(Entry.id == entry_id).update({"end_time": datetime.now()}, synchronize_session=False)
-    # g.db.execute('UPDATE entries SET end_time=CURRENT_TIMESTAMP WHERE entries.id=' + entry_id + '')
-    # g.db.commit()
+    entry = Entry.query.filter_by(id=entry_id).first()
+    # TOOO fix formatting of time (strftime)
+    entry.end_time=datetime.now()
     db.session.commit()
     flash('TASK ENDED')
     return redirect(url_for('show_comments', entry_id=entry_id))
@@ -111,9 +97,8 @@ def add_end_time(entry_id):
 
 @app.route('/<entry_id>/end_time_null_check')
 def end_time_null_check(entry_id):  # need to debug
-    cur = g.db.execute('select end_time from entries where id=' + entry_id)
-    end_time_fill = [dict(end_time=row[0]) for row in cur.fetchall()]
-    if end_time_fill is None:
+    entry = Entry.query.filter_by(id=entry_id).get()
+    if entry.endtime is None:
         return True
     else:
         return False
@@ -144,13 +129,10 @@ def manage_details(username):
             # TODO Check that username is unique
             flash('Username must not be empty')
         else:
-            g.db.execute('update userPassword set gravataremail=?, username=? where username =?',
-                         [request.form['gravataremail'], request.form['username'], session['username']])
-            g.db.execute('update entries set username=? where username=?',
-                         [request.form['username'], session['username']])
-            g.db.commit()
-            session['username'] = request.form['username']
-            session['gravataremail'] = request.form['gravataremail']
+            user = User.query.get(session['uid'])
+            user.username, user.gravataremail = request.form['username'], request.form['gravataremail']
+            db.session.commit()
+            session['username'], session['gravataremail'] = request.form['username'], request.form['gravataremail']
             flash('Successfully changed user details')
     return render_template('manage_details.html')
 
@@ -168,21 +150,18 @@ def change_password():
         # If someone tries to access the page without being logged in.
         abort(401)
     if request.method == 'POST':
-        cursor = g.db.execute('select username from userPassword where username=?', [request.form['username']])
-        row = cursor.fetchone()
+        
+        user = User.query.filter_by(_username=request.form['username']).first()
 
-        if row is None:
+        if user is None:
             error = 'User does not exist'
         elif request.form['password'] is None or request.form['password'] == '':
             error = 'Empty password'
         elif request.form['password'] != request.form['confirm_password']:
             error = 'Please enter same password twice'
         else:
-            # create the User object and add to the database
-            user = User(request.form['username'], request.form['password'], session['gravataremail'])
-            g.db.execute('update userPassword set password=? where username =?',
-                         [user.password, user.username])
-            g.db.commit()
+            user.password = request.form['password']
+            db.session.commit()
             flash('Successfully changed user password')
             return render_template('change_password.html', success='Successfully changed password')
 
