@@ -1,4 +1,4 @@
-__all__ = ['app', 'connect_db', 'User', 'db', 'Entry', 'session', 'Comment', 'time']
+__all__ = ['app', 'User', 'db', 'Entry', 'session', 'Comment', 'time']
 
 from flask import Flask, session
 from os.path import isfile, abspath, dirname, join

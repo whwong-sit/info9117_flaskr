@@ -1,6 +1,7 @@
 from meterage import basedir
 import os.path
 
+DATABASE = os.path.join(basedir, "db", "") + "meterage.db"
 SQLALCHEMY_DATABASE_URI = "sqlite:///" + os.path.join(basedir, "db", "") + "meterage.db"
 SQLALCHEMY_ECHO = True
 
