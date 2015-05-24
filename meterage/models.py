@@ -2,6 +2,7 @@ from flask_bcrypt import generate_password_hash, check_password_hash
 from . import db
 from sqlalchemy.ext.hybrid import hybrid_property
 from datetime import datetime
+import time
 
 class User(db.Model):
     """
@@ -72,7 +73,6 @@ class Entry(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     author = db.relationship('User', backref='entries', lazy='joined')
 
-    username = db.Column(db.String(64))
     title = db.Column(db.String(128))
     text = db.Column(db.Text)
     start_time = db.Column(db.String(16))
@@ -84,14 +84,13 @@ class Entry(db.Model):
     def __repr__(self):
         return "<Entry {0}>".format(self.title)
 
-    def __init__(self, title, text, username, uid, start_time=None, end_time=None):
+    def __init__(self, title, text, uid, start_time=None, end_time=None):
         self.title = title
         self.text = text
         self.user_id = uid
-        self.username = username
         # TODO do some parsing of the incoming time data
         if start_time is None or start_time is "":
-            self.start_time = datetime.now()
+            self.start_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
         else:
             self.start_time = start_time
         self.end_time = end_time
@@ -102,15 +101,17 @@ class Comment(db.Model):
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     entry_id = db.Column(db.Integer, db.ForeignKey('entries.id'))
-    entry = db.relationship('Entry', backref='comments', lazy='joined')
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
-    username = db.Column(db.String(64))
+    entry = db.relationship('Entry', backref='comments', lazy='joined')
+    author = db.relationship('User', backref='comments', lazy='joined')
+
     text = db.Column(db.Text)
 
     def __repr__(self):
-        return '<Comment by {0}>'.format(self.username)
+        return '<Comment by {0}>'.format(self.author)
 
-    def __init__(self, username, text, entry_id):
-        self.username = username
+    def __init__(self, user_id, text, entry_id):
+        self.user_id = user_id
         self.text = text
         self.entry_id = entry_id

@@ -1,9 +1,11 @@
-from flask import request, g, redirect, url_for, abort, render_template, flash
+import hashlib
+import urllib
+
+from flask import request, redirect, url_for, abort, render_template, flash
 from jinja2 import Markup
 from flask_bcrypt import check_password_hash
+
 from . import *
-from datetime import datetime
-import hashlib, urllib
 
 
 @app.route('/')
@@ -23,11 +25,11 @@ def add_entry():
 
     if request.form['start_time'] == '':
         # use the default time (current time)
-        db.session.add(Entry(request.form['title'], request.form['text'], session['username'], session['uid'], None,
+        db.session.add(Entry(request.form['title'], request.form['text'], session['uid'], None,
                              request.form['end_time']))
     else:
-        db.session.add(Entry(request.form['title'], request.form['text'], session['username'], session['uid'],
-                             request.form['start_time'], request.form['end_time']))
+        db.session.add(Entry(request.form['title'], request.form['text'], session['uid'], request.form['start_time'],
+                             request.form['end_time']))
     db.session.commit()
 
     flash('New entry was successfully posted')
@@ -66,15 +68,15 @@ def login():
 @app.route('/<entry_id>/show_comments')
 def show_comments(entry_id):
     comments = Comment.query.filter_by(entry_id=entry_id).order_by(-Comment.id).all()
-    entries = Entry.query.order_by(-Entry.id).all()
-    return render_template('show_comments.html', entries1=entries, comments=comments, entry_id=entry_id)
+    entry = Entry.query.get(entry_id)
+    return render_template('show_comments.html', entry=entry, comments=comments, entry_id=entry_id)
 
 @app.route('/<entry_id>/add_comments', methods=['POST'])
 def add_comments(entry_id):
     if not session.get('logged_in'):
         abort(401)
 
-    db.session.add(Comment(session['username'], request.form['comment_input'], entry_id))
+    db.session.add(Comment(session['uid'], request.form['comment_input'], entry_id))
     db.session.commit()
     flash('New comment was successfully posted')
     return redirect(url_for('show_comments', entry_id=entry_id))
@@ -87,7 +89,7 @@ def add_end_time(entry_id):
     # if end_time_null_check is True:
     entry = Entry.query.filter_by(id=entry_id).first()
     # TOOO fix formatting of time (strftime)
-    entry.end_time=datetime.now()
+    entry.end_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
     db.session.commit()
     flash('TASK ENDED')
     return redirect(url_for('show_comments', entry_id=entry_id))

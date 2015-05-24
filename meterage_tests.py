@@ -333,16 +333,16 @@ class GravatarTests(MeterageBaseTestClass):
 class UserWebInterfaceTests(MeterageBaseTestClass):
 
     def test_web_interface_accessible(self):
-        pass
+        raise NotImplementedError
 
     def test_can_change_username(self):
-        pass
+        raise NotImplementedError
 
     def test_can_change_gravatar_email(self):
-        pass
+        raise NotImplementedError
 
     def test_username_unique(self):
-        pass
+        raise NotImplementedError
 
 if __name__ == '__main__':
     unittest.main()

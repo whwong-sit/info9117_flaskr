@@ -4,12 +4,10 @@
 {% if session.logged_in %}
 
 <ul class=entries>
-    {% for entry in entries1 %}
     <li><h2><a href=" {{ url_for('show_entries') }}">{{ entry.title }}</a><span
-            class=user> by {{ entry.username }} </span></h2> {{ entry.text|safe }}
+            class=user> by {{ entry.author.username }} </span></h2> {{ entry.text | newlines }}
     </li>
     </h3> Started at: {{ entry.start_time }} | </span></h3> End at: {{ entry.end_time }}
-    {% endfor%}
 </ul>
 
 
@@ -34,7 +32,7 @@
 
     <ul class=comments>
         {% for comment in comments %}
-        <li>{{ comment.text }} <span class=user> by {{ comment.username }} </span></li>
+        <li>{{ comment.text }} <span class=user> by {{ comment.author.username }} </span></li>
         {% else %}
         <li><em>No Comment Yet</em></li>
         {% endfor %}
