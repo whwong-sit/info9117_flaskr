@@ -7,11 +7,9 @@ class User(db.Model):
     """
     Defines a user with associated username, password and Gravatar email address.
 
-    I am treating _username, _password and _gravataremail as private fields of the class, but this is purely an
-    implementation detail.  You simply need to make an assignment to a User object's "password"
-    field like so:
+    You simply need to make an assignment to a User object's "password" field like so:
 
-    user.password = "newpassword"
+        user.password = "newpassword"
 
     and the setter function is automatically called.
     """
@@ -20,9 +18,9 @@ class User(db.Model):
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     
-    _username = db.Column(db.String(64), index=True, unique=True)
-    _password = db.Column(db.String(128))
-    _gravataremail = db.Column(db.String(120), index=True, unique=True)
+    username = db.Column(db.String(64), index=True, unique=True)
+    __password = db.Column(db.String(128))
+    gravataremail = db.Column(db.String(120), index=True, unique=True)
     admin = db.Column(db.Boolean)
 
     def __repr__(self):
@@ -38,30 +36,13 @@ class User(db.Model):
         self.admin=admin
 
     @hybrid_property
-    def username(self):
-        """
-        :return: The username
-        """
-        return self._username
-
-    @username.setter
-    def username(self, newname):
-        """
-        Set the username.
-
-        This is as simple as it looks, simply making an assignment to
-        the _username field so it can be returned in the getter.
-        """
-        self._username = newname
-
-    @hybrid_property
     def password(self):
         """
         Getter method for password.
 
         :return: The User object's hashed password
         """
-        return self._password
+        return self.__password
 
     @password.setter
     def password(self, plaintext):
@@ -71,24 +52,7 @@ class User(db.Model):
         :param plaintext: the plain text being entered by the user, to be hased
         "
         """
-        self._password = generate_password_hash(plaintext)
-
-    @hybrid_property
-    def gravataremail(self):
-        """
-        :return: The Gravatar email address
-        """
-        return self._gravataremail
-
-    @gravataremail.setter
-    def gravataremail(self, newemail):
-        """
-        Set the Gravatar email
-
-        This is as simple as it looks, simply making an assignment to
-        the _gravataremail field so it can be returned in the getter.
-        """
-        self._gravataremail = newemail
+        self.__password = generate_password_hash(plaintext)
 
     def check_password(self, plaintext):
         """

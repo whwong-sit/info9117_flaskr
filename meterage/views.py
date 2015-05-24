@@ -42,7 +42,7 @@ def login():
     """
     error = None
     if request.method == 'POST':
-        user = User.query.filter_by(_username=request.form['username']).first()
+        user = User.query.filter_by(username=request.form['username']).first()
 
         if user is not None:
             # if the user is found
@@ -151,7 +151,7 @@ def change_password():
         abort(401)
     if request.method == 'POST':
         
-        user = User.query.filter_by(_username=request.form['username']).first()
+        user = User.query.filter_by(username=request.form['username']).first()
 
         if user is None:
             error = 'User does not exist'
