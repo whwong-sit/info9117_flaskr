@@ -9,3 +9,5 @@
 
 * Distribute the main meterage.py across multiple files, it is getting
   too large
+
+* Fix up the database connections/disconnectons

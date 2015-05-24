@@ -98,15 +98,16 @@ class Entry(db.Model):
 
     __tablename__ = "entries"
 
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     author = db.relationship('User', backref='entries', lazy='joined')
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
 
     username = db.Column(db.String(64))
     title = db.Column(db.String(128))
     text = db.Column(db.Text)
     start_time = db.Column(db.String(16))
     end_time = db.Column(db.String(16))
+    # TODO use DateTime types for the start_time and end_time
     # start_time = db.Column(db.DateTime)
     # end_time = db.Column(db.DateTime)
 
@@ -124,3 +125,22 @@ class Entry(db.Model):
         else:
             self.start_time = start_time
         self.end_time = end_time
+
+class Comment(db.Model):
+
+    __tablename__ = "comments"
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    entry_id = db.Column(db.Integer, db.ForeignKey('entries.id'))
+    entry = db.relationship('Entry', backref='comments', lazy='joined')
+
+    username = db.Column(db.String(64))
+    text = db.Column(db.Text)
+
+    def __repr__(self):
+        return '<Comment by {0}>'.format(self.username)
+
+    def __init__(self, username, text, entry_id):
+        self.username = username
+        self.text = text
+        self.entry_id = entry_id

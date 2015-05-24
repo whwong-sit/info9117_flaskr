@@ -1,4 +1,4 @@
-__all__ = ['app', 'connect_db', 'User', 'avatar', 'db', 'Entry', 'session']
+__all__ = ['app', 'connect_db', 'User', 'avatar', 'db', 'Entry', 'session', 'Comment']
 
 from flask import Flask, session
 from os.path import isfile, abspath, dirname, join
@@ -18,15 +18,16 @@ app.config.from_object(config)
 app.config.from_pyfile('config.py')
 app.config.from_envvar('FLASKR_SETTINGS', silent=True)
 
+# database object, for database interaction
 db = SQLAlchemy(app)
 
 # useful functions
 def connect_db():
     """
-    Make a connection to the database
+    Make a connection to the database.
 
-    database specified in the config.
     """
+    # TODO redo this
     # return sqlite3.connect(app.config['DATABASE'])
 
 def avatar(email, size=50):
@@ -41,8 +42,8 @@ def avatar(email, size=50):
     gravatar_url += urllib.urlencode({'d':"monsterid",'s':str(size)})
     return gravatar_url
 
-# imports
-from models import User, Entry
+# imports; these seem to have to be *here*
+from models import User, Entry, Comment
 import views
 
 # generate database

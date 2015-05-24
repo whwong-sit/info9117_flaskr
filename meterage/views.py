@@ -2,6 +2,7 @@ from flask import request, g, redirect, url_for, abort, render_template, flash
 from jinja2 import Markup
 from flask_bcrypt import check_password_hash
 from . import *
+import datetime
 
 @app.route('/')
 def show_entries():
@@ -9,6 +10,7 @@ def show_entries():
     Get all the information required in show_entries.html from the database and pipe it
     into show_entries.html
     """
+    # TODO get Gravatars working
     return render_template('show_entries.html', entries=Entry.query.order_by(-Entry.id).all())
 
 
@@ -62,27 +64,30 @@ def login():
 
 @app.route('/<entry_id>/show_comments')
 def show_comments(entry_id):
-    cur = g.db.execute(
-        'SELECT DISTINCT comment_input, comments.username FROM comments, entries WHERE comments.entry_id = '
-        + entry_id + ' ORDER BY comment_id desc')
-    comments = [dict(comment_input=row[0], username=row[1]) for row in cur.fetchall()]
+    # cur = g.db.execute(
+    #     'SELECT DISTINCT comment_input, comments.username FROM comments, entries WHERE comments.entry_id = '
+    #     + entry_id + ' ORDER BY comment_id desc')
+    # comments = [dict(comment_input=row[0], username=row[1]) for row in cur.fetchall()]
+    comments = Comment.query.filter_by(entry_id=entry_id).order_by(-Comment.id).all()
 
-    cur = g.db.execute(
-        'select title, text, username, start_time, end_time from entries where id = ' + entry_id + ' order by id desc')
-    entries1 = [dict(title=row[0], text=row[1], username=row[2], start_time=row[3], end_time=row[4]) for row in
-                cur.fetchall()]
-    return render_template('show_comments.html', entries1=entries1, comments=comments, entry_id=entry_id)
-
+    # cur = g.db.execute(
+    #     'select title, text, username, start_time, end_time from entries where id = ' + entry_id + ' order by id desc')
+    # entries = [dict(title=row[0], text=row[1], username=row[2], start_time=row[3], end_time=row[4]) for row in
+    #             cur.fetchall()]
+    entries = Entry.query.order_by(-Entry.id).all()
+    return render_template('show_comments.html', entries1=entries, comments=comments, entry_id=entry_id)
 
 @app.route('/<entry_id>/add_comments', methods=['POST'])
 def add_comments(entry_id):
     if not session.get('logged_in'):
         abort(401)
 
-    g.db.execute('insert into comments (comment_input, entry_id, username) values (?,?,?)',
-                 [request.form['comment_input'], entry_id, session['username']])
+    db.session.add(Comment(session['username'], request.form['comment_input'], entry_id))
+    # g.db.execute('insert into comments (comment_input, entry_id, username) values (?,?,?)',
+    #              [request.form['comment_input'], entry_id, session['username']])
+    db.session.commit()
 
-    g.db.commit()
+    # g.db.commit()
     flash('New comment was successfully posted')
     return redirect(url_for('show_comments', entry_id=entry_id))
 
@@ -92,8 +97,10 @@ def add_end_time(entry_id):
     if not session.get('logged_in'):
         abort(401)
     # if end_time_null_check is True:
-    g.db.execute('UPDATE entries SET end_time=CURRENT_TIMESTAMP WHERE entries.id=' + entry_id + '')
-    g.db.commit()
+    Entry.query.filter_by(Entry.id == entry_id).update({"end_time": datetime.now()}, synchronize_session=False)
+    # g.db.execute('UPDATE entries SET end_time=CURRENT_TIMESTAMP WHERE entries.id=' + entry_id + '')
+    # g.db.commit()
+    db.session.commit()
     flash('TASK ENDED')
     return redirect(url_for('show_comments', entry_id=entry_id))
     # else:
@@ -106,7 +113,9 @@ def end_time_null_check(entry_id):  # need to debug
     cur = g.db.execute('select end_time from entries where id=' + entry_id)
     end_time_fill = [dict(end_time=row[0]) for row in cur.fetchall()]
     if end_time_fill is None:
-        return end_time_null_check is True
+        return True
+    else:
+        return false
 
 
 @app.route('/logout')
