@@ -19,17 +19,23 @@ class User(db.Model):
     __tablename__ = "users"
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    
     _username = db.Column(db.String(64), index=True, unique=True)
     _password = db.Column(db.String(128))
     _gravataremail = db.Column(db.String(120), index=True, unique=True)
+    admin = db.Column(db.Boolean)
 
     def __repr__(self):
-        return '<User {0}>'.format(self.username)
+        if self.admin:
+            return '<Admin {0}>'.format(self.username)
+        else:
+            return '<User {0}>'.format(self.username)
 
-    def __init__(self, username, password, gravataremail):
+    def __init__(self, username, password, gravataremail, admin=False):
         self.username = username
         self.password = password
         self.gravataremail = gravataremail
+        self.admin=admin
 
     @hybrid_property
     def username(self):

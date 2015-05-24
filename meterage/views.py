@@ -55,6 +55,7 @@ def login():
                 session['username'] = user.username
                 session['gravataremail'] = user.gravataremail
                 session['uid'] = user.id
+                session['admin'] = user.admin
                 flash('You were logged in')
                 return redirect(url_for('show_entries'))
         else:
@@ -115,7 +116,7 @@ def end_time_null_check(entry_id):  # need to debug
     if end_time_fill is None:
         return True
     else:
-        return false
+        return False
 
 
 @app.route('/logout')
@@ -194,5 +195,3 @@ def newline_filter(s):
     s = s.replace("\n", '<br />')
     # Markup() is used to prevent '<' and '>' symbols from being interpreted as less-than or greater-than symbols
     return Markup(s)
-
-

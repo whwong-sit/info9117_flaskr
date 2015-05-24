@@ -56,7 +56,10 @@ if not isfile(str(app.config['DATABASE'])):
     gravataremails = ['daisy22229999@gmail.com', 'daisy200029@gmail.com', "jimbean@whisky.biz", "livelong@prosper.edu.au"]
 
     for username, password, gravataremail in zip(usernames, passwords, gravataremails):
-        user = User(username, password, gravataremail)
+        if username == 'admin':
+            user = User(username, password, gravataremail, True)
+        else:
+            user = User(username, password, gravataremail)
         app.logger.debug("Adding {0} to the database.".format(user))
         db.session.add(user)
     db.session.commit()
