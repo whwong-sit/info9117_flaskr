@@ -34,7 +34,7 @@ def step_impl(context):
     with context.app.session_transaction() as sess:
         # see http://flask.pocoo.org/docs/0.10/testing/#accessing-and-modifying-sessions for
         # an explanation of accessing sessions during testing.
-        assert sess['logged_in'], "The user is not logged in."
+        assert sess['logged_in'], "Admin is not logged in."
 
 #### WHENS
 

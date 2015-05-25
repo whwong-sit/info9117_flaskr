@@ -90,14 +90,14 @@ class User(object):
         return self._flag_admin
 
     @flag_admin.setter
-    def flag_admin(self, flag):
+    def flag_admin(self, newflag_admin):
         """
         Set the identifier for admin privileges
 
         This is as simple as it looks, simply making an assignment to
         the _flag_admin field so it can be returned in the getter.
         """
-        self._flag_admin = flag
+        self._flag_admin = newflag_admin
 
     #### identifier for admin approval
 
@@ -109,14 +109,14 @@ class User(object):
         return self._flag_approval
 
     @flag_approval.setter
-    def flag_approval(self, flag):
+    def flag_approval(self, newflag_approval):
         """
         Set the identifier for admin approval
 
         This is as simple as it looks, simply making an assignment to
         the _flag_admin field so it can be returned in the getter.
         """
-        self._flag_approval = flag
+        self._flag_approval = newflag_approval
 
     #### check password
 
