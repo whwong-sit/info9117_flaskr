@@ -2,15 +2,17 @@
 {% block body %}
   {% if session.logged_in %}
   <form action="{{ url_for('add_entry') }}" method="POST" class="add-entry">
-      <dl>
+    <dl>
         <dt>Title:
         <dd><input type=text size=30 name=title>
-		<dt>Start time:
-		<dd><input type=time name=start_time>
         <dt>Text:
         <dd><textarea name=text rows=5 cols=40></textarea>
+		<dt>Start time:
+		<dd><input type=time name=start_time>
+        <dt>Description:
+        <dd><textarea name=task_des rows=5 cols=40></textarea>
         <dd><input type=submit class="btn purple" value="Share">
-      </dl>
+    </dl>
   </form>
   <hr>
   {% endif %}
@@ -20,11 +22,11 @@
 <ul class="chats" style="padding-top:10px">
 {% for entry in entries %}
     <li><h2><i><img src="{{entry.avimg}}"></i><a href="{{ url_for('show_comments', entry_id=entry.id) }}">{{ entry.title }}</a> <span class=user> by {{ entry.username }} </span></h2>
-
         <div class=datetime> start time: {{entry.start_time}}
             end time:{{entry.end_time}}
         </div>
-        {{ entry.text | newlines }}
+        Text: {{ entry.text | newlines }}
+        <div>Description: {{ entry.task_des | newlines }}</div>
 {% else %}
 <li><em>No entries here yet</em></li>
 {% endfor %}
