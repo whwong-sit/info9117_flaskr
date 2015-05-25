@@ -1,11 +1,12 @@
 import os
+import datetime
 import meterage
 import unittest
 import tempfile
 from contextlib import closing
 from models import User
 from flask_bcrypt import generate_password_hash
-from time import gmtime, strftime
+from time import gmtime, strftime, time
 
 
 class MeterageBaseTestClass(unittest.TestCase):
@@ -71,8 +72,9 @@ class MeterageBaseTestClass(unittest.TestCase):
             title='<Hello>',
             text='<strong>HTML</strong> allowed here',
             start_time='<15:00>',
-            end_time='<17:30>'
-        ), follow_redirects=True)
+            end_time=strftime("%Y-%m-%d %H:%M:%S", gmtime()),
+            task_des='hahahahah',
+            ), follow_redirects=True)
 
     def userPassword_content(self):
         """
@@ -135,9 +137,7 @@ class BasicTests(MeterageBaseTestClass):
             with self.app.session_transaction() as sess:
                 # see http://flask.pocoo.org/docs/0.10/testing/#accessing-and-modifying-sessions for
                 # an explanation of accessing sessions during testing.
-                self.assertIn(sess['username'], rv.get_data())
-            self.assertIn('15:00', rv.get_data())
-            self.assertIn('17:30', rv.get_data())
+                self.assertIn(sess['username'], unicode(rv.get_data(), 'utf-8'))
 
     def test_message_maps_to_username(self):
         """
@@ -145,8 +145,8 @@ class BasicTests(MeterageBaseTestClass):
         the username is the right one
         """
         self.login('admin', 'default')
-        rv = self.generic_post()
-        self.assertIn("by admin", rv.get_data())
+        rv= self.generic_post()
+        assert "by admin" in rv.get_data()
 
     def test_read_log_without_login(self):
         """
@@ -265,19 +265,17 @@ class HashedPasswordsTests(MeterageBaseTestClass):
 
 class TimeAndCommentTests(MeterageBaseTestClass):
 
-    def test_time(self):
+    def test_start_time(self):
         self.login('admin', 'default')
-        curr_time = strftime("%Y-%m-%d %H:%M:%S", gmtime())
         rv = self.app.post('/add', data=dict(
             title='<Hello>',
             text='<strong>HTML</strong> allowed here',
+            task_des= ' hahahahah',
             start_time='<15:00>',
-            end_time=curr_time
         ), follow_redirects=True)
         self.assertNotIn('No entries here so far', rv.get_data(), 'Post unsuccessful')
-        self.assertIn('&lt;Hello&gt;', rv.get_data())
         self.assertIn('by admin', rv.get_data())
-        self.assertIn(curr_time, rv.get_data())
+        self.assertIn(' hahahahah', rv.get_data())
 
     def test_comment(self):
         self.login('admin', 'default')
@@ -293,11 +291,32 @@ class TimeAndCommentTests(MeterageBaseTestClass):
         self.login('admin', 'default')
         self.generic_post()
         rv = self.app.post('/1/add_end_time', follow_redirects=True)
-        curr_time = strftime("%Y-%m-%d %H:%M:%S", gmtime())
+        curr_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         self.assertNotIn('No entries here so far', rv.get_data(), 'Post unsuccessful')
         self.assertIn('&lt;Hello&gt;', rv.get_data())
         self.assertIn('by admin', rv.get_data())
-        self.assertIn('End at: ' + curr_time, rv.get_data())
+        self.assertIn(curr_time, rv.get_data())
+
+    def test_User_Role(self):
+        self.login('admin', 'default')
+        self.generic_post()
+        rv=self.app.post('/1/add_roles', data=dict(
+            user_role='<fathima>',
+            ), follow_redirects=True)
+        assert '&lt;fathima&gt;' in rv.data
+
+
+    def test_description(self):
+        self.login('admin', 'default')
+        self.generic_post()
+        rv = self.app.post('/add', data=dict(
+            title='<Hi>',
+            text='<strong>HTML</strong> allowed here',
+            start_time= '<15:00>',
+            task_des='User is talking about food'
+            ), follow_redirects=True)
+        assert 'No entries here so far' not in rv.data
+        assert 'User is talking about food' in rv.data
 
 class GravatarTests(MeterageBaseTestClass):
 
@@ -330,16 +349,58 @@ class GravatarTests(MeterageBaseTestClass):
 class UserWebInterfaceTests(MeterageBaseTestClass):
 
     def test_web_interface_accessible(self):
-        pass
+        self.login(username='hari', password='seldon')
+
+        rv = self.app.get('/user/<username>')
+        self.assertFalse(rv.status_code == 404, "We are unable to access the manage details page")
+        # self.assertIn('hari', rv.get_data())
+        # self.assertIn('nongravataremailaddress@gmail.com', rv.get_data())
 
     def test_can_change_username(self):
-        pass
+
+        self.login(username='hari', password='seldon')
+
+        rv = self.app.post('/user/<username>', data=dict(
+            username='hary',
+            gravataremail='hary@gmail.com',
+            save='save',
+        ), follow_redirects=True)
+
+        self.assertIn('hary', rv.get_data())
+
+        with closing(meterage.connect_db()) as db:
+            cur = db.execute('select username, gravataremail from userPassword where username=?', ['hary'])
+            row = cur.fetchone()
+            self.assertFalse(row[0] == 'hari', "username has not been added to the database")
+            cur.close()
 
     def test_can_change_gravatar_email(self):
-        pass
+
+        self.login(username='hari', password='seldon')
+
+        rv = self.app.post('/user/<username>', data=dict(
+            username='hary',
+            gravataremail='hary@gmail.com',
+            save='save',
+        ), follow_redirects=True)
+
+        self.assertIn('hary@gmail.com', rv.get_data())
+
+        with closing(meterage.connect_db()) as db:
+            cur = db.execute('select username, gravataremail from userPassword where username=?', ['hary'])
+            row = cur.fetchone()
+            self.assertFalse(row[1] == "nongravataremailaddress@gmail.com", "gravataremail has not been added to the database")
+            cur.close()
+
+
 
     def test_username_unique(self):
-        pass
+        with closing(meterage.connect_db()) as db:
+            for user in users:
+                cur = db.execute('select count(username) from userPassword where username=?', [user[0]])
+                row = cur.fetchone()
+                self.assertTrue(row[0] == 1, "The username is unique")
+                cur.close()
 
 if __name__ == '__main__':
     unittest.main()

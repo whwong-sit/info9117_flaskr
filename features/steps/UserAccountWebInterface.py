@@ -2,6 +2,7 @@ from behave import *
 import meterage
 from contextlib import closing
 from re import sub
+from datetime import *
 
 
 #### GIVENS
@@ -31,7 +32,7 @@ def step_impl(context):
         # an explanation of accessing sessions during testing.
         for detail in ["Username", sess['username'], "Gravatar Email", sess['gravataremail']]:
             # assert all these strings are present in rv.get_data() when stripped of HTML junk
-            assert detail in sub('<[^>]*>', '', context.rv.get_data()), "{0} not displayed".format(detail)
+            assert detail in sub('<[^>]*>', '', unicode(context.rv.get_data(),'utf-8')), "{0} not displayed".format(detail)
             context.username = sess['username']
 
 @then(u'the User is able to edit and commit {detail}')

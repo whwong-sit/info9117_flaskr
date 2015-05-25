@@ -1,3 +1,4 @@
+from datetime import *
 from behave import *
 from contextlib import closing
 import meterage
@@ -45,17 +46,17 @@ def step_impl(context):
     """
     context.rv = context.app.post('/add', data=dict(
         title='<Hello>',
-        text='<strong>HTML</strong> allowed here',
-        start_time='09:00:00',
-        end_time='13:00:00'
+            text='<strong>HTML</strong> allowed here',
+            start_time='<15:00>',
+            task_des='hahahahah'
     ), follow_redirects=True)
 
-    for s in ['&lt;Hello&gt;', '09:00:00', '13:00:00', '<strong>HTML</strong> allowed here']:
+    for s in ['&lt;Hello&gt;', '15:00', '<strong>HTML</strong> allowed here']:
         assert s in context.rv.get_data()
     assert 'No entries here so far' not in context.rv.get_data()
     with context.app.session_transaction() as sess:
         # see http://flask.pocoo.org/docs/0.10/testing/#accessing-and-modifying-sessions for
         # an explanation of accessing sessions during testing.
-        assert sess['username'] in context.rv.get_data()
+        assert sess['username'] in unicode(context.rv.get_data(), 'utf-8')
 
 #### THENS
