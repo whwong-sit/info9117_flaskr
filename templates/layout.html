@@ -11,6 +11,7 @@ Reference note: Template Based on Metronic - Responsive Admin Dashboard Template
 <head>
 <meta charset="utf-8"/>
 <title>Meterage</title>
+<<<<<<< HEAD
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
 <!-- BEGIN GLOBAL MANDATORY STYLES -->
@@ -80,6 +81,24 @@ Reference note: Template Based on Metronic - Responsive Admin Dashboard Template
 			</ul>
 		</div>
 		<!-- END TOP NAVIGATION MENU -->
+=======
+<link rel=stylesheet type=text/css href=" {{ url_for('static', filename='style.css')}}">
+<div class=page>
+    <h1><a href="{{ url_for('show_entries') }}">Meterage</a></h1>
+    <div class=metanav>
+    {% if not session.logged_in %}
+        <a href=" {{ url_for('login') }}">log in</a>
+		<a href=" {{ url_for('register') }}">register</a>
+    {% else %}
+        <a href=" {{ url_for('logout') }}">log out</a>
+		
+	<div class=user>
+        <a href="{{ url_for('manage_details', username=session.username) }}"><h3 align=left> {{ session.username }}</h3>
+        </a>
+		{% if (session.username=="admin") %}
+		<a href=" {{ url_for('admin') }}">admin portal</a>
+		{% endif %}
+>>>>>>> 2d956e23999426faeb9d71d34d4d446a8c4f8d03
 	</div>
 	<!-- END HEADER INNER -->
 </div>

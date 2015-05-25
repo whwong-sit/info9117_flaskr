@@ -110,17 +110,19 @@ def login():
     """
     error = None
     if request.method == 'POST':
-        cur = g.db.execute('select username, password, gravataremail from userPassword where username=?',
+        cur = g.db.execute('select username, password, gravataremail, flag_approval from userPassword where username=?',
                            [request.form['username']])
         row = cur.fetchone()
 
         if row is not None:
             # if the user is found
-            user = {'username': row[0], 'password': row[1], 'gravataremail': row[2]}
+            user = {'username': row[0], 'password': row[1], 'gravataremail': row[2], 'flag_approval': row[3]}
 
             if not check_password_hash(user['password'], request.form['password']):
                 # if the password hash in the database does not correspond to the hashed form of the given password
                 error = 'Invalid password'
+            elif user['flag_approval']!=1:
+                error = 'Please contact admin for permission to access'
             else:
                 session['logged_in'] = True
                 session['username'] = user['username']
@@ -284,7 +286,7 @@ def change_password():
             error = 'Please enter same password twice'
         else:
             # create the User object and add to the database
-            user = User(request.form['username'], request.form['password'], session['gravataremail'])
+            user = User(request.form['username'], request.form['password'], session['gravataremail'], False, True)
             g.db.execute('update userPassword set password=? where username =?',
                          [user.password, user.username])
             g.db.commit()
@@ -293,6 +295,97 @@ def change_password():
 
     return render_template('change_password.html', error=error)
 
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    """
+    Allows new user to register for log in. If the username input already exists,
+    new user has to register again with a different username. If that user is not present,
+    it checks that the password corresponds to the confirmation password given.
+    If all of this holds, then the new user is created.
+    """
+    error = None
+    if request.method == 'POST':
+        newuser = request.form['username']
+        cursor = g.db.execute('select username from userPassword where username=?', [newuser])
+        row = cursor.fetchone()
+        
+        if row is not None:
+            error = 'Username has already been used'
+        elif request.form['password'] != request.form['confirm_password']:
+            error = 'Please enter same password twice'
+        else:
+            # create the User object and add to the database
+            user = User(request.form['username'], request.form['password'], request.form['email'], False, False)
+            g.db.execute('insert into userPassword (username, password, gravataremail, flag_admin, flag_approval) values (?, ?, ?, ?, ?)',
+                               [user.username, user.password, user.gravataremail, user.flag_admin, user.flag_approval])
+            g.db.commit()
+            flash('Successfully registered')
+            return render_template('register.html', success='Successfully registered')
+    return render_template('register.html', error=error)
+
+@app.route('/admin', methods=['GET'])
+def admin():
+    """
+    Redirect admin to admin portal page
+    """
+    if not session.get('logged_in'):
+        # If someone tries to access the page without being logged in.
+        abort(401)
+    return render_template('admin.html')
+
+@app.route('/add_new_user', methods=['GET', 'POST'])
+def add_new_user():
+    """
+    Allows the admin to add a new user.  It searches the database for the user specified.
+    If that user is not present, the new user is created.
+    """
+    error = None
+    if not session.get('logged_in'):
+        # If someone tries to access the page without being logged in.
+        abort(401)
+    if request.method == 'POST':
+        newuser = request.form['username']
+        cursor = g.db.execute('select username from userPassword where username=?', [newuser])
+        row = cursor.fetchone()
+
+        if row is not None:
+            error = 'Username has already been used'
+        elif request.form['password'] != request.form['confirm_password']:
+            error = 'Please enter same password twice'
+        else:
+            # create the User object and add to the database
+            user = User(request.form['username'], request.form['password'], request.form['email'], False, True)
+            g.db.execute('insert into userPassword (username, password, gravataremail, flag_admin, flag_approval) values (?, ?, ?, ?, ?)',
+                               [user.username, user.password, user.gravataremail, user.flag_admin, user.flag_approval])
+            g.db.commit()
+            flash('Successfully added new user')
+            return render_template('add_new_user.html', success='Successfully added new user')
+    return render_template('add_new_user.html', error=error)
+
+@app.route('/approve_new_user', methods=['GET', 'POST'])
+def approve_new_user():
+    """
+    Allows the admin to grant access to a new user.  It searches the database for the user specified.
+    If that user is present, the new user is granted with access.
+    """
+    error = None
+    if not session.get('logged_in'):
+        # If someone tries to access the page without being logged in.
+        abort(401)
+    if request.method == 'POST':
+        newuser = request.form['username']
+        cursor = g.db.execute('select username from userPassword where username=?', [newuser])
+        row = cursor.fetchone()
+
+        if row is None:
+            error = 'User does not exist'
+        else:
+            # grant approval for access to user 
+            g.db.execute('update userPassword set flag_approval=? where username=?', [True, newuser])
+            g.db.commit()
+            flash('Successfully granted access to user')
+            return render_template('approve_new_user.html', success='Successfully grant access to user')
+    return render_template('approve_new_user.html', error=error)
 
 @app.template_filter('newlines')
 def newline_filter(s):
@@ -312,15 +405,20 @@ if __name__ == '__main__':
         passwords = ["default", "seldon", "bean", "vulcan"]
 <<<<<<< HEAD
         gravataremails = ['daisy22229999@gmail.com', 'daisy200029@gmail.com', "jimbean@whisky.biz", "livelong@prosper.edu.au"]
+<<<<<<< HEAD
         flag_admin=[True, False, False, False]
         flag_approval=[True, True, True, True]
 =======
         gravataremails = ['daisy22229999@gmail.com', 'daisy200029@gmail.com', "jimbean@whisky.biz",
                           "livelong@prosper.edu.au"]
 >>>>>>> 384280b0e1dc815388e03fb5d2eb210cb4953b89
+=======
+        flag_admins=[True, False, False, False]
+        flag_approvals=[True, True, True, True]
+>>>>>>> 2d956e23999426faeb9d71d34d4d446a8c4f8d03
 
         with closing(connect_db()) as db:
-            for username, password, gravataremail, flag_admin, flag_approval in zip(usernames, passwords, gravataremails, flag_admin, flag_approval):
+            for username, password, gravataremail, flag_admin, flag_approval in zip(usernames, passwords, gravataremails, flag_admins, flag_approvals):
                 user = User(username, password, gravataremail, flag_admin, flag_approval)
                 app.logger.debug("Adding user {0} to the database.".format(user.username))
                 db.execute('insert into userPassword (username, password, gravataremail, flag_admin, flag_approval) values (?, ?, ?, ?, ?)',
@@ -328,7 +426,11 @@ if __name__ == '__main__':
             db.commit()
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     app.run(host='0.0.0.0',port=8080)
+=======
+    app.run(host='127.0.0.1',port=5000)
+>>>>>>> 2d956e23999426faeb9d71d34d4d446a8c4f8d03
 
 =======
     app.run(host='0.0.0.0',port=5000)
