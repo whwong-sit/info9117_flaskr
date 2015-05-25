@@ -351,57 +351,56 @@ class UserWebInterfaceTests(MeterageBaseTestClass):
     def test_web_interface_accessible(self):
         self.login(username='hari', password='seldon')
 
+        rv = self.app.get('/user/<username>')
+        self.assertFalse(rv.status_code == 404, "We are unable to access the manage details page")
+        # self.assertIn('hari', rv.get_data())
+        # self.assertIn('nongravataremailaddress@gmail.com', rv.get_data())
+
+    def test_can_change_username(self):
+
+        self.login(username='hari', password='seldon')
+
         rv = self.app.post('/user/<username>', data=dict(
             username='hary',
             gravataremail='hary@gmail.com',
+            save='save',
         ), follow_redirects=True)
 
-        self.assertIn('hari', rv.get_data())
-        self.assertIn('nongravataremailaddress@gmail.com', rv.get_data())
-		
-    def test_can_change_username(self):
-       
-       rv = self.app.post('/user/<username>', data=dict(
-            username='hary',
-            gravataremail='hary@gmail.com',
-			save='save'
-        ), follow_redirects=True)
-	   
-       self.assertIn('hary', rv.get_data())
+        self.assertIn('hary', rv.get_data())
 
-       with closing(meterage.connect_db()) as db:
-           for user in users:
-                cur = db.execute('select username,gravataremail from userPassword where username=?', [user[0]])
-                row = cur.fetchone()
-                self.assertFalse(row[0] == user[0], "username has not been added to the database")
-                cur.close()
+        with closing(meterage.connect_db()) as db:
+            cur = db.execute('select username, gravataremail from userPassword where username=?', ['hary'])
+            row = cur.fetchone()
+            self.assertFalse(row[0] == 'hari', "username has not been added to the database")
+            cur.close()
 
     def test_can_change_gravatar_email(self):
-                   
+
+        self.login(username='hari', password='seldon')
+
         rv = self.app.post('/user/<username>', data=dict(
             username='hary',
             gravataremail='hary@gmail.com',
-			save='save'
+            save='save',
         ), follow_redirects=True)
-	   
+
         self.assertIn('hary@gmail.com', rv.get_data())
-	   
+
         with closing(meterage.connect_db()) as db:
-            for user in users:
-                cur = db.execute('select username,gravataremail from userPassword where username=?', [user[0]])
-                row = cur.fetchone()
-                self.assertFalse(row[1] == user[1], "gravataremail has not been added to the database")
-                cur.close()
-       
-                       
-						
+            cur = db.execute('select username, gravataremail from userPassword where username=?', ['hary'])
+            row = cur.fetchone()
+            self.assertFalse(row[1] == "nongravataremailaddress@gmail.com", "gravataremail has not been added to the database")
+            cur.close()
+
+
+
     def test_username_unique(self):
         with closing(meterage.connect_db()) as db:
             for user in users:
-                cur = db.execute('select username where username=?', [user[0]])    
-            row = cur.fetchone()
-            self.assertFalse(row[0] == '', "Username is not empty")
-            cur.close()
+                cur = db.execute('select count(username) from userPassword where username=?', [user[0]])
+                row = cur.fetchone()
+                self.assertTrue(row[0] == 1, "The username is unique")
+                cur.close()
 
 if __name__ == '__main__':
     unittest.main()
