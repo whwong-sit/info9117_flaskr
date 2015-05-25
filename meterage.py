@@ -403,19 +403,9 @@ if __name__ == '__main__':
 
         usernames = ["admin", "hari", "jim", "spock"]
         passwords = ["default", "seldon", "bean", "vulcan"]
-<<<<<<< HEAD
         gravataremails = ['daisy22229999@gmail.com', 'daisy200029@gmail.com', "jimbean@whisky.biz", "livelong@prosper.edu.au"]
-<<<<<<< HEAD
-        flag_admin=[True, False, False, False]
-        flag_approval=[True, True, True, True]
-=======
-        gravataremails = ['daisy22229999@gmail.com', 'daisy200029@gmail.com', "jimbean@whisky.biz",
-                          "livelong@prosper.edu.au"]
->>>>>>> 384280b0e1dc815388e03fb5d2eb210cb4953b89
-=======
         flag_admins=[True, False, False, False]
         flag_approvals=[True, True, True, True]
->>>>>>> 2d956e23999426faeb9d71d34d4d446a8c4f8d03
 
         with closing(connect_db()) as db:
             for username, password, gravataremail, flag_admin, flag_approval in zip(usernames, passwords, gravataremails, flag_admins, flag_approvals):
@@ -424,14 +414,4 @@ if __name__ == '__main__':
                 db.execute('insert into userPassword (username, password, gravataremail, flag_admin, flag_approval) values (?, ?, ?, ?, ?)',
                            [user.username, user.password, user.gravataremail, user.flag_admin, user.flag_approval])
             db.commit()
-
-<<<<<<< HEAD
-<<<<<<< HEAD
     app.run(host='0.0.0.0',port=8080)
-=======
-    app.run(host='127.0.0.1',port=5000)
->>>>>>> 2d956e23999426faeb9d71d34d4d446a8c4f8d03
-
-=======
-    app.run(host='0.0.0.0',port=5000)
->>>>>>> 384280b0e1dc815388e03fb5d2eb210cb4953b89
