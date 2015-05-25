@@ -41,12 +41,12 @@ def before_feature(context, feature):
     # add users to the temporary database
     # Note that an admin and a normal user are added.
     with closing(meterage.connect_db()) as db:
-        admin = User('admin', 'default', 'admin@unix.org')
-        db.execute('insert into userPassword (username, password, gravataremail) values (?, ?, ?)',
-                   [admin.username, admin.password, admin.gravataremail])
-        user = User('hari', 'seldon', 'hari@stroustrup.com')
-        db.execute('insert into userPassword (username, password, gravataremail) values (?, ?, ?)',
-                   [user.username, user.password, user.gravataremail])
+        admin = User('admin', 'default', 'admin@unix.org','True','True')
+        db.execute('insert into userPassword (username, password, gravataremail,flag_admin,flag_approval) values (?, ?, ? ,? ,?)',
+                   [admin.username, admin.password, admin.gravataremail,admin.flag_admin, admin.flag_approval])
+        user = User('hari', 'seldon', 'hari@stroustrup.com','False','True')
+        db.execute('insert into userPassword (username, password, gravataremail,flag_admin,flag_approval) values (?, ?, ?,? ,?)',
+                   [user.username, user.password, user.gravataremail,user.flag_admin, user.flag_approval])
         db.commit()
 
 
