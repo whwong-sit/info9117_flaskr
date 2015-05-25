@@ -23,6 +23,7 @@ Reference note: Template Based on Metronic - Responsive Admin Dashboard Template
 <!-- END PAGE LEVEL PLUGIN STYLES -->
 <!-- BEGIN PAGE STYLES -->
 <link href="{{ url_for('static', filename='css/login.css')}}" rel="stylesheet" type="text/css"/>
+<link href="{{ url_for('static', filename='css/register.css')}}" rel="stylesheet" type="text/css"/>
 <!-- END PAGE STYLES -->
 <!-- BEGIN THEME STYLES -->
 <link href="{{ url_for('static', filename='css/components.css')}}" id="style_components" rel="stylesheet" type="text/css"/>
@@ -71,6 +72,7 @@ Reference note: Template Based on Metronic - Responsive Admin Dashboard Template
 						<li>
                             {% if not session.logged_in %}
                             <a href="{{ url_for('login') }}">Log In</a> 
+                            <a href=" {{ url_for('register') }}">Register</a>
                             {% else %}
                             <a href="{{ url_for('logout') }}"><i class="fa fa-fw"></i>Log Out</a>
 						</li>
@@ -148,6 +150,12 @@ Reference note: Template Based on Metronic - Responsive Admin Dashboard Template
 						<li>
 							<a href=" {{ url_for('change_password') }}">
 							Change Password</a>
+						</li>
+						<li>
+							<a href=" {{ url_for('add_new_user') }}">Add New User</a>
+						</li>
+						<li>
+							<a href=" {{ url_for('approve_new_user') }}">Approve New User</a>
 						</li>
 					</ul>
 				</li>
