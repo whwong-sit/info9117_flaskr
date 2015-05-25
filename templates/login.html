@@ -2,6 +2,7 @@
 {% block body %}
 <div class="login">
     <div class=" content">
+        {% if error %}<p class=error><strong>Error:</strong>{{ error }}</p>{% endif %}
         <!-- BEGIN LOGIN FORM -->
         <form class="login-form" action="{{ url_for('login') }}" method="post">
             <h3 class="form-title">Sign In</h3>

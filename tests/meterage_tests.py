@@ -137,7 +137,7 @@ class BasicTests(MeterageBaseTestClass):
             with self.app.session_transaction() as sess:
                 # see http://flask.pocoo.org/docs/0.10/testing/#accessing-and-modifying-sessions for
                 # an explanation of accessing sessions during testing.
-                self.assertIn(sess['username'], rv.get_data())
+                self.assertIn(sess['username'], unicode(rv.get_data(), 'utf-8'))
 
     def test_message_maps_to_username(self):
         """

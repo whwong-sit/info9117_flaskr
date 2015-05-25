@@ -57,6 +57,6 @@ def step_impl(context):
     with context.app.session_transaction() as sess:
         # see http://flask.pocoo.org/docs/0.10/testing/#accessing-and-modifying-sessions for
         # an explanation of accessing sessions during testing.
-        assert sess['username'] in context.rv.get_data()
+        assert sess['username'] in unicode(context.rv.get_data(), 'utf-8')
 
 #### THENS
