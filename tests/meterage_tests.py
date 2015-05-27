@@ -24,11 +24,11 @@ class MeterageBaseTestClass(unittest.TestCase):
         meterage.init_db()
 
         global users
-        usernames = ["admin", "hari"]
-        passwords = ["default", "seldon"]
-        gravataremails = ["daisy22229999@gmail.com", "nongravataremailaddress@gmail.com"]
-        flag_admins=[True, False]
-        flag_approvals=[True, True]
+        usernames = ["admin", "hari", "spock"]
+        passwords = ["default", "seldon", "vulcan"]
+        gravataremails = ["daisy22229999@gmail.com", "nongravataremailaddress@gmail.com", "livelong@prosper.edu.au"]
+        flag_admins=[True, False, False]
+        flag_approvals=[True, True, False]
 		
         users = zip(usernames, passwords, gravataremails, flag_admins, flag_approvals)
 
@@ -405,9 +405,6 @@ class UserWebInterfaceTests(MeterageBaseTestClass):
                 self.assertTrue(row[0] == 1, "The username is unique")
                 cur.close()
 
-if __name__ == '__main__':
-    unittest.main()
-
 class AddingNewUsersTests(MeterageBaseTestClass):
 
     def test_register_existing_username(self):
@@ -434,6 +431,7 @@ class AddingNewUsersTests(MeterageBaseTestClass):
 
     def test_register(self):
         # test for normal registration
+        self.app.get('/register', follow_redirects=True)
         rv = self.app.post('/register', data=dict(
             username='jim',
             password='bean',
@@ -445,7 +443,7 @@ class AddingNewUsersTests(MeterageBaseTestClass):
 
     def test_login_without_approval(self):
         # test for user without approval of access
-        rv = self.login('jim', 'bean')
+        rv = self.login('spock', 'vulcan')
         self.assertIn('Please contact admin for permission to access', rv.get_data())
 
     def test_grant_approval_non_exist_user(self):
@@ -464,7 +462,7 @@ class AddingNewUsersTests(MeterageBaseTestClass):
         self.login('admin', 'default')
         
         rv = self.app.post('/approve_new_user', data=dict(
-            username='jim'
+            username='spock'
         ), follow_redirects=True)
         
         self.assertIn('Successfully granted access to user', rv.get_data())
@@ -472,7 +470,7 @@ class AddingNewUsersTests(MeterageBaseTestClass):
 
     def test_login_approval(self):
         # test for user login with login permission
-        rv = self.login('jim', 'bean')
+        rv = self.login('hari', 'seldon')
 
         self.assertIn('You were logged in', rv.get_data())
         self.logout()
@@ -482,7 +480,7 @@ class AddingNewUsersTests(MeterageBaseTestClass):
         self.login('admin', 'default')
         
         rv = self.app.post('/add_new_user', data=dict(
-            username='test',
+            username='hari',
             password='test',
             confirm_password='test',
 			email='test@test.com'
@@ -504,3 +502,23 @@ class AddingNewUsersTests(MeterageBaseTestClass):
         
         self.assertIn('Successfully added new user', rv.get_data())
         self.logout()
+        with closing(meterage.connect_db()) as db:
+            cur = db.execute('select count(username) from userPassword where username=?', ['another'])
+            row = cur.fetchone()
+            self.assertTrue(row[0] == 1, "User another has been added to the database")
+            cur.close()        
+
+class AddingNewAdminsTests(MeterageBaseTestClass):
+
+    def test_login_as_admin(self):
+        # test for registration with existing username
+        rv = self.login('admin', 'default')
+        #self.assertIn('You were logged in', rv.get_data())
+        with self.app.session_transaction() as sess:
+            # see http://flask.pocoo.org/docs/0.10/testing/#accessing-and-modifying-sessions for
+            # an explanation of accessing sessions during testing.
+            print(rv.get_data())
+            self.assertTrue(sess['admin']==True, "You are logged in as admin")
+
+if __name__ == '__main__':
+    unittest.main()
