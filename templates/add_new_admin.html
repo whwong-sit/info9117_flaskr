@@ -1,0 +1,13 @@
+{% extends "layout.html" %}
+{% block body %}
+  <h2>Add New Admin</h2>
+  {% if error %}<p class=error><strong>Error:</strong>{{ error }}</p>{% endif %}
+  {% if success %}<p class=success>{{ success }}</p>{% endif %}
+  <form action="{{ url_for('add_new_admin') }}" method=post>
+    <dl>
+        <dt>Username:
+        <dd><input type=text name=username required>
+        <dd><input type=submit value=add_new_admin>
+    </dl>
+  </form>
+{% endblock %}

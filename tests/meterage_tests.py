@@ -24,11 +24,11 @@ class MeterageBaseTestClass(unittest.TestCase):
         meterage.init_db()
 
         global users
-        usernames = ["admin", "hari", "spock"]
-        passwords = ["default", "seldon", "vulcan"]
-        gravataremails = ["daisy22229999@gmail.com", "nongravataremailaddress@gmail.com", "livelong@prosper.edu.au"]
-        flag_admins=[True, False, False]
-        flag_approvals=[True, True, False]
+        usernames = ["admin", "hari", "spock", "test"]
+        passwords = ["default", "seldon", "vulcan", "test"]
+        gravataremails = ["daisy22229999@gmail.com", "nongravataremailaddress@gmail.com", "livelong@prosper.edu.au", "test@test.test"]
+        flag_admins=[True, False, False, True]
+        flag_approvals=[True, True, False, True]
 		
         users = zip(usernames, passwords, gravataremails, flag_admins, flag_approvals)
 
@@ -513,12 +513,67 @@ class AddingNewAdminsTests(MeterageBaseTestClass):
     def test_login_as_admin(self):
         # test for registration with existing username
         rv = self.login('admin', 'default')
-        #self.assertIn('You were logged in', rv.get_data())
         with self.app.session_transaction() as sess:
             # see http://flask.pocoo.org/docs/0.10/testing/#accessing-and-modifying-sessions for
             # an explanation of accessing sessions during testing.
-            print(rv.get_data())
             self.assertTrue(sess['admin']==True, "You are logged in as admin")
+
+    def test_non_admin_user_accessing_admin_function(self):
+        self.login(username='hari', password='seldon')
+
+        rv = self.app.get('/change_password')
+        self.assertFalse(rv.status_code == 404, "We are unable to access the change password page")
+
+    def test_granting_privilege_to_non_exist_user(self):
+        self.login('admin', 'default')
+
+        rv = self.app.post('/add_new_admin', data=dict(
+            username='jim'
+        ), follow_redirects=True)
+        self.assertIn("User does not exist" ,rv.get_data())
+
+    def test_normal_granting_privilege(self):
+        self.login('admin', 'default')
+
+        rv = self.app.post('/add_new_admin', data=dict(
+            username='hari'
+        ), follow_redirects=True)
+        self.assertIn("Successfully granted admin privilege to user" ,rv.get_data())
+        with closing(meterage.connect_db()) as db:
+            cur = db.execute('select flag_admin from userPassword where username=?', ['hari'])
+            row = cur.fetchone()
+            self.assertTrue(row[0] == 1, "User has been granted with admin privilege")
+            cur.close()
+        self.logout()
+        self.login('hari', 'seldon')
+        with self.app.session_transaction() as sess:
+            # see http://flask.pocoo.org/docs/0.10/testing/#accessing-and-modifying-sessions for
+            # an explanation of accessing sessions during testing.
+            self.assertTrue(sess['admin']==True, "You are logged in as admin")
+
+    def test_revoke_admin_non_exist_user(self):
+        self.login('admin', 'default')
+
+        rv = self.app.post('/revoke_admin', data=dict(
+            username='jim'
+        ), follow_redirects=True)
+        self.assertIn("User does not exist" ,rv.get_data())
+
+    def test_revoke_non_admin_user(self):
+        self.login('admin', 'default')
+
+        rv = self.app.post('/revoke_admin', data=dict(
+            username='hari'
+        ), follow_redirects=True)
+        self.assertIn("User is not an admin" ,rv.get_data())
+
+    def test_normal_revoke_admin(self):
+        self.login('admin', 'default')
+
+        rv = self.app.post('/revoke_admin', data=dict(
+            username='test'
+        ), follow_redirects=True)
+        self.assertIn("Successfully revoked admin privilege from user" ,rv.get_data())
 
 if __name__ == '__main__':
     unittest.main()
