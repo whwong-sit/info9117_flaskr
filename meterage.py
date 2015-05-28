@@ -110,13 +110,13 @@ def login():
     """
     error = None
     if request.method == 'POST':
-        cur = g.db.execute('select username, password, gravataremail, flag_approval from userPassword where username=?',
+        cur = g.db.execute('select username, password, gravataremail, flag_approval, flag_admin from userPassword where username=?',
                            [request.form['username']])
         row = cur.fetchone()
 
         if row is not None:
             # if the user is found
-            user = {'username': row[0], 'password': row[1], 'gravataremail': row[2], 'flag_approval': row[3]}
+            user = {'username': row[0], 'password': row[1], 'gravataremail': row[2], 'flag_approval': row[3], 'flag_admin': row[4]}
 
             if not check_password_hash(user['password'], request.form['password']):
                 # if the password hash in the database does not correspond to the hashed form of the given password
@@ -125,6 +125,8 @@ def login():
                 error = 'Please contact admin for permission to access'
             else:
                 session['logged_in'] = True
+                if user['flag_admin']==1:
+                    session['admin'] = True
                 session['username'] = user['username']
                 session['gravataremail'] = user['gravataremail']
                 flash('You were logged in')
@@ -229,6 +231,7 @@ def end_time_null_check(entry_id):  # need to debug
 @app.route('/logout')
 def logout():
     session.pop('logged_in', None)
+    session.pop('admin', None)
     flash('You were logged out')
     return redirect(url_for('show_entries'))
 
@@ -291,7 +294,7 @@ def change_password():
                          [user.password, user.username])
             g.db.commit()
             flash('Successfully changed user password')
-            return render_template('change_password.html', success='Successfully changed password')
+            return render_template('change_password.html')
 
     return render_template('change_password.html', error=error)
 
@@ -320,7 +323,7 @@ def register():
                                [user.username, user.password, user.gravataremail, user.flag_admin, user.flag_approval])
             g.db.commit()
             flash('Successfully registered')
-            return render_template('register.html', success='Successfully registered')
+            return render_template('register.html')
     return render_template('register.html', error=error)
 
 @app.route('/admin', methods=['GET'])
@@ -359,7 +362,7 @@ def add_new_user():
                                [user.username, user.password, user.gravataremail, user.flag_admin, user.flag_approval])
             g.db.commit()
             flash('Successfully added new user')
-            return render_template('add_new_user.html', success='Successfully added new user')
+            return render_template('add_new_user.html')
     return render_template('add_new_user.html', error=error)
 
 @app.route('/approve_new_user', methods=['GET', 'POST'])
@@ -384,8 +387,71 @@ def approve_new_user():
             g.db.execute('update userPassword set flag_approval=? where username=?', [True, newuser])
             g.db.commit()
             flash('Successfully granted access to user')
-            return render_template('approve_new_user.html', success='Successfully grant access to user')
+            return render_template('approve_new_user.html')
     return render_template('approve_new_user.html', error=error)
+
+@app.route('/add_new_admin', methods=['GET', 'POST'])
+def add_new_admin():
+    """
+    Allows the admin to grant admin privilege to another non-admin user. It searches the database for the user specified.
+    If that user is present and non-admin, the user is granted with admin privilege.
+    """
+    error = None
+    if not session.get('logged_in'):
+        # If someone tries to access the page without being logged in.
+        abort(401)
+    if not session.get('admin'):
+        # If non-admin tries to access the page
+        abort(401)
+    if request.method == 'POST':
+        newadmin = request.form['username']
+        cursor = g.db.execute('select flag_admin from userPassword where username=?', [newadmin])
+        row = cursor.fetchone()
+
+        if row is None:
+            error = 'User does not exist'
+        elif row[0]==1:
+            error = 'User is already an admin'
+        else:
+            # grant admin privilege to user 
+            g.db.execute('update userPassword set flag_admin=? where username=?', [True, newadmin])
+            g.db.commit()
+            flash('Successfully granted admin privilege to user')
+            return render_template('add_new_admin.html')
+    return render_template('add_new_admin.html', error=error)
+
+@app.route('/revoke_admin', methods=['GET', 'POST'])
+def revoke_admin():
+    """
+    Allows the admin to revoke admin privilege from another user. It searches the database for the user specified.
+    If that user is present, the user's admin privilege is revoke. However, users with admin privilege cannot revoke their own privilege.
+    """
+    error = None
+    if not session.get('logged_in'):
+        # If someone tries to access the page without being logged in.
+        abort(401)
+    if not session.get('admin'):
+        # If non-admin tries to access the page
+        abort(401)
+    if request.method == 'POST':
+        revokeadmin = request.form['username']
+        if session['username']== revokeadmin:
+            error = 'Users cannot remove their own admin privilege'
+            return render_template('revoke_admin.html', error=error)
+        cursor = g.db.execute('select flag_admin from userPassword where username=?', [revokeadmin])
+        row = cursor.fetchone()
+
+        if row is None:
+            error = 'User does not exist'
+        elif row[0]==0:
+            error = 'User is not an admin'
+        else:
+            # revoke admin privilege from user 
+            g.db.execute('update userPassword set flag_admin=? where username=?', [False, revokeadmin])
+            g.db.commit()
+            flash('Successfully revoked admin privilege from user')
+            return render_template('revoke_admin.html')
+    return render_template('revoke_admin.html', error=error)
 
 @app.template_filter('newlines')
 def newline_filter(s):
