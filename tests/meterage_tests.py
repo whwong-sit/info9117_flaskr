@@ -270,12 +270,10 @@ class TimeAndCommentTests(MeterageBaseTestClass):
         rv = self.app.post('/add', data=dict(
             title='<Hello>',
             text='<strong>HTML</strong> allowed here',
-            task_des= ' hahahahah',
             start_time='<15:00>',
         ), follow_redirects=True)
         self.assertNotIn('No entries here so far', rv.get_data(), 'Post unsuccessful')
         self.assertIn('by admin', rv.get_data())
-        self.assertIn(' hahahahah', rv.get_data())
 
     def test_comment(self):
         self.login('admin', 'default')
@@ -305,18 +303,6 @@ class TimeAndCommentTests(MeterageBaseTestClass):
             ), follow_redirects=True)
         assert '&lt;fathima&gt;' in rv.data
 
-
-    def test_description(self):
-        self.login('admin', 'default')
-        self.generic_post()
-        rv = self.app.post('/add', data=dict(
-            title='<Hi>',
-            text='<strong>HTML</strong> allowed here',
-            start_time= '<15:00>',
-            task_des='User is talking about food'
-            ), follow_redirects=True)
-        assert 'No entries here so far' not in rv.data
-        assert 'User is talking about food' in rv.data
 
 class GravatarTests(MeterageBaseTestClass):
 
