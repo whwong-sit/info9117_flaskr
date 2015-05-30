@@ -2,8 +2,17 @@
 {% block body %}
 
 {% if session.logged_in %}
+<style type="text/css">
+ul {
+margin:0;padding:0;
+list-style:none;
+}
+</style>
 
-<ul class=entries>
+<div style="float:left; width:50%">
+<table width="100%">
+<tr>
+<td><ul class=entries>
     {% for entry in entries1 %}
     <li><h2><a href=" {{ url_for('show_entries') }}">{{ entry.title }}</a><span
             class=user> by {{ entry.username }} </span></h2> {{ entry.text|safe }}
@@ -11,6 +20,7 @@
     </h3> Started at: {{ entry.start_time }} | </span></h3> End at: {{ entry.end_time }}
     {% endfor%}
 </ul>
+
 {% if not task_ended %}
 <form action="{{ url_for('add_end_time', entry_id=entry_id) }}" method=post class=add_end_time>
     </dl>
@@ -18,21 +28,33 @@
         <input type=submit value=EndTask!>
 </form>
 {% endif %}
-
-<form action="{{ url_for('add_roles', entry_id=entry_id) }}" method=post class=add_roles>
+</td>
+</tr>
+</table>
+</div>
+<div style="float:left; width:50%">
+<table width="100%">
+<tr>
+<td><form action="{{ url_for('add_roles', entry_id=entry_id) }}" method=post class=add_roles>
 
         <dt>Roles:
         <dd><textarea name=user_role rows=1 cols=15></textarea>
 
         <dd><input type=submit value=Add>
 
-</form>
-<form action="{{ url_for('delete_roles', entry_id=entry_id) }}" method=post class=delete_roles>
+</form><form action="{{ url_for('delete_roles', entry_id=entry_id) }}" method=post class=delete_roles>
         <dd><input type=submit value=Reset>
 
-</form>
+</form></td>
+</tr>
+</table>
+</div>
 
-<div style="height:50; width:560px; background:white; word-wrap: break-word; word-break: normal;">
+
+<div style="float:left; width:50%">
+<table width="100%">
+<tr>
+<td>
     <ul class=roles>
         {% for role in roles %}
         <li>{{ role.user_role }}</li>
@@ -40,9 +62,14 @@
         <li><em>No Role Defined</em></li>
         {% endfor %}
     </ul>
+</td>
+</tr>
+</table>
 </div>
-
-<form action="{{ url_for('add_comments', entry_id=entry_id) }}" method=post class=add_comments>
+<div style="float:left; width:50%">
+<table width="100%"  style="position:absolute; left:20px; top:210px;">
+<tr>
+<td><form action="{{ url_for('add_comments', entry_id=entry_id) }}" method=post class=add_comments>
     <dl>
         <dt>Comments:
         <dd><textarea name=comment_input rows=5 cols=40></textarea>
@@ -51,19 +78,20 @@
     </dl>
 </form>
 
+<ul class=comments>
+    {% for comment in comments %}
+    <li>{{ comment.comment_input }}</li>
+    <li><h6>Commented at: {{ comment.comment_time }}<span class=user> by {{ comment.username }} </span></h6></li>
+    {% else %}
+    <li><em>No Comment Yet</em></li>
+    {% endfor %}
+
+</ul></td>
+</tr>
+</table>
+</div>
 {% endif %}
 
-<br>
-<div style="height:50; width:560px; background:white; word-wrap: break-word; word-break: normal;">
 
-    <ul class=comments>
-        {% for comment in comments %}
-        <li>{{ comment.comment_input }}</li>
-        <li>Commented at: {{ comment.comment_time }}<span class=user> by {{ comment.username }} </span></li>
-        {% else %}
-        <li><em>No Comment Yet</em></li>
-        {% endfor %}
 
-    </ul>
-</div>
 {% endblock %}

@@ -71,11 +71,11 @@ def show_entries():
     into show_entries.html
     """
     cur = g.db.execute('select entries.title, entries.text, userPassword.username, '
-                       'entries.start_time, entries.end_time, userPassword.gravataremail, entries.id, task_des'
+                       'entries.start_time, entries.end_time, userPassword.gravataremail, entries.id'
                        ' from entries inner join userPassword on entries.username=userPassword.username'
                        ' order by entries.id desc')
     entries = [dict(title=row[0], text=row[1], username=row[2], start_time=row[3],
-                    end_time=row[4], gravataremail=row[5], avimg=avatar(row[5]), id=row[6], task_des=row[7]) for row in
+                    end_time=row[4], gravataremail=row[5], avimg=avatar(row[5]), id=row[6]) for row in
                cur.fetchall()]
     return render_template('show_entries.html', entries=entries)
 
@@ -87,14 +87,13 @@ def add_entry():
 
     if request.form['start_time'] == '':
         # use the default time (current time)
-        g.db.execute('insert into entries (title, text, username, task_des) values (?,?,?,?)',
-                     [request.form['title'], request.form['text'], session['username'], request.form['task_des']])
+        g.db.execute('insert into entries (title, text, username) values (?,?,?)',
+                     [request.form['title'], request.form['text'], session['username']])
 
     else:
-        g.db.execute('insert into entries (title, text, username, start_time, task_des)'
-                     ' values (?,?,?,?,?)',
-                     [request.form['title'], request.form['text'], session['username'], request.form['start_time'],
-                      request.form['task_des']])
+        g.db.execute('insert into entries (title, text, username, start_time)'
+                     ' values (?,?,?,?)',
+                     [request.form['title'], request.form['text'], session['username'], request.form['start_time']])
     g.db.commit()
 
     flash('New entry was successfully posted')
@@ -321,5 +320,4 @@ if __name__ == '__main__':
                            [user.username, user.password, user.gravataremail])
             db.commit()
 
-    app.run()
-
+    app.run(host='0.0.0.0',port=5000)

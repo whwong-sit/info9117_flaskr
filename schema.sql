@@ -10,8 +10,7 @@ create table entries (
   text text not null,
   username text not null,
   start_time timestamp default (datetime(current_timestamp,'localtime')),
-  end_time timestamp,
-  task_des text
+  end_time timestamp
 );
 
 -- store user information
