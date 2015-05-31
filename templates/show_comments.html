@@ -3,10 +3,15 @@
 
 {% if session.logged_in %}
 <style type="text/css">
-ul {
-margin:0;padding:0;
-list-style:none;
-}
+    ul {
+    margin:0;padding:0;
+    list-style:none;
+    }
+</style>
+<style type="text/css">
+    wrap{
+    white-space:normal; width:100px;
+    }
 </style>
 
 <div style="float:left; width:50%">
@@ -33,7 +38,7 @@ list-style:none;
 </table>
 </div>
 <div style="float:left; width:50%">
-<table width="100%">
+<table width="100%" style="position:absolute; left:400px; top:270px;">
 <tr>
 <td><form action="{{ url_for('add_roles', entry_id=entry_id) }}" method=post class=add_roles>
 
@@ -52,7 +57,7 @@ list-style:none;
 
 
 <div style="float:left; width:50%">
-<table width="100%">
+<table width="100%" style="position:absolute; left:400px; top:370px;">
 <tr>
 <td>
     <ul class=roles>
@@ -67,7 +72,7 @@ list-style:none;
 </table>
 </div>
 <div style="float:left; width:50%">
-<table width="100%"  style="position:absolute; left:20px; top:210px;">
+<table width="100%" length="300px"  style="position:absolute; left:400px; top:100px;">
 <tr>
 <td><form action="{{ url_for('add_comments', entry_id=entry_id) }}" method=post class=add_comments>
     <dl>
@@ -78,20 +83,33 @@ list-style:none;
     </dl>
 </form>
 
-<ul class=comments>
-    {% for comment in comments %}
-    <li>{{ comment.comment_input }}</li>
-    <li><h6>Commented at: {{ comment.comment_time }}<span class=user> by {{ comment.username }} </span></h6></li>
-    {% else %}
-    <li><em>No Comment Yet</em></li>
-    {% endfor %}
-
-</ul></td>
+</td>
 </tr>
 </table>
 </div>
 {% endif %}
 
+<div>
+<table width="100%" >
+<tr>
+<td>
+    <br>
+    <form>
+    <ul class=comments  >
+    {% for comment in comments %}
+    <li><wrap>{{ comment.comment_input }}</wrap></li>
+    <li><h6>Commented at: {{ comment.comment_time }}<span class=user> by {{ comment.username }} </span></h6></li>
+    {% else %}
+    <li><em>No Comment Yet</em></li>
+    {% endfor %}
+
+</ul>
+        </form>
+
+</td>
+</tr>
+</table>
+</div>
 
 
 {% endblock %}
