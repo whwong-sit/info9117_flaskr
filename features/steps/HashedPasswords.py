@@ -8,10 +8,8 @@ import meterage
 @given(u'all the users and passwords in plain text')
 def step_impl(context):
     # getting users in database
-    with closing(meterage.connect_db()) as db:
-        cur = db.execute('select username, password from userPassword')
-        context.hasheduser = [dict(username=row[0], password=row[1]) for row in cur.fetchall()]
-        assert context.hasheduser[0]['username']=='admin', context.hasheduser
+    assert context.users['admin'] == 'default'
+    assert context.users['hari'] == 'seldon'
 	
 @given(u'the admin is login')
 def step_impl(context):
@@ -32,16 +30,19 @@ def step_impl(context):
 @given(u'the user knows the hashed value of their passwords')
 def step_impl(context):
     # getting users in database
-    with closing(meterage.connect_db()) as db:
-        cur = db.execute('select username, password from userPassword')
-        context.hasheduser = [dict(username=row[0], password=row[1]) for row in cur.fetchall()]
-        assert context.hasheduser[0]['username']=='admin', context.hasheduser
+    context.hasheduser = meterage.User.query.all()
+    assert context.hasheduser[0].username == 'admin'
+    assert context.hasheduser[0].password != 'default'
+    assert context.hasheduser[1].username == 'hari'
+    assert context.hasheduser[1].password != 'seldon'
 
 # WHENS
 
 @when(u'we compare them with passwords stored in database')
 def step_impl(context):
-    pass
+    context.userObjects = meterage.User.query.all()
+    assert context.userObjects, 'there are no users'
+    # comparison will be performed in the next step
 
 @when(u'the admin changed a user password')
 def step_impl(context):
@@ -66,8 +67,8 @@ def step_impl(context):
 
 @then(u'they should not be the same')
 def step_impl(context):
-    assert context.users['admin']!=context.hasheduser[0]['password']
-    assert context.users['hari']!=context.hasheduser[1]['password']
+    assert context.users['admin'] != context.userObjects[0].password
+    assert context.users['hari'] != context.userObjects[1].password
 
 @then(u'the user should not be able to log in with old password')
 def step_impl(context):
@@ -89,6 +90,6 @@ def step_impl(context):
     context.rv = context.app.post('/login', data=dict(
         username='hari',
         #please refer to environment.py for users
-        password=context.hasheduser[1]['password']
+        password=context.hasheduser[1].password
     ), follow_redirects=True)
     assert "Invalid password" in context.rv.get_data()
