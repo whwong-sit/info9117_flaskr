@@ -35,7 +35,7 @@
     <ul class=comments>
         {% for comment in comments %}
         <li>{{ comment.text }} <span
-                class=user> by {{ comment.author.username }} at {{ comment.posttime | timestamp }} </span></li>
+                class=user> by <img src="{{ comment.author.gravataremail | gravatar(size=10) }}"></i> {{ comment.author.username }} at {{ comment.posttime | timestamp }} </span></li>
         {% else %}
         <li><em>No Comment Yet</em></li>
         {% endfor %}
