@@ -4,6 +4,7 @@ import urllib
 from flask import request, redirect, url_for, abort, render_template, flash
 from jinja2 import Markup
 from flask_bcrypt import check_password_hash
+from flask_gravatar import Gravatar
 
 from . import *
 
@@ -178,8 +179,12 @@ def newline_filter(s):
     # Markup() is used to prevent '<' and '>' symbols from being interpreted as less-than or greater-than symbols
     return Markup(s)
 
-@app.template_filter('gravataremail')
-def gravatar_filter(email, size=50):
-    gravatar_url = "http://www.gravatar.com/avatar/" + hashlib.md5(email.lower()).hexdigest()+"?"
-    gravatar_url += urllib.urlencode({'d': "monsterid", 's': str(size)})
-    return gravatar_url
+# This is a Gravatar object, used by Flask-Gravatar extension as a filter in templates
+gravatar = Gravatar(app,
+                    size=50,
+                    rating='g',
+                    default='retro',
+                    force_default=False,
+                    force_lower=False,
+                    use_ssl=False,
+                    base_url=None)

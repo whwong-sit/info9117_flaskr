@@ -1,10 +1,7 @@
 import os
 import unittest
 import tempfile
-from contextlib import closing
 import time
-from flask_sqlalchemy import SQLAlchemy
-from os.path import isfile
 
 import meterage
 
@@ -22,9 +19,13 @@ class MeterageBaseTestClass(unittest.TestCase):
         self.db_fd, meterage.app.config['DATABASE'] = tempfile.mkstemp()
         meterage.app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + meterage.app.config['DATABASE']
         meterage.app.config['TESTING'] = True
+
+        # We cannot be in debug mode or Flask raises an AssertionError
         meterage.app.config['DEBUG'] = False
+
+        # Make this true to see all of the SQL queries fly by in the console
         meterage.app.config['SQLALCHEMY_ECHO'] = False
-        meterage.db = SQLAlchemy(meterage.app)
+        meterage.db = meterage.SQLAlchemy(meterage.app)
         reload(meterage.models)
         self.app = meterage.app.test_client()
 
@@ -36,7 +37,7 @@ class MeterageBaseTestClass(unittest.TestCase):
         gravataremails = ["daisy22229999@gmail.com", "nongravataremailaddress@gmail.com"]
         users = zip(usernames, passwords, gravataremails)
 
-        for username, password, gravataremail in zip(usernames, passwords, gravataremails):
+        for username, password, gravataremail in users:
             if username == 'admin':
                 user = meterage.User(username, password, gravataremail, True)
             else:
@@ -48,7 +49,6 @@ class MeterageBaseTestClass(unittest.TestCase):
         """
         close temporary file and remove from filesystem
         """
-        # os.close(self.db_fd)
         os.unlink(meterage.app.config['DATABASE'])
 
         ### Some useful functions

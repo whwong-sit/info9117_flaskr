@@ -1,7 +1,6 @@
 from flask_bcrypt import generate_password_hash, check_password_hash
 from . import db
 from sqlalchemy.ext.hybrid import hybrid_property
-# from datetime import datetime
 import time
 
 class User(db.Model):
@@ -34,7 +33,7 @@ class User(db.Model):
         self.username = username
         self.password = password
         self.gravataremail = gravataremail
-        self.admin=admin
+        self.admin = admin
 
     @hybrid_property
     def password(self):

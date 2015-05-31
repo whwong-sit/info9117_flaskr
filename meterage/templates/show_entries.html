@@ -19,7 +19,7 @@
 {% endif %}
 <ul class=entries>
 {% for entry in entries %}
-    <li><h2><i><img src="{{ entry.author.gravataremail | gravataremail }}"></i><a
+    <li><h2><i><img src="{{ entry.author.gravataremail | gravatar }}"></i><a
             href="{{ url_for('show_comments', entry_id=entry.id) }}">{{ entry.title
         }}</a> <span class=user> by {{ entry.author.username }} </span></h2>
 

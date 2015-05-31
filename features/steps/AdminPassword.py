@@ -61,18 +61,15 @@ def step_impl(context):
     """
     Check in the database to see that the new value for the user's password is as it should be.
     """
-    with closing(meterage.connect_db()) as db:
-        cur = db.execute('select password from userPassword where username=?', ['hari'])
-        assert len(cur.fetchall()) == 1, "username is not unique"
-        for pw in [row[0] for row in cur.fetchall()]:
-            assert pw == "potter", "Password has not been changed successfully"
+    u = meterage.User.query.filter_by(username='hari').all()
+    assert len(u) == 1, 'username is not unique'
+    assert u[0].check_password('potter'), 'Password change failed.'
 
 @then(u'the change fails')
 def step_impl(context):
 
-    with closing(meterage.connect_db()) as db:
-        cur = db.execute('select password from userPassword where username=?', ['h'])
-        assert len(cur.fetchall()) == 0, "the username entered by the admin corresponds to a user in the database"
+    assert meterage.User.query.filter_by(username='h').first() is None, \
+        "the username entered by the admin corresponds to a user in the database"
 
     errorstring = "<p class=error><strong>Error:</strong>User does not exist</p>"
     assert errorstring in context.rv.get_data(), "the error is not being displayed"

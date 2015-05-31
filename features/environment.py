@@ -3,8 +3,6 @@ import tempfile
 from contextlib import closing
 
 import meterage
-from meterage.models import User
-
 
 # These run before and after every step.
 def before_step(context, step):
@@ -30,30 +28,34 @@ def before_feature(context, feature):
     Create a new test client, initialise a database and activate TESTING mode
     """
     context.db_fd, meterage.app.config['DATABASE'] = tempfile.mkstemp()
+    meterage.app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + meterage.app.config['DATABASE']
     meterage.app.config['TESTING'] = True
-    context.app = meterage.app.test_client()
-    meterage.init_db()
 
-    #flat dictionary of users, so we have access to the plain text versions of the passwords
+    # We cannot be in debug mode or Flask raises an AssertionError
+    meterage.app.config['DEBUG'] = False
+
+    # Make this true to see all of the SQL queries fly by in the console
+    meterage.app.config['SQLALCHEMY_ECHO'] = False
+    meterage.db = meterage.SQLAlchemy(meterage.app)
+    reload(meterage.models)
+    context.app = meterage.app.test_client()
+
+    meterage.db.create_all()
+
+    # flat dictionary of users, so we have access to the plain text versions of the passwords
     context.users = {"admin": "default", "hari": "seldon"}
 
     # add users to the temporary database
     # Note that an admin and a normal user are added.
-    with closing(meterage.connect_db()) as db:
-        admin = User('admin', 'default', 'admin@unix.org')
-        db.execute('insert into userPassword (username, password, gravataremail) values (?, ?, ?)',
-                   [admin.username, admin.password, admin.gravataremail])
-        user = User('hari', 'seldon', 'hari@stroustrup.com')
-        db.execute('insert into userPassword (username, password, gravataremail) values (?, ?, ?)',
-                   [user.username, user.password, user.gravataremail])
-        db.commit()
+    meterage.db.session.add(meterage.User('admin', 'default', 'admin@unix.org', True))
+    meterage.db.session.add(meterage.User('hari', 'seldon', 'hari@stroustrup.com'))
+    meterage.db.session.commit()
 
 
 def after_feature(context, feature):
     """
     Close temporary file and remove from filesystem
     """
-    os.close(context.db_fd)
     os.unlink(meterage.app.config['DATABASE'])
 
 
