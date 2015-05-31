@@ -1,50 +1,50 @@
 {% extends "layout.html" %}
 {% block body %}
-  {% if session.logged_in %}
-  <form action="{{ url_for('add_entry') }}" method="POST" class="add-entry">
-    <dl>
-        <div class="form-group">
-            <label for="title">Title:</label>
-            <input type="text" class="form-control" id="title">
-        </div>
-        <!--<dt>Title:-->
-        <!--<dd><input type=text size=30 name=title>-->
-        <div class="form-group">
-            <label for="text">Text:</label>
-            <textarea name="text" rows="5" class="form-control" id="text"></textarea>
-        </div>
-        <!--<dt>Text:-->
-        <!--<dd><textarea name=text rows=5 cols=40></textarea>-->
-        <div class="form-group">
-            <label for="start_time">Start time:</label>
-            <input type="time" name="start_time", id="start_time">
-        </div>
-		<!--<dt>Start time:-->
-		<!--<dd><input type=time name=start_time>-->
-        <div class="form-group">
-            <label for="task_des">Description:</label>
-            <textarea name="task_des" rows="5" class="form-control" id="task_des"></textarea>
-        </div>
-        <!--<dt>Description:-->
-        <!--<dd><textarea name=task_des rows=5 cols=40></textarea>-->
-        <dd><input type=submit class="btn purple" value="Share">
-    </dl>
-  </form>
-  <hr>
-  {% endif %}
+{% if session.logged_in %}
+<form action="{{ url_for('add_entry') }}" method="POST" class="add-entry">
+    <div class="form-group">
+        <label for="title">Title:</label>
+        <input name="title" type="text" class="form-control" id="title">
+    </div>
+    <div class="form-group">
+        <label for="text">Text:</label>
+        <textarea name="text" rows="5" class="form-control" id="text"></textarea>
+    </div>
+    <div class="form-group">
+        <label for="start_time">start time:</label>
+        <input type="time" name="start_time" id="start_time">
+    </div>
+    <div class="form-group">
+        <label for="task_des">Description:</label>
+        <textarea name="task_des" rows="5" class="form-control" id="task_des"></textarea>
+    </div>
+    <input type=submit class="btn purple" value="Share">
+</form>
+<hr>
+{% endif %}
 
 
-<h3 class="page-title">View Existing Development Log</h3>
+<h3 class="page-title">Meterage</h3>
 <ul class="chats" style="padding-top:10px">
-{% for entry in entries %}
-    <li><h2><i><img src="{{entry.avimg}}"></i><a href="{{ url_for('show_comments', entry_id=entry.id) }}">{{ entry.title }}</a> <span class=user> by {{ entry.username }} </span></h2>
-        <div class=datetime> start time: {{entry.start_time}}
-            end time:{{entry.end_time}}
+    {% for entry in entries %}
+    <li><h2><img src="{{ entry.avimg }}"><a href="{{ url_for('show_comments', entry_id=entry.id) }}">{{
+        entry.title }}</a> <span class=user> by {{ entry.username }} </span></h2>
+
+        <div class="form-group">
+            <label for="starttime">start time:</label>
+            <strong id="starttime">{{ entry.start_time }}</strong>
         </div>
-        Text: {{ entry.text | newlines }}
-        <div>Description: {{ entry.task_des | newlines }}</div>
-{% else %}
-<li><em>No entries here yet</em></li>
-{% endfor %}
+        <div class="form-group">
+            <label for="endtime">end time:</label>
+            <strong id="endtime">{{ entry.end_time }}</strong>
+        </div>
+        <div class="form-group">
+            <label for="entrytext">Text:</label>
+            <div class="panel-body" id="entrytext">{{ entry.text | newlines }}</div>
+        </div>
+
+        {% else %}
+    <li><p class="bg-primary">No entries here yet</p></li>
+    {% endfor %}
 </ul>
 {% endblock %}
