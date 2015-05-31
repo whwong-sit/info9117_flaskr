@@ -110,23 +110,26 @@ def login():
     """
     error = None
     if request.method == 'POST':
-        cur = g.db.execute('select username, password, gravataremail, flag_approval from userPassword where username=?',
+        cur = g.db.execute('select username, password, gravataremail, flag_approval, flag_admin from'
+                           ' userPassword where username=?',
                            [request.form['username']])
         row = cur.fetchone()
 
         if row is not None:
             # if the user is found
-            user = {'username': row[0], 'password': row[1], 'gravataremail': row[2], 'flag_approval': row[3]}
+            user = {'username': row[0], 'password': row[1], 'gravataremail': row[2], 'flag_approval': row[3],
+                    'flag_admin': row[4]}
 
             if not check_password_hash(user['password'], request.form['password']):
                 # if the password hash in the database does not correspond to the hashed form of the given password
                 error = 'Invalid password'
-            elif user['flag_approval']!=1:
+            elif user['flag_approval'] != 1:
                 error = 'Please contact admin for permission to access'
             else:
                 session['logged_in'] = True
                 session['username'] = user['username']
                 session['gravataremail'] = user['gravataremail']
+                session['admin'] = row[4]
                 flash('You were logged in')
                 return redirect(url_for('show_entries'))
         else:
@@ -183,6 +186,7 @@ def add_roles(entry_id):
     g.db.commit()
     flash('New role was successfully posted')
     return redirect(url_for('show_comments', entry_id=entry_id))
+
 
 @app.route('/<entry_id>/delete_roles', methods=['POST'])
 def delete_roles(entry_id):
@@ -405,8 +409,8 @@ if __name__ == '__main__':
         usernames = ["admin", "hari", "jim", "spock"]
         passwords = ["default", "seldon", "bean", "vulcan"]
         gravataremails = ['daisy22229999@gmail.com', 'daisy200029@gmail.com', "jimbean@whisky.biz", "livelong@prosper.edu.au"]
-        flag_admins=[True, False, False, False]
-        flag_approvals=[True, True, True, True]
+        flag_admins = [True, False, False, False]
+        flag_approvals = [True, True, True, True]
 
         with closing(connect_db()) as db:
             for username, password, gravataremail, flag_admin, flag_approval in zip(usernames, passwords, gravataremails, flag_admins, flag_approvals):
@@ -415,4 +419,4 @@ if __name__ == '__main__':
                 db.execute('insert into userPassword (username, password, gravataremail, flag_admin, flag_approval) values (?, ?, ?, ?, ?)',
                            [user.username, user.password, user.gravataremail, user.flag_admin, user.flag_approval])
             db.commit()
-    app.run(host='0.0.0.0',port=8080)
+    app.run(host='0.0.0.0', port=8080)
