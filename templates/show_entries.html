@@ -3,14 +3,30 @@
   {% if session.logged_in %}
   <form action="{{ url_for('add_entry') }}" method="POST" class="add-entry">
     <dl>
-        <dt>Title:
-        <dd><input type=text size=30 name=title>
-        <dt>Text:
-        <dd><textarea name=text rows=5 cols=40></textarea>
-		<dt>Start time:
-		<dd><input type=time name=start_time>
-        <dt>Description:
-        <dd><textarea name=task_des rows=5 cols=40></textarea>
+        <div class="form-group">
+            <label for="title">Title:</label>
+            <input type="text" class="form-control" id="title">
+        </div>
+        <!--<dt>Title:-->
+        <!--<dd><input type=text size=30 name=title>-->
+        <div class="form-group">
+            <label for="text">Text:</label>
+            <textarea name="text" rows="5" class="form-control" id="text"></textarea>
+        </div>
+        <!--<dt>Text:-->
+        <!--<dd><textarea name=text rows=5 cols=40></textarea>-->
+        <div class="form-group">
+            <label for="start_time">Start time:</label>
+            <input type="time" name="start_time", id="start_time">
+        </div>
+		<!--<dt>Start time:-->
+		<!--<dd><input type=time name=start_time>-->
+        <div class="form-group">
+            <label for="task_des">Description:</label>
+            <textarea name="task_des" rows="5" class="form-control" id="task_des"></textarea>
+        </div>
+        <!--<dt>Description:-->
+        <!--<dd><textarea name=task_des rows=5 cols=40></textarea>-->
         <dd><input type=submit class="btn purple" value="Share">
     </dl>
   </form>
