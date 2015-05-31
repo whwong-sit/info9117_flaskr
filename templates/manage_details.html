@@ -1,38 +1,49 @@
 {% extends "layout.html" %}
 {% block body %}
-<head>
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
-<script>
-$(document).ready(function(){
-    $("button").click(function(){
-        $(".hidden").toggle();
-        $("button").toggle();
-        $("span").toggle();
-    });
-});
-</script>
-</head>
 <body>
 
-  <h2>Manage Details</h2>
+<h2>Manage Details</h2>
 
-  <form action="{{ url_for('manage_details', username=session.username) }}" method=post>
+<form action="{{ url_for('manage_details', username=session.username) }}" method=post>
 
-      <table>
-          <tr>
-              <td><b>Username</b>:</td>
-              <td><span>{{ session.username }}</span><input class="hidden" type="text" name="username" value="{{ session.username }}"></td>
-          </tr>
-          <tr>
-              <td><b>Gravatar Email</b>:</td>
-              <td><span>{{ session.gravataremail }}</span><input class="hidden" type="email" name="gravataremail" value="{{ session.gravataremail }}"></td>
-          </tr>
-      </table>
+    <div class="row">
+        <div class="col-md-3"><strong>Username:</strong></div>
+        <div class="col-md-9">{{ session.username }}</div>
+    </div>
+    <div class="row">
+        <div class="col-md-3"><strong>Gravatar Email:</strong></div>
+        <div class="col-md-9">{{ session.gravataremail }}</div>
+    </div>
 
-    <input class="hidden" type=submit value="save" name="save">
-    <input class="hidden" type=submit value="cancel" name="cancel">
-  </form>
+</form>
 
-  <button>edit details</button>
+<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#detailsModal">edit details</button>
+
+<div id="detailsModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Edit Details</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="username">Name:</label>
+                    <input class="form-control" type="text" name="username" value="{{ session.username }}"
+                           id="username">
+                </div>
+                <div class="form-group">
+                    <label for="gemail">Gravatar Email:</label>
+                    <input class="form-control" type="email" name="gravataremail" value="{{ session.gravataremail }}"
+                           id="gemail">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <input type="submit" class="btn btn-default" value="Save" name="save">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 {% endblock %}
