@@ -2,6 +2,8 @@ from flask_bcrypt import generate_password_hash, check_password_hash
 from . import db
 from sqlalchemy.ext.hybrid import hybrid_property
 import time
+from datetime import datetime
+
 
 class User(db.Model):
     """
@@ -106,6 +108,7 @@ class Comment(db.Model):
     author = db.relationship('User', backref='comments', lazy='joined')
 
     text = db.Column(db.Text)
+    posttime = db.Column(db.DateTime)
 
     def __repr__(self):
         return '<Comment by {0}>'.format(self.author)
@@ -114,3 +117,4 @@ class Comment(db.Model):
         self.user_id = user_id
         self.text = text
         self.entry_id = entry_id
+        self.posttime = datetime.now()

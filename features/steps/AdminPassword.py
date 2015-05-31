@@ -1,6 +1,7 @@
 from behave import *
+
 import meterage
-from contextlib import closing
+
 
 
 #### GIVENS

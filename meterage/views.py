@@ -1,10 +1,9 @@
-import hashlib
-import urllib
-
 from flask import request, redirect, url_for, abort, render_template, flash
 from jinja2 import Markup
 from flask_bcrypt import check_password_hash
 from flask_gravatar import Gravatar
+
+import datetime
 
 from . import *
 
@@ -89,14 +88,10 @@ def add_end_time(entry_id):
         abort(401)
     # if end_time_null_check is True:
     entry = Entry.query.filter_by(id=entry_id).first()
-    # TOOO fix formatting of time (strftime)
     entry.end_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
     db.session.commit()
     flash('TASK ENDED')
     return redirect(url_for('show_comments', entry_id=entry_id))
-    # else:
-        # flash('TASK ALREADY ENDED')
-        # return redirect(url_for('show_comments', entry_id=entry_id))
 
 
 @app.route('/<entry_id>/end_time_null_check')
@@ -178,6 +173,12 @@ def newline_filter(s):
     s = s.replace("\n", '<br />')
     # Markup() is used to prevent '<' and '>' symbols from being interpreted as less-than or greater-than symbols
     return Markup(s)
+
+@app.template_filter('timestamp')
+def timestamp_filter(s):
+    if isinstance(s, datetime.datetime):
+        # return time.strftime("%Y-%m-%d %H:%M:%S", s.time())
+        return s.strftime("%Y-%m-%d %H:%M:%S")
 
 # This is a Gravatar object, used by Flask-Gravatar extension as a filter in templates
 gravatar = Gravatar(app,

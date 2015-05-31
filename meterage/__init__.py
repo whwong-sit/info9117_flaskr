@@ -18,7 +18,7 @@ app.config.from_pyfile('config.py')
 app.config.from_envvar('FLASKR_SETTINGS', silent=True)
 db = SQLAlchemy(app)
 
-# imports; these seem to have to be *here*
+# imports; these have to be *here*
 from models import User, Entry, Comment
 import views
 

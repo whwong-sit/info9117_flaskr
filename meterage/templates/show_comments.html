@@ -4,16 +4,18 @@
 {% if session.logged_in %}
 
 <ul class=entries>
-    <li><h2><a href=" {{ url_for('show_entries') }}">{{ entry.title }}</a><span
+    <li><h2><i><img src="{{ entry.author.gravataremail | gravatar }}"></i><a href=" {{ url_for('show_entries') }}">{{
+        entry.title }}</a><span
             class=user> by {{ entry.author.username }} </span></h2> {{ entry.text | newlines }}
     </li>
-    </h3> Started at: {{ entry.start_time }} | </span></h3> End at: {{ entry.end_time }}
+    <h3> Started at: {{ entry.start_time }} </span> </h3>
+
+    <h3> End at: {{ entry.end_time }} </span></h3>
 </ul>
 
 
 <form action="{{ url_for('add_end_time', entry_id=entry_id) }}" method=post class=add_end_time>
-    </dl>
-    <dt>Press to end task:
+    Press to end task:
         <input type=submit value=EndTask!>
 </form>
 
@@ -32,7 +34,8 @@
 
     <ul class=comments>
         {% for comment in comments %}
-        <li>{{ comment.text }} <span class=user> by {{ comment.author.username }} </span></li>
+        <li>{{ comment.text }} <span
+                class=user> by {{ comment.author.username }} at {{ comment.posttime | timestamp }} </span></li>
         {% else %}
         <li><em>No Comment Yet</em></li>
         {% endfor %}

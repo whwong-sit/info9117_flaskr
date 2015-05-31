@@ -1,8 +1,8 @@
 import os
 import tempfile
-from contextlib import closing
 
 import meterage
+
 
 # These run before and after every step.
 def before_step(context, step):

@@ -1,7 +1,9 @@
-from behave import *
-import meterage
-from contextlib import closing
 from re import sub
+
+from behave import *
+
+import meterage
+
 
 
 #### GIVENS
@@ -53,7 +55,6 @@ def step_impl(context, detail):
     # This should take the new value of <detail> and put it through the
     # POST method of /users/<username>/
     rv = context.app.post('/user/<username>', data=data, follow_redirects=True)
-    # print(rv.get_data())
 
     # this ensures that the session's username is still functioning
     context.execute_steps(u'''
@@ -61,16 +62,14 @@ def step_impl(context, detail):
         then account details are displayed
     ''')
 
-    with closing(meterage.connect_db()) as db:
-        with context.app.session_transaction() as sess:
+    with context.app.session_transaction() as sess:
         # see http://flask.pocoo.org/docs/0.10/testing/#accessing-and-modifying-sessions for
         # an explanation of accessing sessions during testing.
-            cur = db.execute('select username, gravataremail from userPassword')
-            rows = [dict(username=row[0], gravataremail=row[1]) for row in cur.fetchall()]
-            assert rows, "userPassword table has not been populated"
-            for row in rows:
-                if row["username"] == sess["username"]:
-                    if detail == "Gravatar email":
-                        assert data["gravataremail"] == row["gravataremail"], "new Gravatar email is not in the database"
-                    elif detail == "username":
-                        assert data[detail] == row["username"], "new username is not in the database"
+        allusers = meterage.User.query.all()
+        assert allusers, "database tables have not been populated"
+        for user in allusers:
+            if user.username == sess['username']:
+                if detail == 'Gravatar email':
+                    assert data['gravataremail'] == user.gravataremail, 'new Gravatar email is not in the database'
+                elif detail == 'username':
+                    assert data[detail] == user.username, 'new username is not in the database'

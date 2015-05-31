@@ -7,6 +7,7 @@ import meterage
 
 from flask_bcrypt import generate_password_hash
 
+
 class MeterageBaseTestClass(unittest.TestCase):
     """
     Base class for unit tests, with some convenient methods to inherit.
@@ -21,9 +22,10 @@ class MeterageBaseTestClass(unittest.TestCase):
         meterage.app.config['TESTING'] = True
 
         # We cannot be in debug mode or Flask raises an AssertionError
+        # TODO investigate this further; it is to do with imports into a central location upon initialisation
         meterage.app.config['DEBUG'] = False
 
-        # Make this true to see all of the SQL queries fly by in the console
+        # Make this True to see all of the SQL queries fly by in the console
         meterage.app.config['SQLALCHEMY_ECHO'] = False
         meterage.db = meterage.SQLAlchemy(meterage.app)
         reload(meterage.models)
@@ -31,13 +33,12 @@ class MeterageBaseTestClass(unittest.TestCase):
 
         meterage.db.create_all()
 
-        global users
         usernames = ["admin", "hari"]
         passwords = ["default", "seldon"]
         gravataremails = ["daisy22229999@gmail.com", "nongravataremailaddress@gmail.com"]
-        users = zip(usernames, passwords, gravataremails)
+        self.users = zip(usernames, passwords, gravataremails)
 
-        for username, password, gravataremail in users:
+        for username, password, gravataremail in self.users:
             if username == 'admin':
                 user = meterage.User(username, password, gravataremail, True)
             else:
@@ -51,7 +52,7 @@ class MeterageBaseTestClass(unittest.TestCase):
         """
         os.unlink(meterage.app.config['DATABASE'])
 
-        ### Some useful functions
+        # Some useful functions
 
     def login(self, username, password):
         """
@@ -82,14 +83,6 @@ class MeterageBaseTestClass(unittest.TestCase):
             end_time='<17:30>'
         ), follow_redirects=True)
 
-    # def userPassword_content(self):
-    #     """
-    #     Get all the data in the userPassword table
-    #     """
-    #     with closing(meterage.connect_db()) as db:
-    #         cur = db.execute('select username, password, gravataremail from userPassword')
-    #         return [dict(username=row[0], password=row[1], gravataremail=row[2]) for row in cur.fetchall()]
-
 
 class BasicTests(MeterageBaseTestClass):
 
@@ -106,15 +99,11 @@ class BasicTests(MeterageBaseTestClass):
         """
         Test that all users may log in and log out
         """
-        # for user in users:
-        #     rv = self.login(users[1][0], users[1][1])
-        #     self.assertIn('You were logged in', rv.get_data())
-        #     rv = self.logout()
-        #     self.assertIn('You were logged out', rv.get_data())
-        rv = self.login('admin', 'default')
-        self.assertIn('You were logged in', rv.get_data(), 'Login failed')
-        rv = self.logout()
-        self.assertIn('You were logged out', rv.get_data(), 'Logout failed')
+        for user in self.users:
+            rv = self.login(user[0], user[1])
+            self.assertIn('You were logged in', rv.get_data(), 'Login failed')
+            rv = self.logout()
+            self.assertIn('You were logged out', rv.get_data(), 'Logout failed')
 
     def test_invalid(self):
         """
@@ -138,7 +127,7 @@ class BasicTests(MeterageBaseTestClass):
         page returned.
         Check that HTML is allowed in the text but not in the title"
         """
-        for username, password, gravataremail in users:
+        for username, password, gravataremail in self.users:
             self.login(username, password)
             rv = self.generic_post()
             self.assertNotIn('No entries here so far', rv.get_data(), 'Post unsuccessful')
@@ -241,7 +230,7 @@ class HashedPasswordsTests(MeterageBaseTestClass):
         """
         Check that the hashed password is added to the database, not the plain text.
         """
-        for user in users:
+        for user in self.users:
             u = meterage.User.query.filter_by(username=user[0]).first()
             self.assertFalse(u.password == user[1], "Hashed password has not been added to the database")
 
@@ -262,7 +251,7 @@ class HashedPasswordsTests(MeterageBaseTestClass):
         """
         Test that entering the actual hash into the "password" box does not result in a successful login.
         """
-        for user in users:
+        for user in self.users:
             u = meterage.User.query.filter_by(username=user[0]).first()
             rv = self.login(u.username, u.password)
             self.assertIn("Invalid password", rv.get_data(), "Login did not fail as it should have")
@@ -287,7 +276,7 @@ class TimeAndCommentTests(MeterageBaseTestClass):
     def test_comment(self):
         self.login('admin', 'default')
         self.generic_post()
-        rv = self.app.post('/1/add_comments', data= dict(
+        rv = self.app.post('/1/add_comments', data=dict(
             comment_input='<FinalVERSION>'
         ), follow_redirects=True)
         self.assertNotIn('No entries here so far', rv.get_data(), 'Post unsuccessful')
@@ -309,19 +298,20 @@ class GravatarTests(MeterageBaseTestClass):
 
     def test_avatar(self):
         """
-        Test that meterage.avatar() method does return the correct Gravatar
+        Test that meterage.gravatar object does produce the correct Gravatar
         """
-        known_url = "http://www.gravatar.com/avatar/bf6c2e089dbd27ec1868027525bc42fe?s=50&d=monsterid"
-        self.assertEqual(meterage.views.gravatar_filter("daisy22229999@gmail.com"),
+        known_url = 'http://www.gravatar.com/avatar/bf6c2e089dbd27ec1868027525bc42fe?s=50&d=retro&r=g'
+        self.assertEqual(meterage.views.gravatar("daisy22229999@gmail.com"),
                          known_url, "Gravatar URL produced is incorrect")
 
     def test_gravatar_shown(self):
         """
         Test that the gravatar is shown on show_entries.html
         """
-        self.login("admin", "default")
+        self.login('admin', 'default')
         rv = self.generic_post()
-        image = '<i><img src="http://www.gravatar.com/avatar/bf6c2e089dbd27ec1868027525bc42fe?s=50&amp;d=monsterid">'
+        image = '<i><img src="http://www.gravatar.com/avatar/bf6c2e089dbd27e' \
+                'c1868027525bc42fe?s=50&amp;d=retro&amp;r=g"></i>'
         self.assertIn(image, rv.get_data(), "image is displayed incorrectly on show_entries.html")
 
     def test_non_gravatar_user(self):
@@ -337,16 +327,16 @@ class GravatarTests(MeterageBaseTestClass):
 class UserWebInterfaceTests(MeterageBaseTestClass):
 
     def test_web_interface_accessible(self):
-        raise NotImplementedError
+        raise NotImplementedError('Daisy said she wrote these tests on the master branch')
 
     def test_can_change_username(self):
-        raise NotImplementedError
+        raise NotImplementedError('Daisy said she wrote these tests on the master branch')
 
     def test_can_change_gravatar_email(self):
-        raise NotImplementedError
+        raise NotImplementedError('Daisy said she wrote these tests on the master branch')
 
     def test_username_unique(self):
-        raise NotImplementedError
+        raise NotImplementedError('Daisy said she wrote these tests on the master branch')
 
 if __name__ == '__main__':
     unittest.main()

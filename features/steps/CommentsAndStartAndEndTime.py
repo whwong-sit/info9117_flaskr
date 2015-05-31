@@ -1,6 +1,5 @@
 from behave import *
-from time import gmtime, strftime
-# import meterage
+from time import localtime, strftime
 
 # WHENS
 
@@ -40,9 +39,9 @@ def step_impl(context):
 
 @then(u'start time will auto sign')
 def step_impl(context):
-    assert strftime("%Y-%m-%d %H:%M", gmtime()) in context.rv.get_data(), context.rv.get_data()
+    assert strftime("%Y-%m-%d %H:%M", localtime()) in context.rv.get_data(), context.rv.get_data()
 
 
 @then(u'end time will auto sign')
 def step_impl(context):
-    assert 'End at: '+ strftime("%Y-%m-%d %H:%M", gmtime()) in context.rv.get_data()
+    assert 'End at: ' + strftime("%Y-%m-%d %H:%M", localtime()) in context.rv.get_data()

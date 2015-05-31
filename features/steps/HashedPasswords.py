@@ -1,4 +1,3 @@
-from contextlib import closing
 from behave import *
 import meterage
 
@@ -55,13 +54,16 @@ def step_impl(context):
         confirm_password='1234'
     ), follow_redirects=True)
 
-    assert "Successfully changed user password" in context.rv.get_data(), print (context.rv.get_data())
+    assert "Successfully changed user password" in context.rv.get_data(), context.rv.get_data()
     context.rv = context.app.get('/logout', follow_redirects=True)
     assert 'You were logged out' in context.rv.get_data()
 
 @when(u'the user is trying to log in with hashed string')
 def step_impl(context):
-    pass
+    context.rv = context.app.post('/login', data=dict(
+        username='hari',
+        password=context.hasheduser[1].password
+    ), follow_redirects=True)
 
 # THENS
 
@@ -87,9 +89,4 @@ def step_impl(context):
     """
     log in as hari with hashed string
     """
-    context.rv = context.app.post('/login', data=dict(
-        username='hari',
-        #please refer to environment.py for users
-        password=context.hasheduser[1].password
-    ), follow_redirects=True)
     assert "Invalid password" in context.rv.get_data()
