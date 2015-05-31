@@ -229,6 +229,7 @@ def end_time_null_check(entry_id):  # need to debug
 @app.route('/logout')
 def logout():
     session.pop('logged_in', None)
+    session.pop('username', None)
     flash('You were logged out')
     return redirect(url_for('show_entries'))
 
