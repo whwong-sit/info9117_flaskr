@@ -151,9 +151,9 @@ def show_comments(entry_id):
     roles = [dict(user_role=row[0]) for row in cur.fetchall()]
 
     end_time_is_null = end_time_null_check(entry_id)
-    #end_time_is_owner = end_time_owner_check(entry_id)
+    end_time_is_owner = end_time_owner_check(entry_id)
     return render_template('show_comments.html', entries1=entries1, comments=comments, roles=roles, entry_id=entry_id,
-                           task_ended=not end_time_is_null)#, owner_acc=end_time_is_owner)
+                           task_ended=not end_time_is_null, owner_acc=end_time_is_owner)
 
 
 @app.route('/<entry_id>/add_comments', methods=['POST'])
@@ -215,13 +215,15 @@ def end_time_null_check(entry_id):  # need to debug
     return end_time_fill[0]['end_time'] is None
 
 
-#@app.route('/<entry_id>/end_time_owner_check')
-#def end_time_owner_check(entry_id):  # need to debug
-#    cur = g.db.execute('select username from entries where id=' + entry_id)
-#    owner_fill = [dict(username=row[0]) for row in cur.fetchall()]
-#    if owner_fill == session['username']:
-#        return True
-
+@app.route('/<entry_id>/end_time_owner_check')
+def end_time_owner_check(entry_id):  # need to debug
+    cur = g.db.execute('select username from entries where id=' + entry_id)
+    owner_fill = [dict(username=row[0]) for row in cur.fetchall()]
+    #return owner_fill[0]['username'] == session['username']
+    if owner_fill[0]['username']:
+        return owner_fill[0]['username'] == session['username']
+    else:
+        return False
 
 @app.route('/logout')
 def logout():

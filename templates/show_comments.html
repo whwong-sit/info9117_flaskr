@@ -26,73 +26,15 @@
     {% endfor%}
 </ul>
 
-{% if not task_ended %}
+    <b>User same: {{ owner_acc }}</b>
+{% if not task_ended and owner_acc %}
 <form action="{{ url_for('add_end_time', entry_id=entry_id) }}" method=post class=add_end_time>
     </dl>
     <dt>Press to end task:
         <input type=submit value=EndTask!>
 </form>
 {% endif %}
-</td>
-</tr>
-</table>
-</div>
-<div style="float:left; width:50%">
-<table width="100%" style="position:absolute; left:400px; top:270px;">
-<tr>
-<td><form action="{{ url_for('add_roles', entry_id=entry_id) }}" method=post class=add_roles>
 
-        <dt>Roles:
-        <dd><textarea name=user_role rows=1 cols=15></textarea>
-
-        <dd><input type=submit value=Add>
-
-</form><form action="{{ url_for('delete_roles', entry_id=entry_id) }}" method=post class=delete_roles>
-        <dd><input type=submit value=Reset>
-
-</form></td>
-</tr>
-</table>
-</div>
-
-
-<div style="float:left; width:50%">
-<table width="100%" style="position:absolute; left:400px; top:370px;">
-<tr>
-<td>
-    <ul class=roles>
-        {% for role in roles %}
-        <li>{{ role.user_role }}</li>
-        {% else %}
-        <li><em>No Role Defined</em></li>
-        {% endfor %}
-    </ul>
-</td>
-</tr>
-</table>
-</div>
-<div style="float:left; width:50%">
-<table width="100%" length="300px"  style="position:absolute; left:400px; top:100px;">
-<tr>
-<td><form action="{{ url_for('add_comments', entry_id=entry_id) }}" method=post class=add_comments>
-    <dl>
-        <dt>Comments:
-        <dd><textarea name=comment_input rows=5 cols=40></textarea>
-
-        <dd><input type=submit value=Add>
-    </dl>
-</form>
-
-</td>
-</tr>
-</table>
-</div>
-{% endif %}
-
-<div>
-<table width="100%" >
-<tr>
-<td>
     <br>
     <form>
     <ul class=comments  >
@@ -110,6 +52,57 @@
 </tr>
 </table>
 </div>
+<div style="float:left; width:50%">
+<table width="100%">
+<tr>
+<td>
+    <br>
+    <br>
+    <br>
+   <form action="{{ url_for('add_comments', entry_id=entry_id) }}" method=post class=add_comments>
+    <dl>
+        <dt>Comments:
+        <dd><textarea name=comment_input rows=5 cols=40></textarea>
+
+        <dd><input type=submit value=Add>
+    </dl>
+</form>
+
+</td>
+</tr>
+</table>
+</div>
+
+
+
+<div style="float:right; width:50%">
+<table width="100%" length="300px">
+<tr>
+<td>
+    <form action="{{ url_for('add_roles', entry_id=entry_id) }}" method=post class=add_roles>
+
+        <dt>Roles:
+        <dd><textarea name=user_role rows=1 cols=15></textarea>
+
+        <dd><input type=submit value=Add>
+
+</form><form action="{{ url_for('delete_roles', entry_id=entry_id) }}" method=post class=delete_roles>
+        <dd><input type=submit value=Reset>
+
+</form>
+
+<ul class=roles>
+        {% for role in roles %}
+        <li>{{ role.user_role }}</li>
+        {% else %}
+        <li><em>No Role Defined</em></li>
+        {% endfor %}
+    </ul>
+</td>
+</tr>
+</table>
+</div>
+{% endif %}
 
 
 {% endblock %}
