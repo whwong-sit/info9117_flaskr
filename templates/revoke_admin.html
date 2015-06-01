@@ -1,0 +1,13 @@
+{% extends "layout.html" %}
+{% block body %}
+  <h2>Revoke Admin</h2>
+  {% if error %}<p class=error><strong>Error:</strong>{{ error }}</p>{% endif %}
+  {% if success %}<p class=success>{{ success }}</p>{% endif %}
+  <form action="{{ url_for('revoke_admin') }}" method=post>
+    <dl>
+        <dt>Username:
+        <dd><input type=text name=username required>
+        <dd><input type=submit value=revoke_admin>
+    </dl>
+  </form>
+{% endblock %}

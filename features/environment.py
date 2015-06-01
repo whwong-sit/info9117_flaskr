@@ -47,6 +47,12 @@ def before_feature(context, feature):
         user = User('hari', 'seldon', 'hari@stroustrup.com', False, True)
         db.execute('insert into userPassword (username, password, gravataremail,flag_admin,flag_approval) values (?, ?, ?,? ,?)',
                    [user.username, user.password, user.gravataremail, user.flag_admin, user.flag_approval])
+        user2 = User('spock', 'vulcan', 'livelong@prosper.edu.au', True, True)
+        db.execute('insert into userPassword (username, password, gravataremail,flag_admin,flag_approval) values (?, ?, ?,? ,?)',
+                   [user2.username, user2.password, user2.gravataremail, user2.flag_admin, user2.flag_approval])
+        user3 = User('test', 'test', 'test@test.edu.au', False, True)
+        db.execute('insert into userPassword (username, password, gravataremail,flag_admin,flag_approval) values (?, ?, ?,? ,?)',
+                   [user3.username, user3.password, user3.gravataremail, user3.flag_admin, user3.flag_approval])
         db.commit()
 
 

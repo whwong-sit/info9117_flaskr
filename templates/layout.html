@@ -139,7 +139,7 @@ Reference note: Template Based on Metronic - Responsive Admin Dashboard Template
 						</li>
 					</ul>
                 </li>                
-                {% if (session.username=="admin") %}
+                {% if (session.admin) %}
 				<li class="last ">
 					<a href="javascript:;">
 					<i class="fa fa-fw"></i>
@@ -156,6 +156,12 @@ Reference note: Template Based on Metronic - Responsive Admin Dashboard Template
 						</li>
 						<li>
 							<a href=" {{ url_for('approve_new_user') }}">Approve New User</a>
+						</li>
+						<li>
+							<a href=" {{ url_for('add_new_admin') }}">Add New Admin</a>
+						</li>
+						<li>
+							<a href=" {{ url_for('revoke_admin') }}">Revoke Admin</a>
 						</li>
 					</ul>
 				</li>
