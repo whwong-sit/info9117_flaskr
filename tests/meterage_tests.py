@@ -27,8 +27,8 @@ class MeterageBaseTestClass(unittest.TestCase):
         usernames = ["admin", "hari", "spock"]
         passwords = ["default", "seldon", "vulcan"]
         gravataremails = ["daisy22229999@gmail.com", "nongravataremailaddress@gmail.com", "livelong@prosper.edu.au"]
-        flag_admins=[True, False, False]
-        flag_approvals=[True, True, False]
+        flag_admins = [True, False, False]
+        flag_approvals = [True, True, False]
 		
         users = zip(usernames, passwords, gravataremails, flag_admins, flag_approvals)
 
@@ -306,7 +306,7 @@ class TimeAndCommentTests(MeterageBaseTestClass):
         rv=self.app.post('/1/add_roles', data=dict(
             user_role='<fathima>',
             ), follow_redirects=True)
-        assert '&lt;fathima&gt;' in rv.data
+        assert '&lt;fathima&gt;' in rv.get_data()
 
 
     def test_description(self):
@@ -318,8 +318,8 @@ class TimeAndCommentTests(MeterageBaseTestClass):
             start_time= '<15:00>',
             task_des='User is talking about food'
             ), follow_redirects=True)
-        assert 'No entries here so far' not in rv.data
-        assert 'User is talking about food' in rv.data
+        assert 'No entries here so far' not in rv.get_data()
+        assert 'User is talking about food' in rv.get_data()
 
 class GravatarTests(MeterageBaseTestClass):
 
@@ -518,7 +518,7 @@ class AddingNewAdminsTests(MeterageBaseTestClass):
             # see http://flask.pocoo.org/docs/0.10/testing/#accessing-and-modifying-sessions for
             # an explanation of accessing sessions during testing.
             print(rv.get_data())
-            self.assertTrue(sess['admin']==True, "You are logged in as admin")
+            self.assertTrue(sess['admin'], 'admin login failed')
 
 if __name__ == '__main__':
     unittest.main()
