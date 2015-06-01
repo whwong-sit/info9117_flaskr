@@ -72,10 +72,10 @@ def step_impl(context):
     POST a new password to the change_password page for the user hari
     """
     context.rv = context.app.post('/add_new_user', data=dict(
-        username='test',
+        username='test1',
         password='test',
 		confirm_password='test',
-		email='test@test.com'
+		email='test1@test1.com'
     ), follow_redirects=True)
 
 
