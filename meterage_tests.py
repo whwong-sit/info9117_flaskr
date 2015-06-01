@@ -2,6 +2,8 @@ import os
 import unittest
 import tempfile
 import time
+from sqlite3 import dbapi2 as sqlite3
+from contextlib import closing
 
 import meterage
 
@@ -82,6 +84,13 @@ class MeterageBaseTestClass(unittest.TestCase):
             start_time='<15:00>',
             end_time='<17:30>'
         ), follow_redirects=True)
+
+    def connect_db(self):
+        """
+        Make a connection to the database
+        database specified in the config.
+        """
+        return sqlite3.connect(meterage.app.config['DATABASE'])
 
 
 class BasicTests(MeterageBaseTestClass):
@@ -337,6 +346,44 @@ class UserWebInterfaceTests(MeterageBaseTestClass):
 
     def test_username_unique(self):
         raise NotImplementedError('Daisy said she wrote these tests on the master branch')
+
+class ORMTests(MeterageBaseTestClass):
+
+    def test_create(self):
+        """
+        Test that we can perform an SQL 'create'
+        """
+        meterage.db.session.add(meterage.Entry('A post', 'Body', 1))
+        meterage.db.session.commit()
+        with closing(self.connect_db()) as db:
+            cur = db.execute('select user_id, title, text, start_time, end_time from entries')
+            entries = [dict(user_id=row[0], title=row[1], text=row[2], start_time=row[3], end_time=row[4]) for row in cur.fetchall()]
+            self.assertTrue(entries, 'There are no entries committed to the database.')
+            self.assertEqual(len(entries), 1, 'there is more than one entry when there ought only be one')
+            self.assertEqual(entries[0]['title'], 'A post', 'Title was added incorrectly')
+            self.assertEqual(entries[0]['text'], 'Body', 'Text body was added incorrectly')
+            self.assertEqual(entries[0]['user_id'], 1, 'User ID was added incorrectly')
+            self.assertRegexpMatches(entries[0]['start_time'], '\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d', 'start time was added incorrectly')
+            self.assertFalse(entries[0]['end_time'], 'end time was added incorrectly')
+
+    def test_read(self):
+        """
+        Test that we can perform an SQL 'read'
+        """
+        raise NotImplementedError        
+
+    def test_update(self):
+        """
+        Test that we can perform an SQL 'update'
+        """
+        raise NotImplementedError
+
+
+    def test_delete(self):
+        """
+        Test that we can perform an SQL 'delete'
+        """
+        raise NotImplementedError
 
 if __name__ == '__main__':
     unittest.main()
