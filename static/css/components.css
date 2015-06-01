@@ -24,7 +24,11 @@ pre,
 li {
   -webkit-border-radius: 0 !important;
   -moz-border-radius: 0 !important;
+<<<<<<< HEAD
   border-radius: 0 !important;
+=======
+  border-radius: 5px !important;
+>>>>>>> origin/fixEntriesMainPage
 }
 
 /* except below bootstrap elements */

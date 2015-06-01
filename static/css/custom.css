@@ -57,4 +57,18 @@ Change Quick Sidebar Width
 .page-quick-sidebar-wrapper .page-quick-sidebar .page-quick-sidebar-content-item-shown .page-quick-sidebar-list {
   margin-left: -370px;
 }
+<<<<<<< HEAD
 */
+=======
+*/
+ul.entries, ul.comments, ul.roles {
+  padding-left: 0px;
+}
+
+div.roles, div.comments {
+  height:50;
+  width:560px;
+  word-wrap: break-word;
+  word-break: normal;
+}
+>>>>>>> origin/fixEntriesMainPage

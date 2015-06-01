@@ -3,9 +3,9 @@ from flask_bcrypt import generate_password_hash, check_password_hash
 
 class User(object):
     """
-    Defines a user with associated username, password and Gravatar email address.
+    Defines a user with associated username, password, Gravatar email address, admin privileges, and approval from admin for log in.
 
-    I am treating _username, _password and _gravataremail as private fields of the class, but this is purely an
+    I am treating _username, _password, _gravataremail, _flag_admin, and _flag_approval as private fiel, _flag_admin, and _flag_approvalds of the class, but this is purely an
     implementation detail.  You simply need to make an assignment to a User object's "password"
     field like so:
 
@@ -14,10 +14,12 @@ class User(object):
     and the setter function is automatically called.
     """
 
-    def __init__(self, username, password, gravataremail):
+    def __init__(self, username, password, gravataremail, flag_admin, flag_approval):
         self.username = username
         self.password = password
         self.gravataremail = gravataremail
+        self.flag_admin = flag_admin
+        self.flag_approval = flag_approval
 
     #### username
 
@@ -77,6 +79,44 @@ class User(object):
         the _gravataremail field so it can be returned in the getter.
         """
         self._gravataremail = newemail
+
+    #### identifier for admin privileges
+
+    @property
+    def flag_admin(self):
+        """
+        :return: The identifier for admin privileges
+        """
+        return self._flag_admin
+
+    @flag_admin.setter
+    def flag_admin(self, newflag_admin):
+        """
+        Set the identifier for admin privileges
+
+        This is as simple as it looks, simply making an assignment to
+        the _flag_admin field so it can be returned in the getter.
+        """
+        self._flag_admin = newflag_admin
+
+    #### identifier for admin approval
+
+    @property
+    def flag_approval(self):
+        """
+        :return: The identifier for admin approval
+        """
+        return self._flag_approval
+
+    @flag_approval.setter
+    def flag_approval(self, newflag_approval):
+        """
+        Set the identifier for admin approval
+
+        This is as simple as it looks, simply making an assignment to
+        the _flag_admin field so it can be returned in the getter.
+        """
+        self._flag_approval = newflag_approval
 
     #### check password
 

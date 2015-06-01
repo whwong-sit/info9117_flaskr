@@ -17,7 +17,9 @@ create table entries (
 create table userPassword (
   username text not null,
   password text not null,
-  gravataremail text not null
+  gravataremail text not null,
+  flag_admin boolean not null default false,
+  flag_approval boolean not null default false
 );
 
 -- store comments on entries

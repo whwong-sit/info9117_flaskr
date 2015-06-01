@@ -24,7 +24,11 @@ Login page
   margin: 40px auto 10px auto;
   padding: 30px;
   padding-top: 10px;
+<<<<<<< HEAD
   overflow: hidden;
+=======
+  /*overflow: hidden;*/
+>>>>>>> origin/fixEntriesMainPage
   position: relative;
 }
 

@@ -3,7 +3,11 @@ Page Header
 ***********/
 /* Header search bar, toggler button & top menu */
 .page-header.navbar {
+<<<<<<< HEAD
   background-color: #2b3643;
+=======
+  /* background-color: #2b3643;
+>>>>>>> origin/fixEntriesMainPage
   /* Top notification menu/bar */
   /* Header seaech box */
   /* Toggler button for sidebar expand/collapse and responsive sidebar menu */
@@ -900,7 +904,15 @@ Page Footer
 Boby
 ****/
 body {
+<<<<<<< HEAD
   background-color: #364150;
+=======
+  /*background-color: #92A6B8;*/
+
+  background-color: #364150;
+  /*background-color: #50647E;*/
+  /*background: url(/static/img/bg.jpg) repeat;*/
+>>>>>>> origin/fixEntriesMainPage
 }
 
 /****

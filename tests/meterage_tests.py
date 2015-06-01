@@ -24,17 +24,20 @@ class MeterageBaseTestClass(unittest.TestCase):
         meterage.init_db()
 
         global users
-        usernames = ["admin", "hari"]
-        passwords = ["default", "seldon"]
-        gravataremails = ["daisy22229999@gmail.com", "nongravataremailaddress@gmail.com"]
-        users = zip(usernames, passwords, gravataremails)
+        usernames = ["admin", "hari", "spock"]
+        passwords = ["default", "seldon", "vulcan"]
+        gravataremails = ["daisy22229999@gmail.com", "nongravataremailaddress@gmail.com", "livelong@prosper.edu.au"]
+        flag_admins=[True, False, False]
+        flag_approvals=[True, True, False]
+		
+        users = zip(usernames, passwords, gravataremails, flag_admins, flag_approvals)
 
         # add an admin and a normal user to the database
         with closing(meterage.connect_db()) as db:
-            for username, password, gravataremail in users:
-                user = User(username, password, gravataremail)
-                db.execute('insert into userPassword (username, password, gravataremail) values (?, ?, ?)',
-                           [user.username, user.password, user.gravataremail])
+            for username, password, gravataremail, flag_admin, flag_approval in users:
+                user = User(username, password, gravataremail, flag_admin, flag_approval)
+                db.execute('insert into userPassword (username, password, gravataremail, flag_admin, flag_approval) values (?, ?, ?, ?, ?)',
+                           [user.username, user.password, user.gravataremail, user.flag_admin, user.flag_approval])
             db.commit()
 
     def tearDown(self):
@@ -121,14 +124,14 @@ class BasicTests(MeterageBaseTestClass):
         # test for invalid username and password
         rv = self.login('adminx', 'defaultx')
         self.assertIn('Invalid username', rv.get_data())
-
+        
     def test_messages(self):
         """
         Test all users may make posts, and the appropriate data are in the
         page returned.
         Check that HTML is allowed in the text but not in the title"
         """
-        for username, password, gravataremail in users:
+        for username, password, gravataremail, flag_admin, flag_approval in users:
             self.login(username, password)
             rv = self.generic_post()
             self.assertNotIn('No entries here so far', rv.get_data(), 'Post unsuccessful')
@@ -222,7 +225,7 @@ class HashedPasswordsTests(MeterageBaseTestClass):
         Check that initialising a User object results in automatic hashing of the plaintext password
         """
 
-        user = User("bilbo", "baggins", "bilbo@hobbiton.tolk")
+        user = User("bilbo", "baggins", "bilbo@hobbiton.tolk", False, False)
         self.assertNotEqual(user.password, "baggins", "password has not been automatically hashed")
 
     def test_hashed_password_added_to_database(self):
@@ -242,7 +245,7 @@ class HashedPasswordsTests(MeterageBaseTestClass):
 
         Check other aspects of changing User object's password
         """
-        user = User("xXx_Supa_Saiyan_xXx", "password1", "swag@yolo.net")
+        user = User("xXx_Supa_Saiyan_xXx", "password1", "swag@yolo.net", False, False)
         user.password = "dogsname"
         self.assertNotEqual(user.password, "password1", "password not reset, password is plain text")
         self.assertNotEqual(user.password, generate_password_hash("password1"), "password not reset")
@@ -372,6 +375,7 @@ class UserWebInterfaceTests(MeterageBaseTestClass):
 
         self.assertIn('hary@gmail.com', rv.get_data())
 
+<<<<<<< HEAD
         with closing(meterage.connect_db()) as db:
             cur = db.execute('select username, gravataremail from userPassword where username=?', ['hary'])
             row = cur.fetchone()
@@ -387,6 +391,138 @@ class UserWebInterfaceTests(MeterageBaseTestClass):
                 row = cur.fetchone()
                 self.assertTrue(row[0] == 1, "The username is unique")
                 cur.close()
+=======
+        with closing(meterage.connect_db()) as db:
+            cur = db.execute('select username, gravataremail from userPassword where username=?', ['hary'])
+            row = cur.fetchone()
+            self.assertFalse(row[1] == "nongravataremailaddress@gmail.com", "gravataremail has not been added to the database")
+            cur.close()
+
+
+
+    def test_username_unique(self):
+        with closing(meterage.connect_db()) as db:
+            for user in users:
+                cur = db.execute('select count(username) from userPassword where username=?', [user[0]])
+                row = cur.fetchone()
+                self.assertTrue(row[0] == 1, "The username is unique")
+                cur.close()
+
+class AddingNewUsersTests(MeterageBaseTestClass):
+
+    def test_register_existing_username(self):
+        # test for registration with existing username
+        rv = self.app.post('/register', data=dict(
+            username='hari',
+            password='bean',
+            confirm_password='bean',
+			email='jimbean@whisky.biz'
+        ), follow_redirects=True)
+
+        self.assertIn('Username has already been used', rv.get_data())
+
+    def test_register_different_confirmation_password(self):
+        # test for registration with password and different confirmation password
+        rv = self.app.post('/register', data=dict(
+            username='jim',
+            password='1234',
+            confirm_password='bean',
+			email='jimbean@whisky.biz'
+        ), follow_redirects=True)
+
+        self.assertIn('Please enter same password twice', rv.get_data())
+
+    def test_register(self):
+        # test for normal registration
+        self.app.get('/register', follow_redirects=True)
+        rv = self.app.post('/register', data=dict(
+            username='jim',
+            password='bean',
+            confirm_password='bean',
+			email='jimbean@whisky.biz'
+        ), follow_redirects=True)
+
+        self.assertIn('Successfully registered', rv.get_data())
+
+    def test_login_without_approval(self):
+        # test for user without approval of access
+        rv = self.login('spock', 'vulcan')
+        self.assertIn('Please contact admin for permission to access', rv.get_data())
+
+    def test_grant_approval_non_exist_user(self):
+        # test for admin grant approval for access to non-exist user
+        self.login('admin', 'default')
+        
+        rv = self.app.post('/approve_new_user', data=dict(
+            username='random'
+        ), follow_redirects=True)
+        
+        self.assertIn('User does not exist', rv.get_data())
+        self.logout()
+
+    def test_grant_approval(self):
+        # test for admin grant approval for access to user
+        self.login('admin', 'default')
+        
+        rv = self.app.post('/approve_new_user', data=dict(
+            username='spock'
+        ), follow_redirects=True)
+        
+        self.assertIn('Successfully granted access to user', rv.get_data())
+        self.logout()
+
+    def test_login_approval(self):
+        # test for user login with login permission
+        rv = self.login('hari', 'seldon')
+
+        self.assertIn('You were logged in', rv.get_data())
+        self.logout()
+
+    def test_add_new_user_used_username(self):
+        # test for adding new user with existing username
+        self.login('admin', 'default')
+        
+        rv = self.app.post('/add_new_user', data=dict(
+            username='hari',
+            password='test',
+            confirm_password='test',
+			email='test@test.com'
+        ), follow_redirects=True)
+
+        self.assertIn('Username has already been used', rv.get_data())
+        self.logout()
+
+    def test_add_new_user(self):
+        # test for normal adding new user
+        self.login('admin', 'default')
+        
+        rv = self.app.post('/add_new_user', data=dict(
+            username='another',
+            password='another',
+            confirm_password='another',
+			email='another@test.com'
+        ), follow_redirects=True)
+        
+        self.assertIn('Successfully added new user', rv.get_data())
+        self.logout()
+        with closing(meterage.connect_db()) as db:
+            cur = db.execute('select count(username) from userPassword where username=?', ['another'])
+            row = cur.fetchone()
+            self.assertTrue(row[0] == 1, "User another has been added to the database")
+            cur.close()        
+
+class AddingNewAdminsTests(MeterageBaseTestClass):
+
+    def test_login_as_admin(self):
+        # test for registration with existing username
+        rv = self.login('admin', 'default')
+        #self.assertIn('You were logged in', rv.get_data())
+        with self.app.session_transaction() as sess:
+            # see http://flask.pocoo.org/docs/0.10/testing/#accessing-and-modifying-sessions for
+            # an explanation of accessing sessions during testing.
+            print(rv.get_data())
+            self.assertTrue(sess['admin']==True, "You are logged in as admin")
+>>>>>>> origin/fixEntriesMainPage
 
 if __name__ == '__main__':
     unittest.main()
