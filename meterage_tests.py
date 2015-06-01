@@ -356,7 +356,7 @@ class ORMTests(MeterageBaseTestClass):
         meterage.db.session.add(meterage.Entry('A post', 'Body', 1))
         meterage.db.session.commit()
         with closing(self.connect_db()) as db:
-            cur = db.execute('select user_id, title, text, start_time, end_time from entries')
+            cur = db.execute('select user_id, title, text, start_time, end_time from ' + meterage.Entry.__tablename__)
             entries = [dict(user_id=row[0], title=row[1], text=row[2], start_time=row[3], end_time=row[4]) for row in cur.fetchall()]
             self.assertTrue(entries, 'There are no entries committed to the database.')
             self.assertEqual(len(entries), 1, 'there is more than one entry when there ought only be one')
@@ -370,7 +370,18 @@ class ORMTests(MeterageBaseTestClass):
         """
         Test that we can perform an SQL 'read'
         """
-        raise NotImplementedError        
+        with closing(self.connect_db()) as db:
+            db.execute("insert into " + meterage.User.__tablename__ + " values ('10', 'Link', 'ocarina', 'link@deku.tree', '0')")
+            db.commit()
+
+        u = meterage.User.query.get(10)
+        self.assertEqual(u.username, 'Link', 'Username was not added correctly')
+        # note that the password is not hashed, since it was manually added into the database
+        self.assertEqual(u.password, 'ocarina', 'Password was not added correctly')
+        self.assertEqual(u.id, 10, 'User ID was not set correctly')
+        self.assertEqual(u.gravataremail, 'link@deku.tree', 'Gravatar email not added correctly')
+        self.assertFalse(u.admin, 'user was added as an admin when they ought not to have been')
+
 
     def test_update(self):
         """
