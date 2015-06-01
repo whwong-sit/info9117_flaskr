@@ -5,17 +5,26 @@
 
 <ul class=entries>
     {% for entry in entries1 %}
-    <li><h2><a href=" {{ url_for('show_entries') }}">{{ entry.title }}</a><span
-            class=user> by {{ entry.username }} </span></h2> {{ entry.text|safe }}
-    </li>
-    </h3> Started at: {{ entry.start_time }} | </span></h3> End at: {{ entry.end_time }}
+    <h3><a href=" {{ url_for('show_entries') }}">{{ entry.title }}</a><span
+            class=user> by {{ entry.username }} </span></h3> {{ entry.text|safe }}
+
+    </h3> <dt> Started at: {{ entry.start_time }}<dt>
+    </span></h3><dt> Ended at: {{ entry.end_time }}  <dt>
     {% endfor%}
 </ul>
+
+
+
+
 {% if not task_ended %}
-<form action="{{ url_for('add_end_time', entry_id=entry_id) }}" method=post class=add_end_time>
+<br><form action="{{ url_for('add_end_time', entry_id=entry_id) }}" method=post class=add_end_time>
     </dl>
-    <dt>Press to end task:
-        <input type=submit value=EndTask!>
+    <dl>Finished your task?
+    <dl>So, press the EndTask! button:
+    <br><input class="btn purple" type=submit value=EndTask!>
+
+
+    </dl>
 </form>
 {% endif %}
 
@@ -23,45 +32,41 @@
 
         <dt>Roles:
         <dd><textarea name=user_role rows=1 cols=15></textarea>
-
-        <dd><input type=submit value=Add>
-
 </form>
+
 <form action="{{ url_for('delete_roles', entry_id=entry_id) }}" method=post class=delete_roles>
-        <dd><input type=submit value=Reset>
-
+  <input class="btn blue" type=submit value=Add>  <input class="btn blue" type=submit value=Reset>
 </form>
 
-<div style="height:50; width:560px; background:white; word-wrap: break-word; word-break: normal;">
+<div class="roles">
     <ul class=roles>
         {% for role in roles %}
         <li>{{ role.user_role }}</li>
         {% else %}
-        <li><em>No Role Defined</em></li>
+        <!--<br><em>No Role Defined</em>-->
         {% endfor %}
     </ul>
 </div>
-
+<br>
 <form action="{{ url_for('add_comments', entry_id=entry_id) }}" method=post class=add_comments>
     <dl>
         <dt>Comments:
         <dd><textarea name=comment_input rows=5 cols=40></textarea>
 
-        <dd><input type=submit value=Add>
+        <dd><input class="btn blue" type=submit value=Add>
     </dl>
 </form>
-
 {% endif %}
 
-<br>
-<div style="height:50; width:560px; background:white; word-wrap: break-word; word-break: normal;">
+<div class="comments">
 
     <ul class=comments>
         {% for comment in comments %}
-        <li>{{ comment.comment_input }}</li>
-        <li>Commented at: {{ comment.comment_time }}<span class=user> by {{ comment.username }} </span></li>
+         <br>{{ comment.comment_input }}
+         <br><dt>Commented at: {{ comment.comment_time }}  </dt>
+         <dt><span class=user> by {{ comment.username }} </span></dt>
         {% else %}
-        <li><em>No Comment Yet</em></li>
+        <!--<li><em>No Comment Yet</em></li>-->
         {% endfor %}
 
     </ul>

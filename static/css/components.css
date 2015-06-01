@@ -24,7 +24,7 @@ pre,
 li {
   -webkit-border-radius: 0 !important;
   -moz-border-radius: 0 !important;
-  border-radius: 0 !important;
+  border-radius: 5px !important;
 }
 
 /* except below bootstrap elements */

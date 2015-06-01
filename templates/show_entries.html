@@ -5,13 +5,22 @@
     <dl>
         <dt>Title:
         <dd><input type=text size=30 name=title>
+        <br>
+
+        <p>
         <dt>Text:
         <dd><textarea name=text rows=5 cols=40></textarea>
-		<dt>Start time:
+        <br>
+
+        <p>
+        <dt>Start time:
 		<dd><input type=time name=start_time>
+        <br>
+
+        <p>
         <dt>Description:
         <dd><textarea name=task_des rows=5 cols=40></textarea>
-        <dd><input type=submit class="btn purple" value="Share">
+        <dd><input type=submit class="btn blue" value="Share">
     </dl>
   </form>
   <hr>
@@ -21,9 +30,10 @@
 <h3 class="page-title">View Existing Development Log</h3>
 <ul class="chats" style="padding-top:10px">
 {% for entry in entries %}
-    <li><h2><i><img src="{{entry.avimg}}"></i><a href="{{ url_for('show_comments', entry_id=entry.id) }}">{{ entry.title }}</a> <span class=user> by {{ entry.username }} </span></h2>
-        <div class=datetime> start time: {{entry.start_time}}
-            end time:{{entry.end_time}}
+    <li><h3><i><img src="{{entry.avimg}}"></i><a href="{{ url_for('show_comments', entry_id=entry.id) }}">{{ entry.title }}</a> <span class=user> by {{ entry.username }} </span></h3>
+        <div class=datetime>
+        Start time: {{entry.start_time}}
+            <br>End time: {{entry.end_time}}
         </div>
         Text: {{ entry.text | newlines }}
         <div>Description: {{ entry.task_des | newlines }}</div>

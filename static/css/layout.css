@@ -72,7 +72,7 @@ Page Header
 .page-header.navbar .page-logo {
   float: left;
   display: block;
-  width: 235px;
+  width: 500px;
   height: 46px;
   padding-left: 20px;
   padding-right: 20px;
@@ -87,6 +87,8 @@ Page Header
 }
 .page-header.navbar .page-logo .logo-default {
   margin: 16px 0 0 0;
+  width: 57px;
+  height: 20px;
 }
 .page-header.navbar .page-logo .logo-mini {
   display: none;
@@ -2093,9 +2095,10 @@ Page content
   color: #888;
 }
 .page-container-bg-solid .page-title {
-  color: #666;
+  color: #94D1DE;
   margin-bottom: 20px;
   margin-top: 20px;
+  font-size: 35px;
 }
 .page-container-bg-solid .page-title small {
   color: #666;
