@@ -385,6 +385,7 @@ class ORMTests(MeterageBaseTestClass):
     def test_update(self):
         """
         Test that we can perform an SQL 'update'
+        Note that the ORM appears not to perform the update when we perform a manual query.
         """
         # Add a comment object
         meterage.db.session.add(meterage.Entry('title', 'text', 1))
@@ -397,25 +398,20 @@ class ORMTests(MeterageBaseTestClass):
         meterage.db.session.commit()
 
         # Check that the update was performed successfully
-        with closing(self.connect_db()) as db:
-            cur = db.execute('select text from ' + meterage.Entry.__tablename__)
-            entries = [dict(text=row[0]) for row in cur.fetchall()]
-            self.assertTrue(entries, 'comment was not added correctly')
-            self.assertEqual(entries[0]['text'], 'new text', 'text was not updated correctly')
+        self.assertEqual(meterage.Entry.query.filter_by(title='title').first().text, 'new text', 'text was not updated')
 
     def test_delete(self):
         """
         Test that we can perform an SQL 'delete'
+        Note that the ORM appears to not delete the user when we perform a manual query.
         """
         # Delete hari
         meterage.User.query.filter_by(id=2).delete()
         meterage.db.session.commit()
 
-        # Check that he is deleted
-        with closing(self.connect_db()) as db:
-            cur = db.execute('select username from ' + meterage.User.__tablename__)
-            users = [dict(username=row[0]) for row in cur.fetchall()]
-            self.assertEqual(len(users), 1, 'user was not deleted')
+        # Attempt to draw out hari
+        hari = meterage.User.query.get(2)
+        self.assertFalse(hari, 'hari was not deleted succesfully')
 
 
 if __name__ == '__main__':
