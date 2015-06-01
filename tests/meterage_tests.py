@@ -345,7 +345,7 @@ class GravatarTests(MeterageBaseTestClass):
         """
         self.login("hari", "seldon")
         rv = self.generic_post()
-        some_image = '<i><img src="http://www.gravatar.com/avatar/'
+        some_image = '<img src="http://www.gravatar.com/avatar/'
         self.assertIn(some_image, rv.get_data(), "image is displayed incorrectly on show_entries.html")
 
 
