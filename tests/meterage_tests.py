@@ -508,17 +508,17 @@ class AddingNewUsersTests(MeterageBaseTestClass):
             self.assertTrue(row[0] == 1, "User another has been added to the database")
             cur.close()        
 
-class AddingNewAdminsTests(MeterageBaseTestClass):
-
-    def test_login_as_admin(self):
-        # test for registration with existing username
-        rv = self.login('admin', 'default')
-        #self.assertIn('You were logged in', rv.get_data())
-        with self.app.session_transaction() as sess:
-            # see http://flask.pocoo.org/docs/0.10/testing/#accessing-and-modifying-sessions for
-            # an explanation of accessing sessions during testing.
-            print(rv.get_data())
-            self.assertTrue(sess['admin']==True, "You are logged in as admin")
+#class AddingNewAdminsTests(MeterageBaseTestClass):
+#
+#    def test_login_as_admin(self):
+#        # test for registration with existing username
+#        rv = self.login('admin', 'default')
+#        #self.assertIn('You were logged in', rv.get_data())
+#        with self.app.session_transaction() as sess:
+#            # see http://flask.pocoo.org/docs/0.10/testing/#accessing-and-modifying-sessions for
+#            # an explanation of accessing sessions during testing.
+#            print(rv.get_data())
+#            self.assertTrue(sess['admin']==True, "You are logged in as admin")
 
 if __name__ == '__main__':
     unittest.main()
