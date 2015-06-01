@@ -67,7 +67,7 @@ ul.entries, ul.comments, ul.roles {
 
 div.roles, div.comments {
   height:50;
-  width:560px;
+  width:300px;
   word-wrap: break-word;
   word-break: normal;
 }

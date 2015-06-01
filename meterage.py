@@ -415,9 +415,7 @@ if __name__ == '__main__':
                 db.execute('insert into userPassword (username, password, gravataremail, flag_admin, flag_approval) values (?, ?, ?, ?, ?)',
                            [user.username, user.password, user.gravataremail, user.flag_admin, user.flag_approval])
             db.commit()
-<<<<<<< HEAD
+
 
     app.run(host='0.0.0.0',port=5000)
-=======
-    app.run(host='0.0.0.0',port=8080)
->>>>>>> origin/fixEntriesMainPage
+

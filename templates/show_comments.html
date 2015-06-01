@@ -2,155 +2,103 @@
 {% block body %}
 
 {% if session.logged_in %}
-<style type="text/css">
-    ul {
-    margin:0;padding:0;
-    list-style:none;
-    }
-</style>
-<style type="text/css">
-    wrap{
-    white-space:normal; width:100px;
-    }
-</style>
+
 
 <div style="float:left; width:50%">
-<table width="100%">
-<tr>
-<td><ul class=entries>
-    {% for entry in entries1 %}
-    <h3><a href=" {{ url_for('show_entries') }}">{{ entry.title }}</a><span
-            class=user> by {{ entry.username }} </span></h3> {{ entry.text|safe }}
+    <table width="100%">
+        <tr>
+            <td><ul class=entries>
+                {% for entry in entries1 %}
+                <h3><a href=" {{ url_for('show_entries') }}">{{ entry.title }}</a><span
+                        class=user> by {{ entry.username }} </span></h3> {{ entry.text|safe }}
 
-    </h3> <dt> Started at: {{ entry.start_time }}<dt>
-    </span></h3><dt> Ended at: {{ entry.end_time }}  <dt>
-    {% endfor%}
-</ul>
+                </h3> <dt> Started at: {{ entry.start_time }}</dt>
+                </span></h3><dt> Ended at: {{ entry.end_time }}  </dt>
+                {% endfor%}
+            </ul>
+                {% if not task_ended and owner_acc %}
+                <br><form action="{{ url_for('add_end_time', entry_id=entry_id) }}" method=post class=add_end_time>
+                    </dl>
+                    <dl>Finished your task?
+                        <dl>So, press the EndTask! button:
+                            <br><input class="btn purple" type=submit value=EndTask!>
 
-<<<<<<< HEAD
-    <b>User same: {{ owner_acc }}</b>
-{% if not task_ended and owner_acc %}
-<form action="{{ url_for('add_end_time', entry_id=entry_id) }}" method=post class=add_end_time>
-=======
+                        </dl>
+                    </dl>
+                </form>
+                {% endif %}
 
+                <br>
+                <form>
+                    <div class="comments">
+                        <ul class=comments>
+                            {% for comment in comments %}
+                            <br>{{ comment.comment_input }}
+                            <br><dt>Commented at: {{ comment.comment_time }}  </dt>
+                            <dt><span class=user> by {{ comment.username }} </span></dt>
+                            {% else %}
+                            <li><em>No Comment Yet</em></li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </form>
 
-
-{% if not task_ended %}
-<br><form action="{{ url_for('add_end_time', entry_id=entry_id) }}" method=post class=add_end_time>
-    </dl>
-    <dl>Finished your task?
-    <dl>So, press the EndTask! button:
-    <br><input class="btn purple" type=submit value=EndTask!>
-
-
->>>>>>> origin/fixEntriesMainPage
-    </dl>
-</form>
-{% endif %}
-
-    <br>
-    <form>
-    <ul class=comments  >
-    {% for comment in comments %}
-    <li><wrap>{{ comment.comment_input }}</wrap></li>
-    <li><h6>Commented at: {{ comment.comment_time }}<span class=user> by {{ comment.username }} </span></h6></li>
-    {% else %}
-    <li><em>No Comment Yet</em></li>
-    {% endfor %}
-
-</ul>
-        </form>
-
-</td>
-</tr>
-</table>
+            </td>
+        </tr>
+    </table>
 </div>
-<div style="float:left; width:50%">
-<table width="100%">
-<tr>
-<td>
-    <br>
-    <br>
-    <br>
-   <form action="{{ url_for('add_comments', entry_id=entry_id) }}" method=post class=add_comments>
-    <dl>
-        <dt>Comments:
-        <dd><textarea name=comment_input rows=5 cols=40></textarea>
-
-        <dd><input type=submit value=Add>
-    </dl>
-</form>
-
-</td>
-</tr>
-</table>
-</div>
-
-
 
 <div style="float:right; width:50%">
-<table width="100%" length="300px">
-<tr>
-<td>
-    <form action="{{ url_for('add_roles', entry_id=entry_id) }}" method=post class=add_roles>
+    <table width="100%">
+        <tr>
+            <td>
 
-        <dt>Roles:
-        <dd><textarea name=user_role rows=1 cols=15></textarea>
-<<<<<<< HEAD
+                <br>
+                <form action="{{ url_for('add_comments', entry_id=entry_id) }}" method=post class=add_comments>
+                    <dl>
+                        <dt>Comments:
+                        <dd><textarea name=comment_input rows=5 cols=40></textarea>
+                            <br>
+                        <dd><input class="btn blue" type=submit value=Add>
+                    </dl>
+                </form>
 
-        <dd><input type=submit value=Add>
+                <div class="roles">
 
-</form><form action="{{ url_for('delete_roles', entry_id=entry_id) }}" method=post class=delete_roles>
-        <dd><input type=submit value=Reset>
-=======
-</form>
->>>>>>> origin/fixEntriesMainPage
+                    <form action="{{ url_for('add_roles', entry_id=entry_id) }}" method=post class=add_roles>
 
-<form action="{{ url_for('delete_roles', entry_id=entry_id) }}" method=post class=delete_roles>
-  <input class="btn blue" type=submit value=Add>  <input class="btn blue" type=submit value=Reset>
-</form>
+                        <dt>Roles:
+                        <dd><textarea name=user_role rows=1 cols=15></textarea></dd>
+                        <span>   </span>
+                        <input class="btn blue" type=submit value=Add>
+                    </form>
 
-<<<<<<< HEAD
-<ul class=roles>
-=======
-<div class="roles">
-    <ul class=roles>
->>>>>>> origin/fixEntriesMainPage
-        {% for role in roles %}
-        <li>{{ role.user_role }}</li>
-        {% else %}
-        <!--<br><em>No Role Defined</em>-->
-        {% endfor %}
-    </ul>
-</td>
-</tr>
-</table>
+                    <form action="{{ url_for('delete_roles', entry_id=entry_id) }}" method=post class=delete_roles>
+                        <input class="btn blue" type=submit value=Reset>
+                    </form>
+                </div>
+                    <div class="roles">
+                        <br>
+                        <ul class=roles>
+
+                            {% for role in roles %}
+                            <li>{{ role.user_role }}</li>
+                            {% else %}
+                            <em>No Role Defined</em>
+                            {% endfor %}
+                        </ul>
+                    </div>
+
+
+                </div>
+
+
+            </td>
+        </tr>
+    </table>
 </div>
-<<<<<<< HEAD
+
+
 {% endif %}
-
-=======
-<br>
-<form action="{{ url_for('add_comments', entry_id=entry_id) }}" method=post class=add_comments>
-    <dl>
-        <dt>Comments:
-        <dd><textarea name=comment_input rows=5 cols=40></textarea>
-
-        <dd><input class="btn blue" type=submit value=Add>
-    </dl>
-</form>
-{% endif %}
-
-<div class="comments">
-
-    <ul class=comments>
-        {% for comment in comments %}
-         <br>{{ comment.comment_input }}
-         <br><dt>Commented at: {{ comment.comment_time }}  </dt>
-         <dt><span class=user> by {{ comment.username }} </span></dt>
-        {% else %}
-        <!--<li><em>No Comment Yet</em></li>-->
-        {% endfor %}
->>>>>>> origin/fixEntriesMainPage
 
 {% endblock %}
