@@ -382,19 +382,35 @@ class ORMTests(MeterageBaseTestClass):
         self.assertEqual(u.gravataremail, 'link@deku.tree', 'Gravatar email not added correctly')
         self.assertFalse(u.admin, 'user was added as an admin when they ought not to have been')
 
-
     def test_update(self):
         """
         Test that we can perform an SQL 'update'
         """
-        raise NotImplementedError
+        # Add a comment object
+        meterage.db.session.add(meterage.Entry('title', 'text', 1))
+        # meterage.db.session.add(meterage.Comment(2, 'comment text', 3))
+        meterage.db.session.commit()
+
+        # Change the comment
+        e = meterage.Entry.query.first()
+        e.text = 'new text'
+        meterage.db.session.commit()
+
+        # Check that the update was performed successfully
+        with closing(self.connect_db()) as db:
+            cur = db.execute('select text from ' + meterage.Entry.__tablename__)
+            entries = [dict(text=row[0]) for row in cur.fetchall()]
+            self.assertTrue(entries, 'comment was not added correctly')
+            print(entries[0])
+            self.assertEqual(entries[0]['text'], 'new text', 'text was not updated correctly')
 
 
     def test_delete(self):
         """
         Test that we can perform an SQL 'delete'
         """
-        raise NotImplementedError
+        meterage.User.
+
 
 if __name__ == '__main__':
     unittest.main()
