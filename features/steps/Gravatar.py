@@ -34,9 +34,7 @@ def step_impl(context):
 
 @then(u'the Gravatar is displayed alongside the post')
 def step_impl(context):
-
-    gravatar = '<li><h2><i><img src="http://www.gravatar.com/avatar/cf2ee704bb2c7ebc4884b06c45f703fb?s=50&amp;d' \
-               '=monsterid"></i><a href="/1/show_comments">&lt;Hello&gt;</a> <span class=user> by hari </span></h2>'
+    gravatar = '"http://www.gravatar.com/avatar/cf2ee704bb2c7ebc4884b06c45f703fb?s=50&amp;d=monsterid"'
     assert gravatar in context.rv.get_data(), "image is not being displayed"
 
 @then(u'their Gravatar is no longer displayed beside posts')
