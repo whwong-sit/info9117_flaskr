@@ -401,15 +401,21 @@ class ORMTests(MeterageBaseTestClass):
             cur = db.execute('select text from ' + meterage.Entry.__tablename__)
             entries = [dict(text=row[0]) for row in cur.fetchall()]
             self.assertTrue(entries, 'comment was not added correctly')
-            print(entries[0])
             self.assertEqual(entries[0]['text'], 'new text', 'text was not updated correctly')
-
 
     def test_delete(self):
         """
         Test that we can perform an SQL 'delete'
         """
-        meterage.User.
+        # Delete hari
+        meterage.User.query.filter_by(id=2).delete()
+        meterage.db.session.commit()
+
+        # Check that he is deleted
+        with closing(self.connect_db()) as db:
+            cur = db.execute('select username from ' + meterage.User.__tablename__)
+            users = [dict(username=row[0]) for row in cur.fetchall()]
+            self.assertEqual(len(users), 1, 'user was not deleted')
 
 
 if __name__ == '__main__':
