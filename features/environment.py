@@ -1,11 +1,8 @@
 import os
-import meterage
 import tempfile
-from contextlib import closing
 
-from flask_bcrypt import check_password_hash
+import meterage
 
-from models import User
 
 # These run before and after every step.
 def before_step(context, step):
@@ -31,36 +28,36 @@ def before_feature(context, feature):
     Create a new test client, initialise a database and activate TESTING mode
     """
     context.db_fd, meterage.app.config['DATABASE'] = tempfile.mkstemp()
+    meterage.app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + meterage.app.config['DATABASE']
     meterage.app.config['TESTING'] = True
-    context.app = meterage.app.test_client()
-    meterage.init_db()
 
-    #flat dictionary of users, so we have access to the plain text versions of the passwords
+    # We cannot be in debug mode or Flask raises an AssertionError
+    meterage.app.config['DEBUG'] = False
+
+    # Make this true to see all of the SQL queries fly by in the console
+    meterage.app.config['SQLALCHEMY_ECHO'] = False
+    meterage.db = meterage.SQLAlchemy(meterage.app)
+    reload(meterage.models)
+    context.app = meterage.app.test_client()
+
+    meterage.db.create_all()
+
+    # flat dictionary of users, so we have access to the plain text versions of the passwords
     context.users = {"admin": "default", "hari": "seldon"}
 
     # add users to the temporary database
     # Note that an admin and a normal user are added.
-    with closing(meterage.connect_db()) as db:
-        admin = User('admin', 'default', 'admin@unix.org', True, True)
-        db.execute('insert into userPassword (username, password, gravataremail,flag_admin,flag_approval) values (?, ?, ? ,? ,?)',
-                   [admin.username, admin.password, admin.gravataremail, admin.flag_admin, admin.flag_approval])
-        user = User('hari', 'seldon', 'hari@stroustrup.com', False, True)
-        db.execute('insert into userPassword (username, password, gravataremail,flag_admin,flag_approval) values (?, ?, ?,? ,?)',
-                   [user.username, user.password, user.gravataremail, user.flag_admin, user.flag_approval])
-        user2 = User('spock', 'vulcan', 'livelong@prosper.edu.au', True, True)
-        db.execute('insert into userPassword (username, password, gravataremail,flag_admin,flag_approval) values (?, ?, ?,? ,?)',
-                   [user2.username, user2.password, user2.gravataremail, user2.flag_admin, user2.flag_approval])
-        user3 = User('test', 'test', 'test@test.edu.au', False, True)
-        db.execute('insert into userPassword (username, password, gravataremail,flag_admin,flag_approval) values (?, ?, ?,? ,?)',
-                   [user3.username, user3.password, user3.gravataremail, user3.flag_admin, user3.flag_approval])
-        db.commit()
+    meterage.db.session.add(meterage.User('admin', 'default', 'admin@unix.org', True, True))
+    meterage.db.session.add(meterage.User('hari', 'seldon', 'hari@stroustrup.com', False, True))
+    meterage.db.session.add(meterage.User('spock', 'vulcan', 'livelong@prosper.edu.au', True, True))
+    meterage.db.session.add(meterage.User('test', 'test', 'text@text.edu.au', False, True))    
+    meterage.db.session.commit()
 
 
 def after_feature(context, feature):
     """
     Close temporary file and remove from filesystem
     """
-    os.close(context.db_fd)
     os.unlink(meterage.app.config['DATABASE'])
 
 
@@ -84,4 +81,3 @@ def after_all(context):
 
 def after_all(context):
     pass
-

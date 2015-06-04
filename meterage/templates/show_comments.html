@@ -4,31 +4,31 @@
 {% if session.logged_in %}
 
 <ul class=entries>
-    {% for entry in entries1 %}
-    <li><h2><a href=" {{ url_for('show_entries') }}">{{ entry.title }}</a><span
-            class=user> by {{ entry.username }} </span></h2> {{ entry.text|safe }}
+    <li><h2><i><img src="{{ entry.author.gravataremail | gravatar }}"></i><a href=" {{ url_for('show_entries') }}">{{
+        entry.title }}</a><span
+            class=user> by {{ entry.author.username }} </span></h2> {{ entry.text | newlines }}
     </li>
-    </h3> Started at: {{ entry.start_time }} | </span></h3> End at: {{ entry.end_time }}
-    {% endfor%}
+    <h3> Started at: {{ entry.start_time }} </span> </h3>
+
+    <h3> End at: {{ entry.end_time }} </span></h3>
 </ul>
 {% if not task_ended %}
 <form action="{{ url_for('add_end_time', entry_id=entry_id) }}" method=post class=add_end_time>
-    </dl>
-    <dt>Press to end task:
-        <input type=submit value=EndTask!>
+    Press to end task:
+    <input type=submit value=EndTask!>
 </form>
 {% endif %}
 
 <form action="{{ url_for('add_roles', entry_id=entry_id) }}" method=post class=add_roles>
 
-        <dt>Roles:
-        <dd><textarea name=user_role rows=1 cols=15></textarea>
+    <dt>Roles:
+    <dd><textarea name=user_role rows=1 cols=15></textarea>
 
-        <dd><input type=submit value=Add>
+    <dd><input type=submit value=Add>
 
 </form>
 <form action="{{ url_for('delete_roles', entry_id=entry_id) }}" method=post class=delete_roles>
-        <dd><input type=submit value=Reset>
+    <dd><input type=submit value=Reset>
 
 </form>
 
@@ -58,8 +58,9 @@
 
     <ul class=comments>
         {% for comment in comments %}
-        <li>{{ comment.comment_input }}</li>
-        <li>Commented at: {{ comment.comment_time }}<span class=user> by {{ comment.username }} </span></li>
+        <li>{{ comment.text }} <span
+                class=user> by <img src="{{ comment.author.gravataremail | gravatar(size=10) }}"></i> {{ comment.author.username }} at {{ comment.posttime | timestamp }} </span>
+        </li>
         {% else %}
         <li><em>No Comment Yet</em></li>
         {% endfor %}

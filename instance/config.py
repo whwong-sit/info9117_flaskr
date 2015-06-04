@@ -1,4 +1,9 @@
-DATABASE = 'db/meterage.db'
+from meterage import basedir
+import os.path
+
+DATABASE = os.path.join(basedir, "db", "") + "meterage.db"
+SQLALCHEMY_DATABASE_URI = "sqlite:///" + DATABASE
+SQLALCHEMY_ECHO = True
 
 # this needs to be set for sessions to be enabled.
 # See http://flask.pocoo.org/docs/0.10/quickstart/#sessions

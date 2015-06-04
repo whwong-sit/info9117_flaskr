@@ -1,10 +1,11 @@
 import os
-import datetime
-import meterage
 import unittest
 import tempfile
+from sqlite3 import dbapi2 as sqlite3
 from contextlib import closing
-from models import User
+
+import meterage
+
 from flask_bcrypt import generate_password_hash
 from time import gmtime, strftime, time
 
@@ -19,35 +20,43 @@ class MeterageBaseTestClass(unittest.TestCase):
         create a new test client, initialise a database and activate TESTING mode
         """
         self.db_fd, meterage.app.config['DATABASE'] = tempfile.mkstemp()
+        meterage.app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + meterage.app.config['DATABASE']
         meterage.app.config['TESTING'] = True
+
+        # We cannot be in debug mode or Flask raises an AssertionError
+        # TODO investigate this further; it is to do with imports into a central location upon initialisation
+        meterage.app.config['DEBUG'] = False
+
+        # Make this True to see all of the SQL queries fly by in the console
+        meterage.app.config['SQLALCHEMY_ECHO'] = False
+        meterage.db = meterage.SQLAlchemy(meterage.app)
+        reload(meterage.models)
         self.app = meterage.app.test_client()
-        meterage.init_db()
 
-        global users
-        usernames = ["admin", "hari", "spock", "test"]
-        passwords = ["default", "seldon", "vulcan", "test"]
-        gravataremails = ["daisy22229999@gmail.com", "nongravataremailaddress@gmail.com", "livelong@prosper.edu.au", "test@test.test"]
-        flag_admins=[True, False, False, True]
-        flag_approvals=[True, True, False, True]
-		
-        users = zip(usernames, passwords, gravataremails, flag_admins, flag_approvals)
+        meterage.db.create_all()
 
-        # add an admin and a normal user to the database
-        with closing(meterage.connect_db()) as db:
-            for username, password, gravataremail, flag_admin, flag_approval in users:
-                user = User(username, password, gravataremail, flag_admin, flag_approval)
-                db.execute('insert into userPassword (username, password, gravataremail, flag_admin, flag_approval) values (?, ?, ?, ?, ?)',
-                           [user.username, user.password, user.gravataremail, user.flag_admin, user.flag_approval])
-            db.commit()
+        usernames = ['admin', 'hari', 'spock', 'test']
+        passwords = ['default', 'seldon', 'vulcan', 'test']
+        gravataremails = ['daisy22229999@gmail.com', 'nongravataremailaddress@gmail.com',
+                          'livelong@prosper.edu.au', 'test@test.test']
+        admins = [True, False, False, True]
+        approvals = [True, True, False, True]
+        self.users = zip(usernames, passwords, gravataremails, admins, approvals)
+
+        for username, password, gravataremail, admin, approval in self.users:
+            meterage.db.session.add(meterage.User(username, password, gravataremail, admin, approval))
+        meterage.db.session.commit()
 
     def tearDown(self):
         """
         close temporary file and remove from filesystem
         """
+        # meterage.db.session.remove()
+        # meterage.db.drop_all()
         os.close(self.db_fd)
         os.unlink(meterage.app.config['DATABASE'])
 
-        #### Some useful functions
+        # Some useful functions
 
     def login(self, username, password):
         """
@@ -79,13 +88,12 @@ class MeterageBaseTestClass(unittest.TestCase):
             task_des='hahahahah',
             ), follow_redirects=True)
 
-    def userPassword_content(self):
+    def connect_db(self):
         """
-        Get all the data in the userPassword table
+        Make a connection to the database
+        database specified in the config.
         """
-        with closing(meterage.connect_db()) as db:
-            cur = db.execute('select username, password, gravataremail from userPassword')
-            return [dict(username=row[0], password=row[1], gravataremail=row[2]) for row in cur.fetchall()]
+        return sqlite3.connect(meterage.app.config['DATABASE'])
 
 
 class BasicTests(MeterageBaseTestClass):
@@ -103,11 +111,11 @@ class BasicTests(MeterageBaseTestClass):
         """
         Test that all users may log in and log out
         """
-        for user in users:
-            rv = self.login(users[1][0], users[1][1])
-            self.assertIn('You were logged in', rv.get_data())
+        for user in self.users:
+            rv = self.login(user[0], user[1])
+            self.assertIn('You were logged in', rv.get_data(), 'Login failed')
             rv = self.logout()
-            self.assertIn('You were logged out', rv.get_data())
+            self.assertIn('You were logged out', rv.get_data(), 'Logout failed')
 
     def test_invalid(self):
         """
@@ -131,7 +139,7 @@ class BasicTests(MeterageBaseTestClass):
         page returned.
         Check that HTML is allowed in the text but not in the title"
         """
-        for username, password, gravataremail, flag_admin, flag_approval in users:
+        for username, password, gravataremail, admin, approval in self.users:
             self.login(username, password)
             rv = self.generic_post()
             self.assertNotIn('No entries here so far', rv.get_data(), 'Post unsuccessful')
@@ -148,7 +156,7 @@ class BasicTests(MeterageBaseTestClass):
         the username is the right one
         """
         self.login('admin', 'default')
-        rv= self.generic_post()
+        rv = self.generic_post()
         assert "by admin" in rv.get_data()
 
     def test_read_log_without_login(self):
@@ -224,20 +232,16 @@ class HashedPasswordsTests(MeterageBaseTestClass):
         """
         Check that initialising a User object results in automatic hashing of the plaintext password
         """
-
-        user = User("bilbo", "baggins", "bilbo@hobbiton.tolk", False, False)
+        user = meterage.User("bilbo", "baggins", "bilbo@hobbiton.tolk")
         self.assertNotEqual(user.password, "baggins", "password has not been automatically hashed")
 
     def test_hashed_password_added_to_database(self):
         """
         Check that the hashed password is added to the database, not the plain text.
         """
-        with closing(meterage.connect_db()) as db:
-            for user in users:
-                cur = db.execute('select username, password from userPassword where username=?', [user[0]])
-                row = cur.fetchone()
-                self.assertFalse(row[1] == user[1], "Hashed password has not been added to the database")
-                cur.close()
+        for user in self.users:
+            u = meterage.User.query.filter_by(username=user[0]).first()
+            self.assertFalse(u.password == user[1], "Hashed password has not been added to the database")
 
     def test_hashed_password_is_not_plaintext(self):
         """
@@ -245,7 +249,7 @@ class HashedPasswordsTests(MeterageBaseTestClass):
 
         Check other aspects of changing User object's password
         """
-        user = User("xXx_Supa_Saiyan_xXx", "password1", "swag@yolo.net", False, False)
+        user = meterage.User("xXx_Supa_Saiyan_xXx", "password1", "swag@yolo.net")
         user.password = "dogsname"
         self.assertNotEqual(user.password, "password1", "password not reset, password is plain text")
         self.assertNotEqual(user.password, generate_password_hash("password1"), "password not reset")
@@ -256,14 +260,10 @@ class HashedPasswordsTests(MeterageBaseTestClass):
         """
         Test that entering the actual hash into the "password" box does not result in a successful login.
         """
-
-        with closing(meterage.connect_db()) as db:
-            for user in users:
-                cur = db.execute('select username, password from userPassword where username=?', [user[0]])
-                row = cur.fetchone()
-                rv = self.login(row[0], row[1])
-                self.assertIn("Invalid password", rv.get_data(), "Login did not fail as it should have")
-                cur.close()
+        for user in self.users:
+            u = meterage.User.query.filter_by(username=user[0]).first()
+            rv = self.login(u.username, u.password)
+            self.assertIn("Invalid password", rv.get_data(), "Login did not fail as it should have")
 
 
 class TimeAndCommentTests(MeterageBaseTestClass):
@@ -273,17 +273,17 @@ class TimeAndCommentTests(MeterageBaseTestClass):
         rv = self.app.post('/add', data=dict(
             title='<Hello>',
             text='<strong>HTML</strong> allowed here',
-            task_des= ' hahahahah',
+            task_des='hahahahah',
             start_time='<15:00>',
         ), follow_redirects=True)
         self.assertNotIn('No entries here so far', rv.get_data(), 'Post unsuccessful')
         self.assertIn('by admin', rv.get_data())
-        self.assertIn(' hahahahah', rv.get_data())
+        self.assertIn('hahahahah', rv.get_data())
 
     def test_comment(self):
         self.login('admin', 'default')
         self.generic_post()
-        rv = self.app.post('/1/add_comments', data= dict(
+        rv = self.app.post('/1/add_comments', data=dict(
             comment_input='<FinalVERSION>'
         ), follow_redirects=True)
         self.assertNotIn('No entries here so far', rv.get_data(), 'Post unsuccessful')
@@ -294,7 +294,7 @@ class TimeAndCommentTests(MeterageBaseTestClass):
         self.login('admin', 'default')
         self.generic_post()
         rv = self.app.post('/1/add_end_time', follow_redirects=True)
-        curr_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        curr_time = time.strftime("%Y-%m-%d %H:%M:", time.localtime())
         self.assertNotIn('No entries here so far', rv.get_data(), 'Post unsuccessful')
         self.assertIn('&lt;Hello&gt;', rv.get_data())
         self.assertIn('by admin', rv.get_data())
@@ -303,11 +303,10 @@ class TimeAndCommentTests(MeterageBaseTestClass):
     def test_User_Role(self):
         self.login('admin', 'default')
         self.generic_post()
-        rv=self.app.post('/1/add_roles', data=dict(
+        rv = self.app.post('/1/add_roles', data=dict(
             user_role='<fathima>',
             ), follow_redirects=True)
-        assert '&lt;fathima&gt;' in rv.data
-
+        self.assertIn('&lt;fathima&gt;', rv.get_data())
 
     def test_description(self):
         self.login('admin', 'default')
@@ -315,28 +314,32 @@ class TimeAndCommentTests(MeterageBaseTestClass):
         rv = self.app.post('/add', data=dict(
             title='<Hi>',
             text='<strong>HTML</strong> allowed here',
-            start_time= '<15:00>',
+            start_time='<15:00>',
             task_des='User is talking about food'
             ), follow_redirects=True)
-        assert 'No entries here so far' not in rv.data
-        assert 'User is talking about food' in rv.data
+        self.assertNotIn('No entries here so far', rv.get_data())
+        self.assertIn('User is talking about food', rv.get_data())
+
 
 class GravatarTests(MeterageBaseTestClass):
 
     def test_avatar(self):
         """
-        Test that meterage.avatar() method does return the correct Gravatar
+        Test that meterage.gravatar object does produce the correct Gravatar
         """
-        known_url = "http://www.gravatar.com/avatar/bf6c2e089dbd27ec1868027525bc42fe?s=50&d=monsterid"
-        self.assertEqual(meterage.avatar("daisy22229999@gmail.com"), known_url, "Gravatar URL produced is incorrect")
+        known_url = 'http://www.gravatar.com/avatar/bf6c2e089dbd27ec1868027525bc42fe?s=50&d=retro&r=g'
+        self.assertEqual(meterage.views.gravatar("daisy22229999@gmail.com"),
+                         known_url, "Gravatar URL produced is incorrect")
 
     def test_gravatar_shown(self):
         """
         Test that the gravatar is shown on show_entries.html
         """
-        self.login("admin", "default")
+        self.login('admin', 'default')
         rv = self.generic_post()
-        image = '<img src="http://www.gravatar.com/avatar/bf6c2e089dbd27ec1868027525bc42fe?s=50&amp;d=monsterid" class="img-rounded" alt="Gravatar">'
+        image = '<img src="http://www.gravatar.com/avatar/bf6c2e089dbd27ec1868027525bc42fe?s=50&amp;d=monsterid" clas' \
+                's="img-rounded" alt="Gravatar">'
+
         self.assertIn(image, rv.get_data(), "image is displayed incorrectly on show_entries.html")
 
     def test_non_gravatar_user(self):
@@ -352,16 +355,14 @@ class GravatarTests(MeterageBaseTestClass):
 class UserWebInterfaceTests(MeterageBaseTestClass):
 
     def test_web_interface_accessible(self):
-        self.login(username='hari', password='seldon')
+        self.login('hari', 'seldon')
 
         rv = self.app.get('/user/<username>')
-        self.assertFalse(rv.status_code == 404, "We are unable to access the manage details page")
-        # self.assertIn('hari', rv.get_data())
-        # self.assertIn('nongravataremailaddress@gmail.com', rv.get_data())
+        self.assertNotEqual(rv.status_code, 404, "We are unable to access the manage details page")
 
     def test_can_change_username(self):
 
-        self.login(username='hari', password='seldon')
+        self.login('hari', 'seldon')
 
         rv = self.app.post('/user/<username>', data=dict(
             username='hary',
@@ -370,16 +371,11 @@ class UserWebInterfaceTests(MeterageBaseTestClass):
         ), follow_redirects=True)
 
         self.assertIn('hary', rv.get_data())
-
-        with closing(meterage.connect_db()) as db:
-            cur = db.execute('select username, gravataremail from userPassword where username=?', ['hary'])
-            row = cur.fetchone()
-            self.assertFalse(row[0] == 'hari', "username has not been added to the database")
-            cur.close()
+        self.assertTrue(meterage.User.query.filter_by(username='hary').first(), 'username not changed')
 
     def test_can_change_gravatar_email(self):
 
-        self.login(username='hari', password='seldon')
+        self.login('hari', 'seldon')
 
         rv = self.app.post('/user/<username>', data=dict(
             username='hary',
@@ -388,22 +384,17 @@ class UserWebInterfaceTests(MeterageBaseTestClass):
         ), follow_redirects=True)
 
         self.assertIn('hary@gmail.com', rv.get_data())
-
-        with closing(meterage.connect_db()) as db:
-            cur = db.execute('select username, gravataremail from userPassword where username=?', ['hary'])
-            row = cur.fetchone()
-            self.assertFalse(row[1] == "nongravataremailaddress@gmail.com", "gravataremail has not been added to the database")
-            cur.close()
-
-
+        self.assertTrue(meterage.User.query.filter_by(gravataremail='hary@gmail.com').first(),
+                        'gravataremail not changed')
 
     def test_username_unique(self):
-        with closing(meterage.connect_db()) as db:
-            for user in users:
-                cur = db.execute('select count(username) from userPassword where username=?', [user[0]])
-                row = cur.fetchone()
-                self.assertTrue(row[0] == 1, "The username is unique")
-                cur.close()
+        # This test tells us nothing at this point, since we know the usernames are unique... we set them that way
+        # in the setUp function!
+        # TODO make this test more meaningful by adding/removing users/changing usernames around and seeing if
+        # TODO usernames remain unique
+        for user in self.users:
+            self.assertEqual(meterage.User.query.filter_by(username=user[0]).count(), 1, 'usernames are not unique')
+
 
 class AddingNewUsersTests(MeterageBaseTestClass):
 
@@ -413,7 +404,7 @@ class AddingNewUsersTests(MeterageBaseTestClass):
             username='hari',
             password='bean',
             confirm_password='bean',
-			email='jimbean@whisky.biz'
+            email='jimbean@whisky.biz'
         ), follow_redirects=True)
 
         self.assertIn('Username has already been used', rv.get_data())
@@ -530,7 +521,7 @@ class AddingNewAdminsTests(MeterageBaseTestClass):
         rv = self.app.post('/add_new_admin', data=dict(
             username='jim'
         ), follow_redirects=True)
-        self.assertIn("User does not exist" ,rv.get_data())
+        self.assertIn("User does not exist", rv.get_data())
 
     def test_normal_granting_privilege(self):
         self.login('admin', 'default')
@@ -538,18 +529,15 @@ class AddingNewAdminsTests(MeterageBaseTestClass):
         rv = self.app.post('/add_new_admin', data=dict(
             username='hari'
         ), follow_redirects=True)
-        self.assertIn("Successfully granted admin privilege to user" ,rv.get_data())
-        with closing(meterage.connect_db()) as db:
-            cur = db.execute('select flag_admin from userPassword where username=?', ['hari'])
-            row = cur.fetchone()
-            self.assertTrue(row[0] == 1, "User has been granted with admin privilege")
-            cur.close()
+        self.assertIn('Successfully granted admin privilege to user', rv.get_data())
+        self.assertTrue(meterage.User.query.filter_by(username='hari').first().admin,
+                        'hari was not granted admin rights')
         self.logout()
         self.login('hari', 'seldon')
         with self.app.session_transaction() as sess:
             # see http://flask.pocoo.org/docs/0.10/testing/#accessing-and-modifying-sessions for
             # an explanation of accessing sessions during testing.
-            self.assertTrue(sess['admin']==True, "You are logged in as admin")
+            self.assertTrue(sess['admin'], 'hari was not granted admin rights')
 
     def test_revoke_admin_non_exist_user(self):
         self.login('admin', 'default')
@@ -557,7 +545,7 @@ class AddingNewAdminsTests(MeterageBaseTestClass):
         rv = self.app.post('/revoke_admin', data=dict(
             username='jim'
         ), follow_redirects=True)
-        self.assertIn("User does not exist" ,rv.get_data())
+        self.assertIn("User does not exist", rv.get_data())
 
     def test_revoke_non_admin_user(self):
         self.login('admin', 'default')
@@ -565,7 +553,7 @@ class AddingNewAdminsTests(MeterageBaseTestClass):
         rv = self.app.post('/revoke_admin', data=dict(
             username='hari'
         ), follow_redirects=True)
-        self.assertIn("User is not an admin" ,rv.get_data())
+        self.assertIn("User is not an admin", rv.get_data())
 
     def test_normal_revoke_admin(self):
         self.login('admin', 'default')
@@ -573,7 +561,78 @@ class AddingNewAdminsTests(MeterageBaseTestClass):
         rv = self.app.post('/revoke_admin', data=dict(
             username='test'
         ), follow_redirects=True)
-        self.assertIn("Successfully revoked admin privilege from user" ,rv.get_data())
+        self.assertIn("Successfully revoked admin privilege from user", rv.get_data())
+
+
+class ORMTests(MeterageBaseTestClass):
+
+    def test_create(self):
+        """
+        Test that we can perform an SQL 'create'
+        """
+        meterage.db.session.add(meterage.Entry('A post', 'Body', 1))
+        meterage.db.session.commit()
+        with closing(self.connect_db()) as db:
+            cur = db.execute('select user_id, title, text, start_time, end_time from ' + meterage.Entry.__tablename__)
+            entries = [dict(user_id=row[0], title=row[1], text=row[2], start_time=row[3], end_time=row[4]) for row in
+                       cur.fetchall()]
+            self.assertTrue(entries, 'There are no entries committed to the database.')
+            self.assertEqual(len(entries), 1, 'there is more than one entry when there ought only be one')
+            self.assertEqual(entries[0]['title'], 'A post', 'Title was added incorrectly')
+            self.assertEqual(entries[0]['text'], 'Body', 'Text body was added incorrectly')
+            self.assertEqual(entries[0]['user_id'], 1, 'User ID was added incorrectly')
+            self.assertRegexpMatches(entries[0]['start_time'], '\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d',
+                                     'start time was added incorrectly')
+            self.assertFalse(entries[0]['end_time'], 'end time was added incorrectly')
+
+    def test_read(self):
+        """
+        Test that we can perform an SQL 'read'
+
+        THIS TEST WORKS BY ITSELF, BUT NOT WHEN RUN WITH ALL OTHER TESTS
+        """
+        meterage.db.session.add(meterage.User('Link', 'ocarina', 'link@deku.tree'))
+        meterage.db.session.commit()
+        u = meterage.User.query.get(3)
+        self.assertEqual(u.username, 'Link', 'Username was not added correctly')
+        self.assertTrue(u.check_password('ocarina'), 'Password was not added correctly')
+        self.assertEqual(u.id, 3, 'User ID was not set correctly')
+        self.assertEqual(u.gravataremail, 'link@deku.tree', 'Gravatar email not added correctly')
+        self.assertFalse(u.admin, 'user was added as an admin when they ought not to have been')
+
+    def test_update(self):
+        """
+        Test that we can perform an SQL 'update'
+
+        THIS TEST WORKS BY ITSELF, BUT NOT WHEN RUN WITH ALL OTHER TESTS
+        """
+        # Add an Entry object
+        meterage.db.session.add(meterage.Entry('title', 'text', 1))
+        meterage.db.session.commit()
+
+        # Change the comment
+        e = meterage.Entry.query.first()
+        e.text = 'new text'
+        meterage.db.session.commit()
+
+        e = meterage.Entry.query.first()
+        self.assertEqual(e.text, 'new text', 'update was not performed correctly')
+        self.assertEqual(e.user_id, 1, 'User ID was not set correctly for this Entry object')
+
+    def test_delete(self):
+        """
+        Test that we can perform an SQL 'delete'
+
+        THIS TEST WORKS BY ITSELF, BUT NOT WHEN RUN WITH ALL OTHER TESTS
+        """
+        # Delete hari
+        meterage.User.query.filter_by(id=2).delete()
+        meterage.db.session.commit()
+
+        # Try to draw out hari
+        hari = meterage.User.query.get(2)
+
+        self.assertFalse(hari, 'hari was not deleted')
 
 if __name__ == '__main__':
     unittest.main()
