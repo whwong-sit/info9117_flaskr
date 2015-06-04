@@ -3,16 +3,32 @@
 
 {% if session.logged_in %}
 
-<ul class=entries>
-    <li><h2><i><img src="{{ entry.author.gravataremail | gravatar }}"></i><a href=" {{ url_for('show_entries') }}">{{
-        entry.title }}</a><span
-            class=user> by {{ entry.author.username }} </span></h2> {{ entry.text | newlines }}
-    </li>
-    <h3> Started at: {{ entry.start_time }} </span> </h3>
+<ul class="chats" style="padding-top:10px">
 
-    <h3> End at: {{ entry.end_time }} </span></h3>
+    <img src="{{ entry.author.gravataremail | gravatar }}" class="img-rounded" alt="Gravatar"><h2><a
+            href="{{ url_for('show_entries') }}">{{
+        entry.title }}</a> <span> by {{ entry.author.username }} </span></h2>
+
+    <div class="form-group">
+        <label for="starttime">start time:</label>
+        <strong id="starttime">{{ entry.start_time }}</strong>
+    </div>
+    <div class="form-group">
+        <label for="endtime">end time:</label>
+        <strong id="endtime">{{ entry.end_time }}</strong>
+    </div>
+    <div class="form-group">
+        <label for="taskdes">Description:</label>
+        <strong id="taskdes">{{ entry.task_des }}</strong>
+    </div>
+    <div class="form-group">
+        <label for="entrytext">Text:</label>
+        <div class="panel-body" id="entrytext">{{ entry.text | newlines }}</div>
+    </div>
+
 </ul>
-{% if not task_ended %}
+
+{% if not entry.end_time %}
 <form action="{{ url_for('add_end_time', entry_id=entry_id) }}" method=post class=add_end_time>
     Press to end task:
     <input type=submit value=EndTask!>
