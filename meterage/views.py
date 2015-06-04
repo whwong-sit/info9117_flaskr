@@ -27,6 +27,7 @@ def add_entry():
     if request.form['start_time'] not in ['', None]:
         e.start_time = request.form['start_time']
 
+    db.session.add(e)
     db.session.commit()
 
     flash('New entry was successfully posted')
