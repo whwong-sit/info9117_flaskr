@@ -14,3 +14,11 @@
 
 [ ] Implement the Entry start_time and end_time fields to use DateTime
     objects.
+
+[ ] Fix up the setUp and tearDown methods in the unit tests so they
+    work correctly with SQLAlchemy
+
+[ ] Refactor.  The code is getting unruly at this point.
+
+[ ] Implement email confirmations.  There is an official Flask
+    extension to this end.

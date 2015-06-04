@@ -7,7 +7,7 @@ from contextlib import closing
 
 import meterage
 
-from flask_bcrypt import generate_password_hash, check_password_hash
+from flask_bcrypt import generate_password_hash
 
 
 class MeterageBaseTestClass(unittest.TestCase):
@@ -403,21 +403,20 @@ class ORMTests(MeterageBaseTestClass):
         self.assertEqual(e.text, 'new text', 'update was not performed correctly')
         self.assertEqual(e.user_id, 1, 'User ID was not set correctly for this Entry object')
 
+    def test_delete(self):
+        """
+        Test that we can perform an SQL 'delete'
 
-    # def test_delete(self):
-    #     """
-    #     Test that we can perform an SQL 'delete'
-    #     """
-    #     # Delete hari
-    #     meterage.User.query.filter_by(id=2).delete()
-    #     meterage.db.session.commit()
+        THIS TEST WORKS BY ITSELF, BUT NOT WHEN RUN WITH ALL OTHER TESTS
+        """
+        # Delete hari
+        meterage.User.query.filter_by(id=2).delete()
+        meterage.db.session.commit()
 
-    #     # Check that he is deleted
-    #     with closing(self.connect_db()) as db:
-    #         cur = db.execute('select username from ' + meterage.User.__tablename__)
-    #         users = [dict(username=row[0]) for row in cur.fetchall()]
-    #         self.assertEqual(len(users), 1, 'user was not deleted')
+        # Try to draw out hari
+        hari = meterage.User.query.get(2)
 
+        self.assertFalse(hari, 'hari was not deleted')
 
 if __name__ == '__main__':
     unittest.main()
