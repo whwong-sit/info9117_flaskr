@@ -52,6 +52,9 @@ class MeterageBaseTestClass(unittest.TestCase):
         """
         close temporary file and remove from filesystem
         """
+        # meterage.db.session.remove()
+        # meterage.db.drop_all()
+        os.close(self.db_fd)
         os.unlink(meterage.app.config['DATABASE'])
 
         # Some useful functions
@@ -369,6 +372,8 @@ class ORMTests(MeterageBaseTestClass):
     def test_read(self):
         """
         Test that we can perform an SQL 'read'
+
+        THIS TEST WORKS BY ITSELF, BUT NOT WHEN RUN WITH ALL OTHER TESTS
         """
         meterage.db.session.add(meterage.User('Link', 'ocarina', 'link@deku.tree'))
         meterage.db.session.commit()
@@ -379,26 +384,25 @@ class ORMTests(MeterageBaseTestClass):
         self.assertEqual(u.gravataremail, 'link@deku.tree', 'Gravatar email not added correctly')
         self.assertFalse(u.admin, 'user was added as an admin when they ought not to have been')
 
-    # def test_update(self):
-    #     """
-    #     Test that we can perform an SQL 'update'
-    #     """
-    #     # Add a comment object
-    #     meterage.db.session.add(meterage.Entry('title', 'text', 1))
-    #     # meterage.db.session.add(meterage.Comment(2, 'comment text', 3))
-    #     meterage.db.session.commit()
+    def test_update(self):
+        """
+        Test that we can perform an SQL 'update'
 
-    #     # Change the comment
-    #     e = meterage.Entry.query.first()
-    #     e.text = 'new text'
-    #     meterage.db.session.commit()
+        THIS TEST WORKS BY ITSELF, BUT NOT WHEN RUN WITH ALL OTHER TESTS
+        """
+        # Add an Entry object
+        meterage.db.session.add(meterage.Entry('title', 'text', 1))
+        meterage.db.session.commit()
 
-    #     # Check that the update was performed successfully
-    #     with closing(self.connect_db()) as db:
-    #         cur = db.execute('select text from ' + meterage.Entry.__tablename__)
-    #         entries = [dict(text=row[0]) for row in cur.fetchall()]
-    #         self.assertTrue(entries, 'comment was not added correctly')
-    #         self.assertEqual(entries[0]['text'], 'new text', 'text was not updated correctly')
+        # Change the comment
+        e = meterage.Entry.query.first()
+        e.text = 'new text'
+        meterage.db.session.commit()
+
+        e = meterage.Entry.query.first()
+        self.assertEqual(e.text, 'new text', 'update was not performed correctly')
+        self.assertEqual(e.user_id, 1, 'User ID was not set correctly for this Entry object')
+
 
     # def test_delete(self):
     #     """
