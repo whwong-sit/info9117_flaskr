@@ -1,7 +1,12 @@
 {% extends "layout.html" %}
 {% block body %}
   <h2>Add New User</h2>
-  {% if error %}<p class=error><strong>Error:</strong>{{ error }}</p>{% endif %}
+  {% if error %}
+  <div class="alert alert-danger" role="alert">
+    <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+    <span class="sr-only">Error:</span>{{ error }}
+  </div>
+  {% endif %}
   {% if success %}<p class=success>{{ success }}</p>{% endif %}
   <form action="{{ url_for('add_new_user') }}" method=post>
     <dl>
@@ -13,7 +18,7 @@
 		<dd><input type=password name=confirm_password required>
 		<dt>Email:
 		<dd><input type=email name=email required>
-        <dd><input type=submit value=add_new_user>
+        <dd><input type=submit value="Add New User">
     </dl>
   </form>
 {% endblock %}

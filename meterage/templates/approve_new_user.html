@@ -1,13 +1,26 @@
 {% extends "layout.html" %}
 {% block body %}
-  <h2>Approve New User</h2>
-  {% if error %}<p class=error><strong>Error:</strong>{{ error }}</p>{% endif %}
-  {% if success %}<p class=success>{{ success }}</p>{% endif %}
-  <form action="{{ url_for('approve_new_user') }}" method=post>
-    <dl>
-        <dt>Username:
-        <dd><input type=text name=username required>
-        <dd><input type=submit value=approve_new_user>
-    </dl>
-  </form>
+<h2>Approve New User</h2>
+
+{% if error %}
+<div class="alert alert-danger">
+    <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+    <strong>Error:</strong> {{ error }}
+</div>
+{% endif %}
+
+{% if success %}
+<div class="alert alert-success fade in">
+    <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+    <strong>Success!</strong> {{ success }}
+</div>
+{% endif %}
+
+<form role="form" action="{{ url_for('approve_new_user') }}" method=post>
+    <div class="form-group">
+        <label for="username">Username:</label>
+        <input class="form-control" type="text" name="username" id="username" required>
+    </div>
+    <button type="submit" class="btn btn-default" name="approve">Approve</button>
+</form>
 {% endblock %}

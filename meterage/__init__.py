@@ -29,7 +29,8 @@ if not isfile(str(app.config['DATABASE'])):
 
     usernames = ["admin", "hari", "jim", "spock"]
     passwords = ["default", "seldon", "bean", "vulcan"]
-    gravataremails = ['daisy22229999@gmail.com', 'daisy200029@gmail.com', "jimbean@whisky.biz", "livelong@prosper.edu.au"]
+    gravataremails = ['daisy22229999@gmail.com', 'daisy200029@gmail.com', "jimbean@whisky.biz",
+                      "livelong@prosper.edu.au"]
 
     for username, password, gravataremail in zip(usernames, passwords, gravataremails):
         if username == 'admin':

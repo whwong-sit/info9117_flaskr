@@ -16,9 +16,9 @@ def show_entries():
     """
     return render_template('show_entries.html', entries=Entry.query.order_by(-Entry.id).all())
 
+
 @app.route('/add', methods=['POST'])
 def add_entry():
-
     if not session.get('logged_in'):
         abort(401)
 
@@ -32,6 +32,7 @@ def add_entry():
 
     flash('New entry was successfully posted')
     return redirect(url_for('show_entries'))
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -62,6 +63,7 @@ def login():
             error = 'Invalid username'
     return render_template('login.html', error=error)
 
+
 @app.route('/logout')
 def logout():
     session.pop('logged_in', None)
@@ -70,9 +72,11 @@ def logout():
     flash('You were logged out')
     return redirect(url_for('show_entries'))
 
+
 @app.route('/<entry_id>/show_comments')
 def show_comments(entry_id):
     return render_template('show_comments.html', entry=Entry.query.get(entry_id))
+
 
 @app.route('/<entry_id>/add_comments', methods=['POST'])
 def add_comments(entry_id):
@@ -83,6 +87,7 @@ def add_comments(entry_id):
     db.session.commit()
     flash('New comment was successfully posted')
     return redirect(url_for('show_comments', entry_id=entry_id))
+
 
 @app.route('/<entry_id>/add_roles', methods=['POST'])
 def add_roles(entry_id):
@@ -98,6 +103,7 @@ def add_roles(entry_id):
         flash('New role was successfully posted')
     return redirect(url_for('show_comments', entry_id=entry_id))
 
+
 @app.route('/<entry_id>/delete_roles', methods=['POST'])
 def delete_roles(entry_id):
     if not session.get('logged_in'):
@@ -110,11 +116,12 @@ def delete_roles(entry_id):
     flash('Role has been reset')
     return redirect(url_for('show_comments', entry_id=entry_id))
 
+
 @app.route('/<entry_id>/add_end_time', methods=['POST'])
 def add_end_time(entry_id):
     if not session.get('logged_in'):
         abort(401)
-    
+
     e = Entry.query.filter_by(id=entry_id).first()
     if e.end_time is None:
         e.end_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
@@ -123,6 +130,7 @@ def add_end_time(entry_id):
     else:
         flash('TASK ALREADY ENDED')
     return redirect(url_for('show_comments', entry_id=entry_id))
+
 
 @app.route('/user/<username>', methods=['GET', 'POST'])
 def manage_details(username):
@@ -154,6 +162,7 @@ def manage_details(username):
 
     return render_template('manage_details.html', error=error)
 
+
 @app.route('/change_password', methods=['GET', 'POST'])
 def change_password():
     """
@@ -167,7 +176,7 @@ def change_password():
         # If someone tries to access the page without being logged in.
         abort(401)
     if request.method == 'POST':
-        
+
         user = User.query.filter_by(username=request.form['username']).first()
 
         if user is None:
@@ -184,37 +193,29 @@ def change_password():
 
     return render_template('change_password.html', error=error)
 
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     """
-    Allows new user to register for log in. If the username input already exists,
-    new user has to register again with a different username. If that user is not present,
-    it checks that the password corresponds to the confirmation password given.
-    If all of this holds, then the new user is created.
+    Allows new user to register for log in. If the username input already exists, new user has to register again
+    with a different username. If that user is not present, it checks that the password corresponds to the confirmation
+    password given.  If all of this holds, then the new user is created.
     """
     error = None
     if request.method == 'POST':
-        try :
+        try:
             if request.form['password'] == request.form['confirm_password']:
-                db.session.add(User(request.form['username'], request.form['password'], request.form['email'], False, False))
+                db.session.add(
+                    User(request.form['username'], request.form['password'], request.form['email'], False, False))
                 db.session.commit()
                 flash('Successfully registered')
             else:
                 error = 'Please enter the same password twice'
-        except : # SQL exception for not having a unique username
+        except:  # SQL exception for not having a unique username
             error = 'Username has already been used'
-            
+
     return render_template('register.html', error=error)
 
-@app.route('/admin', methods=['GET'])
-def admin():
-    """
-    Redirect admin to admin portal page
-    """
-    if not session.get('logged_in'):
-        # If someone tries to access the page without being logged in.
-        abort(401)
-    return render_template('admin.html')
 
 @app.route('/add_new_user', methods=['GET', 'POST'])
 def add_new_user():
@@ -229,17 +230,19 @@ def add_new_user():
         abort(401)
 
     if request.method == 'POST':
-        try :
+        try:
             if request.form['password'] == request.form['confirm_password']:
-                db.session.add(User(request.form['username'], request.form['password'], request.form['email'], False, True))
+                db.session.add(User(request.form['username'], request.form['password'], request.form['email'],
+                                    False, True))
                 db.session.commit()
                 flash('Successfully added new user')
             else:
                 error = 'Please enter the same password twice'
-        except : # SQL exception for not having a unique username
+        except:  # SQL exception for not having a unique username
             error = 'Username has already been used'
-            
-    return render_template('add_new_user.html', error=error)            
+
+    return render_template('add_new_user.html', error=error)
+
 
 @app.route('/approve_new_user', methods=['GET', 'POST'])
 def approve_new_user():
@@ -248,20 +251,21 @@ def approve_new_user():
     If that user is present, the new user is granted with access.
     """
     error = None
+    success = None
     if not session.get('logged_in'):
-        # If someone tries to access the page without being logged in.
         abort(401)
 
     if request.method == 'POST':
-        e = User.query.filter_by(username=request.form['username'].first())
+        e = User.query.filter_by(username=request.form['username']).first()
         if e is not None:
             e.approved = True
             db.session.commit()
-            flash('Successfull granted access to ' + request.form['username'])
+            success = 'Successfully granted access to ' + request.form['username']
         else:
             error = 'No such user as ' + request.form['username']
-            
-    return render_template('approve_new_user.html', error=error)
+
+    return render_template('approve_new_user.html', error=error, success=success)
+
 
 @app.route('/add_new_admin', methods=['GET', 'POST'])
 def add_new_admin():
@@ -270,55 +274,53 @@ def add_new_admin():
     If that user is present and non-admin, the user is granted with admin privilege.
     """
     error = None
-    if not session.get('logged_in'):
-        # If someone tries to access the page without being logged in.
+    success = None
+    if not (session.get('logged_in') and session.get('admin')):
         abort(401)
-    if not session.get('admin'):
-        # If non-admin tries to access the page
-        abort(401)
+
     if request.method == 'POST':
         try:
             u = User.query.filter_by(username=request.form['username']).first()
-            if u.admin :
-                error = 'User is already an admin'
+            if u.admin:
+                error = request.form['username'] + ' is already an admin'
             else:
-               u.admin = True
-               db.session.commit()
-               flash('Successfully granted admin privilege to user')
-        except :
-            error = 'User does not exist'
-             
-    return render_template('add_new_admin.html', error=error)
+                u.admin = True
+                db.session.commit()
+                success = 'Successfully granted admin privileges to ' + request.form['username']
+        except:
+            error = 'User ' + request.form['username'] + ' does not exist'
+
+    return render_template('add_new_admin.html', error=error, success=success)
+
 
 @app.route('/revoke_admin', methods=['GET', 'POST'])
 def revoke_admin():
     """
     Allows the admin to revoke admin privilege from another user. It searches the database for the user specified.
-    If that user is present, the user's admin privilege is revoke. However, users with admin privilege cannot revoke their own privilege.
+    If that user is present, the user's admin privilege is revoked. However, users with admin privilege cannot revoke
+    their own privilege.
     """
     error = None
-    if not session.get('logged_in'):
-        # If someone tries to access the page without being logged in.
+    success = None
+    if not (session.get('logged_in') and session.get('admin')):
         abort(401)
-    if not session.get('admin'):
-        # If non-admin tries to access the page
-        abort(401)
+
     if request.method == 'POST':
         try:
             u = User.query.filter_by(username=request.form['username']).first()
             if u.username == session['username']:
                 error = "You can't revoke your own admin rights!"
-            elif not u.admin :
+            elif not u.admin:
                 error = 'User is not an admin'
             else:
-               u.admin = False
-               db.session.commit()
-               flash('Successfully removed admin privileges')
-        except :
+                u.admin = False
+                db.session.commit()
+                success = 'Successfully removed admin privileges'
+        except:  # TODO specify the exception.  It was not working when I tried
             error = 'User does not exist'
-    
-    return render_template('revoke_admin.html', error=error)
-    
+
+    return render_template('revoke_admin.html', error=error, success=success)
+
 
 #####################################
 #### Filters and other functions ####
@@ -330,6 +332,7 @@ def newline_filter(s):
     s = s.replace("\n", '<br />')
     # Markup() is used to prevent '<' and '>' symbols from being interpreted as less-than or greater-than symbols
     return Markup(s)
+
 
 @app.template_filter('timestamp')
 def timestamp_filter(s):

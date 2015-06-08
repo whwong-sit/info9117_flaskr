@@ -1,13 +1,26 @@
 {% extends "layout.html" %}
 {% block body %}
-  <h2>Revoke Admin</h2>
-  {% if error %}<p class=error><strong>Error:</strong>{{ error }}</p>{% endif %}
-  {% if success %}<p class=success>{{ success }}</p>{% endif %}
-  <form action="{{ url_for('revoke_admin') }}" method=post>
-    <dl>
-        <dt>Username:
-        <dd><input type=text name=username required>
-        <dd><input type=submit value=revoke_admin>
-    </dl>
-  </form>
+<h2>Revoke Admin</h2>
+
+{% if error %}
+<div class="alert alert-danger">
+    <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+    <strong>Error:</strong> {{ error }}
+</div>
+{% endif %}
+
+{% if success %}
+<div class="alert alert-success fade in">
+    <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+    <strong>Success!</strong> {{ success }}
+</div>
+{% endif %}
+
+<form role="form" action="{{ url_for('revoke_admin') }}" method=post>
+    <div class="form-group">
+        <label for="username">Username:</label>
+        <input class="form-control" type="text" name="username" id="username" required>
+    </div>
+    <button type="submit" class="btn btn-default" name="revoke">Revoke</button>
+</form>
 {% endblock %}

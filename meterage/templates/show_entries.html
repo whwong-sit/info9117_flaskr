@@ -1,5 +1,7 @@
 {% extends "layout.html" %}
 {% block body %}
+<h2 class="page-title">Meterage</h2>
+
 {% if session.logged_in %}
 <form action="{{ url_for('add_entry') }}" method="POST" class="add-entry">
     <div class="form-group">
@@ -23,33 +25,38 @@
 <hr>
 {% endif %}
 
-<h3 class="page-title">Meterage</h3>
-<ul class="chats" style="padding-top:10px">
-    {% for entry in entries %}
+{% for entry in entries %}
 
-    <img src="{{ entry.author.gravataremail | gravatar }}" class="img-rounded" alt="Gravatar"><h2><a
-            href="{{ url_for('show_comments', entry_id=entry.id) }}">{{
-        entry.title }}</a> <span> by {{ entry.author.username }} </span></h2>
+<div class="row">
+    <div class="col-md-4"><img src="{{ entry.author.gravataremail | gravatar }}" class="img-rounded"
+                                       alt="Gravatar"><a href="{{ url_for('show_comments', entry_id=entry.id) }}">
+        <strong> {{ entry.title }} </a> </strong><span> by {{ entry.author.username }} </span>
+    </div>
+    <div class="col-md-8">{{ entry.text | newlines }}</div>
+</div>
 
-    <div class="form-group">
-        <label for="starttime">start time:</label>
+<div class="row">
+    <div class="col-md-4">
+        <label for="starttime">Start:</label>
         <strong id="starttime">{{ entry.start_time }}</strong>
     </div>
-    <div class="form-group">
-        <label for="endtime">end time:</label>
+</div>
+{% if entry.end_time %}
+<div class="row">
+    <div class="col-md-4">
+        <label for="endtime">End:</label>
         <strong id="endtime">{{ entry.end_time }}</strong>
     </div>
-    <div class="form-group">
+</div>
+{% endif %}
+<div class="row">
+    <div class="col-md-4">
         <label for="taskdes">Description:</label>
         <strong id="taskdes">{{ entry.task_des }}</strong>
     </div>
-    <div class="form-group">
-        <label for="entrytext">Text:</label>
-        <div class="panel-body" id="entrytext">{{ entry.text | newlines }}</div>
-    </div>
+</div>
 
-    {% else %}
-    <p class="bg-primary">No entries here yet</p>
-    {% endfor %}
-</ul>
+{% else %}
+<p class="bg-primary">No entries here yet</p>
+{% endfor %}
 {% endblock %}

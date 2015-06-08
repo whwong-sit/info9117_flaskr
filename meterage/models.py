@@ -19,7 +19,7 @@ class User(db.Model):
     __tablename__ = "users"
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    
+
     username = db.Column(db.String(64), index=True, unique=True)
     __password = db.Column(db.String(128))
     gravataremail = db.Column(db.String(120), index=True, unique=True)
@@ -38,7 +38,6 @@ class User(db.Model):
         self.gravataremail = gravataremail
         self.admin = admin
         self.approved = approved
-
 
     @hybrid_property
     def password(self):
@@ -69,8 +68,8 @@ class User(db.Model):
         """
         return check_password_hash(self.password, plaintext)
 
-class Entry(db.Model):
 
+class Entry(db.Model):
     __tablename__ = "entries"
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -103,8 +102,8 @@ class Entry(db.Model):
         self.task_des = task_des
         self.user_role = user_role
 
-class Comment(db.Model):
 
+class Comment(db.Model):
     __tablename__ = "comments"
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
