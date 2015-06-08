@@ -82,7 +82,7 @@ class Entry(db.Model):
     start_time = db.Column(db.String(16))
     end_time = db.Column(db.String(16))
     task_des = db.Column(db.String)
-    user_role = db.Column(db.String)
+    user_role = db.Column(db.PickleType)
     # TODO use DateTime types for the start_time and end_time
     # start_time = db.Column(db.DateTime)
     # end_time = db.Column(db.DateTime)
@@ -90,7 +90,7 @@ class Entry(db.Model):
     def __repr__(self):
         return "<Entry {0}>".format(self.title)
 
-    def __init__(self, title, text, uid, start_time=None, end_time=None, task_des=None):
+    def __init__(self, title, text, uid, start_time=None, end_time=None, task_des=None, user_role=[]):
         self.title = title
         self.text = text
         self.user_id = uid
@@ -101,6 +101,7 @@ class Entry(db.Model):
             self.start_time = start_time
         self.end_time = end_time
         self.task_des = task_des
+        self.user_role = user_role
 
 class Comment(db.Model):
 

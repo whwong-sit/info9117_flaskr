@@ -72,9 +72,7 @@ def logout():
 
 @app.route('/<entry_id>/show_comments')
 def show_comments(entry_id):
-    comments = Comment.query.filter_by(entry_id=entry_id).order_by(-Comment.id).all()
-    entry = Entry.query.get(entry_id)
-    return render_template('show_comments.html', entry=entry, comments=comments, entry_id=entry_id)
+    return render_template('show_comments.html', entry=Entry.query.get(entry_id))
 
 @app.route('/<entry_id>/add_comments', methods=['POST'])
 def add_comments(entry_id):
@@ -91,11 +89,13 @@ def add_roles(entry_id):
     if not session.get('logged_in'):
         abort(401)
 
-    e = Entry.query.get(entry_id)
-    e.user_role = request.form['user_role']
-    db.session.commit()
-        
-    flash('New role was successfully posted')
+    if request.form['user_role'] not in ['', None]:
+        # I am not sure why we need to use such a convoluted method here, but PickleType seems to require it.
+        a = Entry.query.get(entry_id).user_role
+        a.append(request.form['user_role'])
+        Entry.query.get(entry_id).user_role = a
+        db.session.commit()
+        flash('New role was successfully posted')
     return redirect(url_for('show_comments', entry_id=entry_id))
 
 @app.route('/<entry_id>/delete_roles', methods=['POST'])
@@ -104,7 +104,7 @@ def delete_roles(entry_id):
         abort(401)
 
     e = Entry.query.get(entry_id)
-    e.user_role = None
+    e.user_role = []
     db.session.commit()
 
     flash('Role has been reset')

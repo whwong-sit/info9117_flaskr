@@ -29,13 +29,13 @@
 </ul>
 
 {% if not entry.end_time %}
-<form action="{{ url_for('add_end_time', entry_id=entry_id) }}" method=post class=add_end_time>
+<form action="{{ url_for('add_end_time', entry_id=entry.id) }}" method=post class=add_end_time>
     Press to end task:
-    <input type=submit value=EndTask!>
+    <input type=submit value="End Task">
 </form>
 {% endif %}
 
-<form action="{{ url_for('add_roles', entry_id=entry_id) }}" method=post class=add_roles>
+<form action="{{ url_for('add_roles', entry_id=entry.id) }}" method=post class=add_roles>
 
     <dt>Roles:
     <dd><textarea name=user_role rows=1 cols=15></textarea>
@@ -43,22 +43,22 @@
     <dd><input type=submit value=Add>
 
 </form>
-<form action="{{ url_for('delete_roles', entry_id=entry_id) }}" method=post class=delete_roles>
+<form action="{{ url_for('delete_roles', entry_id=entry.id) }}" method=post class=delete_roles>
     <dd><input type=submit value=Reset>
 
 </form>
 
 <div style="height:50; width:560px; background:white; word-wrap: break-word; word-break: normal;">
     <ul class=roles>
-        {% for role in roles %}
-        <li>{{ role.user_role }}</li>
+        {% for role in entry.user_role %}
+        <li>{{ role }}</li>
         {% else %}
         <li><em>No Role Defined</em></li>
         {% endfor %}
     </ul>
 </div>
 
-<form action="{{ url_for('add_comments', entry_id=entry_id) }}" method=post class=add_comments>
+<form action="{{ url_for('add_comments', entry_id=entry.id) }}" method=post class=add_comments>
     <dl>
         <dt>Comments:
         <dd><textarea name=comment_input rows=5 cols=40></textarea>
@@ -73,9 +73,10 @@
 <div style="height:50; width:560px; background:white; word-wrap: break-word; word-break: normal;">
 
     <ul class=comments>
-        {% for comment in comments %}
-        <li>{{ comment.text }} <span
-                class=user> by <img src="{{ comment.author.gravataremail | gravatar(size=10) }}"></i> {{ comment.author.username }} at {{ comment.posttime | timestamp }} </span>
+        <li class="hidden">{{ entry.comments.reverse() }}</li>
+        {% for comment in entry.comments %}
+        <li>{{ comment.text | newlines }} <span
+                class=user> by <img src="{{ comment.author.gravataremail | gravatar(size=15) }}"></i> {{ comment.author.username }} at {{ comment.posttime | timestamp }} </span>
         </li>
         {% else %}
         <li><em>No Comment Yet</em></li>
