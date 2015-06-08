@@ -3,7 +3,7 @@
 <h2 class="page-title">Meterage</h2>
 
 {% if session.logged_in %}
-<form action="{{ url_for('add_entry') }}" method="POST" class="add-entry">
+<form role="form" action="{{ url_for('add_entry') }}" method="POST">
     <div class="form-group">
         <label for="title">Title:</label>
         <input name="title" type="text" class="form-control" id="title">
@@ -20,43 +20,47 @@
         <label for="task_des">Description:</label>
         <textarea name="task_des" rows="5" class="form-control" id="task_des"></textarea>
     </div>
-    <input type=submit class="btn purple" value="Share">
+    <input type=submit class="btn purple btn-block" value="Share">
 </form>
 <hr>
 {% endif %}
 
 {% for entry in entries %}
 
-<div class="row">
-    <div class="col-md-4"><img src="{{ entry.author.gravataremail | gravatar }}" class="img-rounded"
-                                       alt="Gravatar"><a href="{{ url_for('show_comments', entry_id=entry.id) }}">
-        <strong> {{ entry.title }} </a> </strong><span> by {{ entry.author.username }} </span>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title"><img src="{{ entry.author.gravataremail | gravatar }}" class="img-rounded"
+                                     alt="Gravatar"><a href="{{ url_for('show_comments', entry_id=entry.id) }}"> {{
+            entry.title }}</a> by {{ entry.author.username }}</h3>
     </div>
-    <div class="col-md-8">{{ entry.text | newlines }}</div>
-</div>
-
-<div class="row">
-    <div class="col-md-4">
-        <label for="starttime">Start:</label>
-        <strong id="starttime">{{ entry.start_time }}</strong>
-    </div>
-</div>
-{% if entry.end_time %}
-<div class="row">
-    <div class="col-md-4">
-        <label for="endtime">End:</label>
-        <strong id="endtime">{{ entry.end_time }}</strong>
-    </div>
-</div>
-{% endif %}
-<div class="row">
-    <div class="col-md-4">
-        <label for="taskdes">Description:</label>
-        <strong id="taskdes">{{ entry.task_des }}</strong>
+    <div class="panel-body">
+        <div class="row">
+            <div class="col-md-4">
+                <label for="starttime">Start:</label>
+                <strong id="starttime">{{ entry.start_time }}</strong>
+            </div>
+        </div>
+        {% if entry.end_time %}
+        <div class="row">
+            <div class="col-md-4">
+                <label for="endtime">End:</label>
+                <strong id="endtime">{{ entry.end_time }}</strong>
+            </div>
+        </div>
+        {% endif %}
+        <div class="row">
+            <div class="col-md-4">
+                <label for="taskdes">Description:</label>
+                <strong id="taskdes">{{ entry.task_des }}</strong>
+            </div>
+        </div>
+        <p class="lead">{{ entry.text | newlines }}</p>
     </div>
 </div>
 
 {% else %}
 <p class="bg-primary">No entries here yet</p>
 {% endfor %}
+
 {% endblock %}
+

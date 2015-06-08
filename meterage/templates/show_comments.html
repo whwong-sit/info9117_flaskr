@@ -3,85 +3,90 @@
 
 {% if session.logged_in %}
 
-<ul class="chats" style="padding-top:10px">
+<div class="page-header">
+    <h1>{{ entry.title }}
+        <small>by {{ entry.author.username }}</small>
+    </h1>
+</div>
 
-    <img src="{{ entry.author.gravataremail | gravatar }}" class="img-rounded" alt="Gravatar"><h2><a
-            href="{{ url_for('show_entries') }}">{{
-        entry.title }}</a> <span> by {{ entry.author.username }} </span></h2>
+<div class="row">
+    <div class="col-md-4"><img src="{{ entry.author.gravataremail | gravatar }}" class="img-rounded"
+                               alt="Gravatar"><a href="{{ url_for('show_comments', entry_id=entry.id) }}"></a>
+    </div>
+    <div class="col-md-8">{{ entry.text | newlines }}</div>
+</div>
 
-    <div class="form-group">
-        <label for="starttime">start time:</label>
+<div class="row">
+    <div class="col-md-4">
+        <label for="starttime">Start:</label>
         <strong id="starttime">{{ entry.start_time }}</strong>
     </div>
-    <div class="form-group">
-        <label for="endtime">end time:</label>
+</div>
+{% if entry.end_time %}
+<div class="row">
+    <div class="col-md-4">
+        <label for="endtime">End:</label>
         <strong id="endtime">{{ entry.end_time }}</strong>
     </div>
-    <div class="form-group">
+</div>
+{% else %}
+<form action="{{ url_for('add_end_time', entry_id=entry.id) }}" method=post>
+    <button type="submit" class="btn btn-default">Press to end task</button>
+</form>
+{% endif %}
+<div class="row">
+    <div class="col-md-4">
         <label for="taskdes">Description:</label>
         <strong id="taskdes">{{ entry.task_des }}</strong>
     </div>
-    <div class="form-group">
-        <label for="entrytext">Text:</label>
-        <div class="panel-body" id="entrytext">{{ entry.text | newlines }}</div>
-    </div>
-
-</ul>
-
-{% if not entry.end_time %}
-<form action="{{ url_for('add_end_time', entry_id=entry.id) }}" method=post class=add_end_time>
-    Press to end task:
-    <input type=submit value="End Task">
-</form>
-{% endif %}
-
-<form action="{{ url_for('add_roles', entry_id=entry.id) }}" method=post class=add_roles>
-
-    <dt>Roles:
-    <dd><textarea name=user_role rows=1 cols=15></textarea>
-
-    <dd><input type=submit value=Add>
-
-</form>
-<form action="{{ url_for('delete_roles', entry_id=entry.id) }}" method=post class=delete_roles>
-    <dd><input type=submit value=Reset>
-
-</form>
-
-<div style="height:50; width:560px; background:white; word-wrap: break-word; word-break: normal;">
-    <ul class=roles>
-        {% for role in entry.user_role %}
-        <li>{{ role }}</li>
-        {% else %}
-        <li><em>No Role Defined</em></li>
-        {% endfor %}
-    </ul>
 </div>
 
-<form action="{{ url_for('add_comments', entry_id=entry.id) }}" method=post class=add_comments>
-    <dl>
-        <dt>Comments:
-        <dd><textarea name=comment_input rows=5 cols=40></textarea>
+<form role="form" action="{{ url_for('change_roles', entry_id=entry.id) }}" method=post>
+    <div class="panel panel-default">
+        <div class="form-group">
+            <div class="panel-heading">
+                <h3 class="panel-title"><label for="roles">Roles</label></h3>
+            </div>
+        </div>
+        <div class="panel-body">
+            <input name="user_role" type="textarea" class="form-control" id="roles" value="Define a role here...">
+            <ul class="list-group">
+                {% for role in entry.user_role %}
+                <li class="list-group-item">{{ role }}</li>
+                {% else %}
+                <li class="list-group-item"><p class="bg-info">No roles defined yet :(</p></li>
+                {% endfor %}
+            </ul>
+            <div class="btn-group" role="group" aria-label="...">
+                <button type="submit" class="btn btn-default" name="add">Add</button>
+                <button type="submit" class="btn btn-warning" name="reset">Reset</button>
+            </div>
+        </div>
+    </div>
+</form>
 
-        <dd><input type=submit value=Add>
-    </dl>
+<form action="{{ url_for('add_comments', entry_id=entry.id) }}" method=post>
+    <div class="form-group">
+        <label for="comments">Comments:</label>
+        <input name="comment_input" type="textarea" class="form-control" id="comments">
+    </div>
+    <button type="submit" class="btn btn-default" name="add">Add</button>
 </form>
 
 {% endif %}
 
 <br>
-<div style="height:50; width:560px; background:white; word-wrap: break-word; word-break: normal;">
 
-    <ul class=comments>
-        <li class="hidden">{{ entry.comments.reverse() }}</li>
-        {% for comment in entry.comments %}
-        <li>{{ comment.text | newlines }} <span
-                class=user> by <img src="{{ comment.author.gravataremail | gravatar(size=15) }}"></i> {{ comment.author.username }} at {{ comment.posttime | timestamp }} </span>
-        </li>
-        {% else %}
-        <li><em>No Comment Yet</em></li>
-        {% endfor %}
+<ul class="list-group">
+    <li class="hidden">{{ entry.comments.reverse() }}</li>
+    {% for comment in entry.comments %}
+    <li class="list-group-item">"{{ comment.text | newlines }}" - <img
+            src="{{ comment.author.gravataremail | gravatar(size=15) }}"></i> {{ comment.author.username }}, {{
+        comment.posttime | timestamp }}
+    </li>
+    {% else %}
+    <li class="list-group-item"><p class="bg-info">No Comment Yet</p></li>
+    {% endfor %}
+</ul>
 
-    </ul>
-</div>
 {% endblock %}

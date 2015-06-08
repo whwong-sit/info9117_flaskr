@@ -70,7 +70,11 @@ Reference note: Template Based on Metronic - Responsive Admin Dashboard Template
                 <li class="dropdown dropdown-user">
                     <a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown"
                        data-close-others="true">
+                        {% if session.gravataremail %}
+                        <img alt="" class="img-circle" src="{{ session.gravataremail | gravatar(size=19) }}"/>
+                        {% else %}
                         <img alt="" class="img-circle" src="{{ url_for('static', filename='img/avatar3_small.jpg')}}"/>
+                        {% endif %}
 					<span class="username username-hide-on-mobile">
 					{{ session.username }} </span>
                         <i class="fa fa-angle-down"></i>
@@ -319,7 +323,7 @@ Reference note: Template Based on Metronic - Responsive Admin Dashboard Template
 <!-- BEGIN FOOTER -->
 <div class="page-footer">
     <div class="page-footer-inner">
-        2015 &copy; Dev Log by Team Cool.
+        2015 &copy; Meterage, INFO9117.
     </div>
     <div class="scroll-to-top">
         <i class="icon-arrow-up"></i>
@@ -353,6 +357,7 @@ jQuery(document).ready(function() {
    Layout.init(); // init layout
    Demo.init(); // init demo features
 });
+
 
 </script>
 <!-- END JAVASCRIPTS -->

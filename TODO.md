@@ -12,7 +12,7 @@
 [x] Distribute the main meterage.py across multiple files, it is
     getting too large
 
-[x] Fix up the database connections/disconnectons
+[x] Fix up the database connections/disconnections
 
 [ ] Implement the Entry start_time and end_time fields to use DateTime
     objects.
@@ -25,3 +25,6 @@
 
 [ ] Implement email confirmations.  There is an official Flask
     extension to this end.
+
+[ ] Fix the way "flashes" are implement, probably using some kind of
+    CSS class declaration or Bootstrap.

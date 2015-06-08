@@ -69,6 +69,7 @@ def logout():
     session.pop('logged_in', None)
     session.pop('username', None)
     session.pop('admin', None)
+    session.pop('gravataremail', None)
     flash('You were logged out')
     return redirect(url_for('show_entries'))
 
@@ -89,31 +90,23 @@ def add_comments(entry_id):
     return redirect(url_for('show_comments', entry_id=entry_id))
 
 
-@app.route('/<entry_id>/add_roles', methods=['POST'])
-def add_roles(entry_id):
+@app.route('/<entry_id>/change_roles', methods=['POST'])
+def change_roles(entry_id):
     if not session.get('logged_in'):
         abort(401)
 
-    if request.form['user_role'] not in ['', None]:
-        # I am not sure why we need to use such a convoluted method here, but PickleType seems to require it.
-        a = Entry.query.get(entry_id).user_role
-        a.append(request.form['user_role'])
-        Entry.query.get(entry_id).user_role = a
-        db.session.commit()
-        flash('New role was successfully posted')
-    return redirect(url_for('show_comments', entry_id=entry_id))
-
-
-@app.route('/<entry_id>/delete_roles', methods=['POST'])
-def delete_roles(entry_id):
-    if not session.get('logged_in'):
-        abort(401)
-
-    e = Entry.query.get(entry_id)
-    e.user_role = []
+    if "reset" in request.form.keys():
+        e = Entry.query.get(entry_id)
+        e.user_role = []
+        flash('Roles have been reset')
+    else:
+        if request.form['user_role'] not in ['', None]:
+            # I am not sure why we need to use such a convoluted method here, but PickleType seems to require it.
+            a = Entry.query.get(entry_id).user_role
+            a.append(request.form['user_role'])
+            Entry.query.get(entry_id).user_role = a
+            flash('New role was successfully posted')
     db.session.commit()
-
-    flash('Role has been reset')
     return redirect(url_for('show_comments', entry_id=entry_id))
 
 
