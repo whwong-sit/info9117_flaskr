@@ -1,10 +1,7 @@
 from behave import *
-import datetime
-# import meterage
+from time import localtime, strftime
 
 # WHENS
-
-
 
 @when(u'the user adds a new entry to log with an unspecified start time')
 def step_impl(context):
@@ -27,17 +24,25 @@ def step_impl(context):
 def step_impl(context):
     context.rv = context.app.post('/1/add_end_time', follow_redirects=True)
 
+
 # THENS
 
 @then(u'the comment should appear right after added')
 def step_impl(context):
-    assert '&lt;FinalVERSION&gt;' in context.rv.get_data()
+    assert '<FinalVERSION>' in context.rv.get_data()
+
 
 @then(u'the username should displayed right next to the comment')
 def step_impl(context):
     assert 'by hari' in context.rv.get_data()
 
-@then(u'time will auto sign')
+
+@then(u'start time will auto sign')
 def step_impl(context):
-    curr_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    assert curr_time in context.rv.get_data()
+    assert strftime("%Y-%m-%d %H:%M", localtime()) in context.rv.get_data(), context.rv.get_data()
+
+
+@then(u'end time will auto sign')
+def step_impl(context):
+    assert 'End at: ' + strftime("%Y-%m-%d %H:%M", localtime()) in context.rv.get_data()
+
