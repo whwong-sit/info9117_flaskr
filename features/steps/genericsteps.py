@@ -1,7 +1,8 @@
 from datetime import *
 from behave import *
-from contextlib import closing
+
 import meterage
+
 
 #### GIVENS
 
@@ -11,9 +12,9 @@ def step_impl(context):
     log in as user "hari"
     """
 
-    # TODO finish this.  Used to test that this user was not somehow created in the change password method.
-    with closing(meterage.connect_db()) as db:
-        cur = db.execute('select password from userPassword where username=?', ['h'])
+    # Used to test that this user was not somehow created in the change password method.
+    assert not meterage.User.query.filter_by(username='h').first(), \
+        'A user "h" has been created when trying to change password.'
 
     context.app.post('/login', data=dict(
         username='hari',
@@ -24,6 +25,7 @@ def step_impl(context):
         # see http://flask.pocoo.org/docs/0.10/testing/#accessing-and-modifying-sessions for
         # an explanation of accessing sessions during testing.
         assert sess['logged_in'], "The user is not logged in."
+
 
 @given(u'the Admin is logged in')
 def step_impl(context):
@@ -37,6 +39,7 @@ def step_impl(context):
         # an explanation of accessing sessions during testing.
         assert sess['logged_in'], "Admin is not logged in."
 
+
 #### WHENS
 
 @when(u'the User makes a post')
@@ -46,9 +49,9 @@ def step_impl(context):
     """
     context.rv = context.app.post('/add', data=dict(
         title='<Hello>',
-            text='<strong>HTML</strong> allowed here',
-            start_time='<15:00>',
-            task_des='hahahahah'
+        text='<strong>HTML</strong> allowed here',
+        start_time='<15:00>',
+        task_des='hahahahah'
     ), follow_redirects=True)
 
     for s in ['&lt;Hello&gt;', '15:00', '<strong>HTML</strong> allowed here']:

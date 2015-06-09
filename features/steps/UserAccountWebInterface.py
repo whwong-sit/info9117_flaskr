@@ -1,9 +1,6 @@
 from behave import *
 import meterage
-from contextlib import closing
 from re import sub
-from datetime import *
-
 
 #### GIVENS
 
@@ -19,6 +16,7 @@ def step_impl(context):
     # assert that this page actually exists
     assert context.rv.status_code != 404, "'/user/<username>/' page does not exist; you're getting a 404 error"
 
+
 #### THENS
 
 @then(u'account details are displayed')
@@ -32,8 +30,10 @@ def step_impl(context):
         # an explanation of accessing sessions during testing.
         for detail in ["Username", sess['username'], "Gravatar Email", sess['gravataremail']]:
             # assert all these strings are present in rv.get_data() when stripped of HTML junk
-            assert detail in sub('<[^>]*>', '', unicode(context.rv.get_data(),'utf-8')), "{0} not displayed".format(detail)
+            assert detail in sub('<[^>]*>', '', unicode(context.rv.get_data(), 'utf-8')), "{0} not displayed".format(
+                detail)
             context.username = sess['username']
+
 
 @then(u'the User is able to edit and commit {detail}')
 def step_impl(context, detail):
@@ -54,7 +54,6 @@ def step_impl(context, detail):
     # This should take the new value of <detail> and put it through the
     # POST method of /users/<username>/
     rv = context.app.post('/user/<username>', data=data, follow_redirects=True)
-    # print(rv.get_data())
 
     # this ensures that the session's username is still functioning
     context.execute_steps(u'''
@@ -62,16 +61,14 @@ def step_impl(context, detail):
         then account details are displayed
     ''')
 
-    with closing(meterage.connect_db()) as db:
-        with context.app.session_transaction() as sess:
+    with context.app.session_transaction() as sess:
         # see http://flask.pocoo.org/docs/0.10/testing/#accessing-and-modifying-sessions for
         # an explanation of accessing sessions during testing.
-            cur = db.execute('select username, gravataremail from userPassword')
-            rows = [dict(username=row[0], gravataremail=row[1]) for row in cur.fetchall()]
-            assert rows, "userPassword table has not been populated"
-            for row in rows:
-                if row["username"] == sess["username"]:
-                    if detail == "Gravatar email":
-                        assert data["gravataremail"] == row["gravataremail"], "new Gravatar email is not in the database"
-                    elif detail == "username":
-                        assert data[detail] == row["username"], "new username is not in the database"
+        allusers = meterage.User.query.all()
+        assert allusers, "database tables have not been populated"
+        for user in allusers:
+            if user.username == sess['username']:
+                if detail == 'Gravatar email':
+                    assert data['gravataremail'] == user.gravataremail, 'new Gravatar email is not in the database'
+                elif detail == 'username':
+                    assert data[detail] == user.username, 'new username is not in the database'

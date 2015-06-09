@@ -44,5 +44,5 @@ def step_impl(context):
 
 @then(u'end time will auto sign')
 def step_impl(context):
-    assert 'End at: ' + strftime("%Y-%m-%d %H:%M", localtime()) in context.rv.get_data()
+    assert '<strong id="endtime">' + strftime("%Y-%m-%d %H:%M", localtime()) in context.rv.get_data()
 
