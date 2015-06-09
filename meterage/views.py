@@ -66,11 +66,12 @@ def login():
 
 @app.route('/logout')
 def logout():
+    if 'logged_in' in session.keys():
+        flash('You were logged out')
     session.pop('logged_in', None)
     session.pop('username', None)
     session.pop('admin', None)
     session.pop('gravataremail', None)
-    flash('You were logged out')
     return redirect(url_for('show_entries'))
 
 
@@ -133,6 +134,7 @@ def manage_details(username):
     :param username: the current user's username
     :return: manage_details
     """
+    # TODO fix this up so that the URL works properly
 
     error = None
 
@@ -308,7 +310,7 @@ def revoke_admin():
             else:
                 u.admin = False
                 db.session.commit()
-                success = 'Successfully removed admin privileges'
+                success = 'Successfully revoked admin privileges from ' + u.username
         except:  # TODO specify the exception.  It was not working when I tried
             error = 'User does not exist'
 

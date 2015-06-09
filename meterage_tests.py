@@ -7,7 +7,7 @@ from contextlib import closing
 import meterage
 
 from flask_bcrypt import generate_password_hash
-from time import gmtime, strftime, time
+import time
 
 
 class MeterageBaseTestClass(unittest.TestCase):
@@ -84,9 +84,9 @@ class MeterageBaseTestClass(unittest.TestCase):
             title='<Hello>',
             text='<strong>HTML</strong> allowed here',
             start_time='<15:00>',
-            end_time=strftime("%Y-%m-%d %H:%M:%S", gmtime()),
+            end_time=time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime()),
             task_des='hahahahah',
-            ), follow_redirects=True)
+        ), follow_redirects=True)
 
     def connect_db(self):
         """
@@ -97,7 +97,6 @@ class MeterageBaseTestClass(unittest.TestCase):
 
 
 class BasicTests(MeterageBaseTestClass):
-
     def test_no_messages(self):
         """
         When we only have the userPassword table in the database populated,
@@ -112,10 +111,19 @@ class BasicTests(MeterageBaseTestClass):
         Test that all users may log in and log out
         """
         for user in self.users:
-            rv = self.login(user[0], user[1])
-            self.assertIn('You were logged in', rv.get_data(), 'Login failed')
-            rv = self.logout()
-            self.assertIn('You were logged out', rv.get_data(), 'Logout failed')
+            if user[4]:
+                # user is approved to use Meterage
+                rv = self.login(user[0], user[1])
+                self.assertIn('You were logged in', rv.get_data(), 'Login failed')
+                rv = self.logout()
+                self.assertIn('You were logged out', rv.get_data(), 'Logout failed')
+            else:
+                rv = self.login(user[0], user[1])
+                self.assertIn('Please contact an admin for access permission', rv.get_data(),
+                              'Login ought to have failed')
+                rv = self.logout()
+                self.assertNotIn('You were logged out', rv.get_data(), 'The user was not logged in but was told that'
+                                                                       ' they logged out successfully')
 
     def test_invalid(self):
         """
@@ -132,7 +140,7 @@ class BasicTests(MeterageBaseTestClass):
         # test for invalid username and password
         rv = self.login('adminx', 'defaultx')
         self.assertIn('Invalid username', rv.get_data())
-        
+
     def test_messages(self):
         """
         Test all users may make posts, and the appropriate data are in the
@@ -172,7 +180,6 @@ class BasicTests(MeterageBaseTestClass):
 
 
 class ChangePasswordsTests(MeterageBaseTestClass):
-
     def test_change_password(self):
         """
         Test that the admin can change an existing user's password
@@ -227,7 +234,6 @@ class ChangePasswordsTests(MeterageBaseTestClass):
 
 
 class HashedPasswordsTests(MeterageBaseTestClass):
-
     def test_User_password_hashed_upon_initialising(self):
         """
         Check that initialising a User object results in automatic hashing of the plaintext password
@@ -267,7 +273,6 @@ class HashedPasswordsTests(MeterageBaseTestClass):
 
 
 class TimeAndCommentTests(MeterageBaseTestClass):
-
     def test_start_time(self):
         self.login('admin', 'default')
         rv = self.app.post('/add', data=dict(
@@ -287,7 +292,7 @@ class TimeAndCommentTests(MeterageBaseTestClass):
             comment_input='<FinalVERSION>'
         ), follow_redirects=True)
         self.assertNotIn('No entries here so far', rv.get_data(), 'Post unsuccessful')
-        self.assertIn('&lt;FinalVERSION&gt;', rv.get_data())
+        self.assertIn('<FinalVERSION>', rv.get_data())
         self.assertIn('by admin', rv.get_data())
 
     def test_end_time(self):
@@ -303,10 +308,11 @@ class TimeAndCommentTests(MeterageBaseTestClass):
     def test_User_Role(self):
         self.login('admin', 'default')
         self.generic_post()
-        rv = self.app.post('/1/add_roles', data=dict(
+        rv = self.app.post('/1/change_roles', data=dict(
             user_role='<fathima>',
-            ), follow_redirects=True)
-        self.assertIn('&lt;fathima&gt;', rv.get_data())
+            add=''
+        ), follow_redirects=True)
+        self.assertIn('&lt;fathima&gt;', rv.get_data(), rv.get_data())
 
     def test_description(self):
         self.login('admin', 'default')
@@ -316,13 +322,12 @@ class TimeAndCommentTests(MeterageBaseTestClass):
             text='<strong>HTML</strong> allowed here',
             start_time='<15:00>',
             task_des='User is talking about food'
-            ), follow_redirects=True)
+        ), follow_redirects=True)
         self.assertNotIn('No entries here so far', rv.get_data())
         self.assertIn('User is talking about food', rv.get_data())
 
 
 class GravatarTests(MeterageBaseTestClass):
-
     def test_avatar(self):
         """
         Test that meterage.gravatar object does produce the correct Gravatar
@@ -337,9 +342,7 @@ class GravatarTests(MeterageBaseTestClass):
         """
         self.login('admin', 'default')
         rv = self.generic_post()
-        image = '<img src="http://www.gravatar.com/avatar/bf6c2e089dbd27ec1868027525bc42fe?s=50&amp;d=monsterid" clas' \
-                's="img-rounded" alt="Gravatar">'
-
+        image = '<img src="http://www.gravatar.com/avatar/bf6c2e089dbd27ec1868027525bc42fe?s=50&amp;d=retro&amp;r=g"'
         self.assertIn(image, rv.get_data(), "image is displayed incorrectly on show_entries.html")
 
     def test_non_gravatar_user(self):
@@ -353,7 +356,6 @@ class GravatarTests(MeterageBaseTestClass):
 
 
 class UserWebInterfaceTests(MeterageBaseTestClass):
-
     def test_web_interface_accessible(self):
         self.login('hari', 'seldon')
 
@@ -361,7 +363,6 @@ class UserWebInterfaceTests(MeterageBaseTestClass):
         self.assertNotEqual(rv.status_code, 404, "We are unable to access the manage details page")
 
     def test_can_change_username(self):
-
         self.login('hari', 'seldon')
 
         rv = self.app.post('/user/<username>', data=dict(
@@ -374,7 +375,6 @@ class UserWebInterfaceTests(MeterageBaseTestClass):
         self.assertTrue(meterage.User.query.filter_by(username='hary').first(), 'username not changed')
 
     def test_can_change_gravatar_email(self):
-
         self.login('hari', 'seldon')
 
         rv = self.app.post('/user/<username>', data=dict(
@@ -397,7 +397,6 @@ class UserWebInterfaceTests(MeterageBaseTestClass):
 
 
 class AddingNewUsersTests(MeterageBaseTestClass):
-
     def test_register_existing_username(self):
         # test for registration with existing username
         rv = self.app.post('/register', data=dict(
@@ -415,10 +414,10 @@ class AddingNewUsersTests(MeterageBaseTestClass):
             username='jim',
             password='1234',
             confirm_password='bean',
-			email='jimbean@whisky.biz'
+            email='jimbean@whisky.biz'
         ), follow_redirects=True)
 
-        self.assertIn('Please enter same password twice', rv.get_data())
+        self.assertIn('Please enter the same password twice', rv.get_data())
 
     def test_register(self):
         # test for normal registration
@@ -427,7 +426,7 @@ class AddingNewUsersTests(MeterageBaseTestClass):
             username='jim',
             password='bean',
             confirm_password='bean',
-			email='jimbean@whisky.biz'
+            email='jimbean@whisky.biz'
         ), follow_redirects=True)
 
         self.assertIn('Successfully registered', rv.get_data())
@@ -435,28 +434,28 @@ class AddingNewUsersTests(MeterageBaseTestClass):
     def test_login_without_approval(self):
         # test for user without approval of access
         rv = self.login('spock', 'vulcan')
-        self.assertIn('Please contact admin for permission to access', rv.get_data())
+        self.assertIn('Please contact an admin for access permission', rv.get_data())
 
     def test_grant_approval_non_exist_user(self):
         # test for admin grant approval for access to non-exist user
         self.login('admin', 'default')
-        
+
         rv = self.app.post('/approve_new_user', data=dict(
             username='random'
         ), follow_redirects=True)
-        
-        self.assertIn('User does not exist', rv.get_data())
+
+        self.assertIn('No such user as random', rv.get_data())
         self.logout()
 
     def test_grant_approval(self):
         # test for admin grant approval for access to user
         self.login('admin', 'default')
-        
+
         rv = self.app.post('/approve_new_user', data=dict(
             username='spock'
         ), follow_redirects=True)
-        
-        self.assertIn('Successfully granted access to user', rv.get_data())
+
+        self.assertIn('Successfully granted access to spock', rv.get_data())
         self.logout()
 
     def test_login_approval(self):
@@ -469,12 +468,12 @@ class AddingNewUsersTests(MeterageBaseTestClass):
     def test_add_new_user_used_username(self):
         # test for adding new user with existing username
         self.login('admin', 'default')
-        
+
         rv = self.app.post('/add_new_user', data=dict(
             username='hari',
             password='test',
             confirm_password='test',
-			email='test@test.com'
+            email='test@test.com'
         ), follow_redirects=True)
 
         self.assertIn('Username has already been used', rv.get_data())
@@ -483,31 +482,28 @@ class AddingNewUsersTests(MeterageBaseTestClass):
     def test_add_new_user(self):
         # test for normal adding new user
         self.login('admin', 'default')
-        
+
         rv = self.app.post('/add_new_user', data=dict(
             username='another',
             password='another',
             confirm_password='another',
-			email='another@test.com'
+            email='another@test.com'
         ), follow_redirects=True)
-        
+
         self.assertIn('Successfully added new user', rv.get_data())
         self.logout()
-        with closing(meterage.connect_db()) as db:
-            cur = db.execute('select count(username) from userPassword where username=?', ['another'])
-            row = cur.fetchone()
-            self.assertTrue(row[0] == 1, "User another has been added to the database")
-            cur.close()        
+        self.assertTrue(meterage.User.query.filter_by(username='another').first(),
+                        "User 'another' was not added to the database")
+
 
 class AddingNewAdminsTests(MeterageBaseTestClass):
-
     def test_login_as_admin(self):
         # test for registration with existing username
         rv = self.login('admin', 'default')
         with self.app.session_transaction() as sess:
             # see http://flask.pocoo.org/docs/0.10/testing/#accessing-and-modifying-sessions for
             # an explanation of accessing sessions during testing.
-            self.assertTrue(sess['admin']==True, "You are logged in as admin")
+            self.assertTrue(sess['admin'], "You are logged in as admin")
 
     def test_non_admin_user_accessing_admin_function(self):
         self.login(username='hari', password='seldon')
@@ -521,7 +517,7 @@ class AddingNewAdminsTests(MeterageBaseTestClass):
         rv = self.app.post('/add_new_admin', data=dict(
             username='jim'
         ), follow_redirects=True)
-        self.assertIn("User does not exist", rv.get_data())
+        self.assertIn('User jim does not exist', rv.get_data(), 'Non-existent user was granted user privileges?!')
 
     def test_normal_granting_privilege(self):
         self.login('admin', 'default')
@@ -529,7 +525,7 @@ class AddingNewAdminsTests(MeterageBaseTestClass):
         rv = self.app.post('/add_new_admin', data=dict(
             username='hari'
         ), follow_redirects=True)
-        self.assertIn('Successfully granted admin privilege to user', rv.get_data())
+        self.assertIn('Successfully granted admin privileges to hari', rv.get_data())
         self.assertTrue(meterage.User.query.filter_by(username='hari').first().admin,
                         'hari was not granted admin rights')
         self.logout()
@@ -561,11 +557,10 @@ class AddingNewAdminsTests(MeterageBaseTestClass):
         rv = self.app.post('/revoke_admin', data=dict(
             username='test'
         ), follow_redirects=True)
-        self.assertIn("Successfully revoked admin privilege from user", rv.get_data())
+        self.assertIn("Successfully revoked admin privileges from test", rv.get_data())
 
 
 class ORMTests(MeterageBaseTestClass):
-
     def test_create(self):
         """
         Test that we can perform an SQL 'create'
@@ -593,10 +588,10 @@ class ORMTests(MeterageBaseTestClass):
         """
         meterage.db.session.add(meterage.User('Link', 'ocarina', 'link@deku.tree'))
         meterage.db.session.commit()
-        u = meterage.User.query.get(3)
+        u = meterage.User.query.filter_by(username='Link').first()
         self.assertEqual(u.username, 'Link', 'Username was not added correctly')
         self.assertTrue(u.check_password('ocarina'), 'Password was not added correctly')
-        self.assertEqual(u.id, 3, 'User ID was not set correctly')
+        self.assertEqual(u.id, 5, 'User ID was not set correctly')
         self.assertEqual(u.gravataremail, 'link@deku.tree', 'Gravatar email not added correctly')
         self.assertFalse(u.admin, 'user was added as an admin when they ought not to have been')
 
@@ -633,6 +628,7 @@ class ORMTests(MeterageBaseTestClass):
         hari = meterage.User.query.get(2)
 
         self.assertFalse(hari, 'hari was not deleted')
+
 
 if __name__ == '__main__':
     unittest.main()
